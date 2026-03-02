@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight, FileText, Send, Bell } from 'lucide-react';
+import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { ProtocolBanner } from '@/components/protocols/ProtocolBanner';
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
 import { SmartPrescribingPad } from '@/components/protocols/SmartPrescribingPad';
@@ -115,7 +116,10 @@ export default function ProtocolConsultation() {
   return (
     <ClinicalLayout>
       <div className="p-4 lg:p-6 space-y-4 max-w-4xl">
-        <ProtocolBanner name={meta.name} version={meta.version} jurisdiction="Victoria" effectiveDate={meta.effective} sourceUrl={meta.url} />
+        <div className="flex items-center justify-between">
+          <ProtocolBanner name={meta.name} version={meta.version} jurisdiction="Victoria" effectiveDate={meta.effective} sourceUrl={meta.url} />
+          <CalculatorsDialog />
+        </div>
 
         {/* Step indicators */}
         <div className="flex items-center gap-2">

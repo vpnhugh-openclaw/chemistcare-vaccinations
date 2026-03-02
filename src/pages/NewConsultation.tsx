@@ -20,6 +20,7 @@ import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
 } from 'lucide-react';
+import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
 
@@ -179,7 +180,10 @@ const NewConsultation = () => {
                   );
                 })}
               </div>
-              <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
+              <div className="flex items-center gap-2">
+                <CalculatorsDialog />
+                <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
+              </div>
             </div>
 
             {/* Step 1: Patient */}
