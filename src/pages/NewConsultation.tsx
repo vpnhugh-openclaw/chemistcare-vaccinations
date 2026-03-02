@@ -21,6 +21,7 @@ import {
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
 } from 'lucide-react';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
+import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
 
@@ -235,9 +236,9 @@ const NewConsultation = () => {
                         </Select>
                       </div>
                     </div>
-                    <div><Label className="text-xs">Known Allergies</Label><Textarea placeholder="List all known allergies (drug and non-drug)" value={formData.allergies || ''} onChange={e => updateField('allergies', e.target.value)} className="h-20" /></div>
-                    <div><Label className="text-xs">Current Medications</Label><Textarea placeholder="List all current medications including OTC and supplements" value={formData.medications || ''} onChange={e => updateField('medications', e.target.value)} className="h-20" /></div>
-                    <div><Label className="text-xs">Comorbidities</Label><Textarea placeholder="List relevant comorbidities" value={formData.comorbidities || ''} onChange={e => updateField('comorbidities', e.target.value)} className="h-16" /></div>
+                    <div><Label className="text-xs">Known Allergies</Label><TagInput placeholder="Type allergy and press Enter…" value={parseTagString(formData.allergies)} onChange={tags => updateField('allergies', tagsToString(tags))} /></div>
+                    <div><Label className="text-xs">Current Medications</Label><TagInput placeholder="Type medication and press Enter…" value={parseTagString(formData.medications)} onChange={tags => updateField('medications', tagsToString(tags))} /></div>
+                    <div><Label className="text-xs">Comorbidities</Label><TagInput placeholder="Type comorbidity and press Enter…" value={parseTagString(formData.comorbidities)} onChange={tags => updateField('comorbidities', tagsToString(tags))} /></div>
                     <Separator />
                     <div className="grid grid-cols-3 gap-4">
                       <div><Label className="text-xs">GP Name</Label><Input placeholder="Dr." value={formData.gpName || ''} onChange={e => updateField('gpName', e.target.value)} /></div>
