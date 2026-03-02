@@ -104,3 +104,34 @@ You can also run:
 - `scripts/mac-stop.command` (stops local backend)
 
 Tip: move `mac-start.command` to your Desktop for one-click launch.
+
+## macOS packaged app (.app/.dmg)
+
+You can package ChemistCare as a normal Mac app.
+
+### Build installer
+
+```bash
+npm install
+npm run local:bootstrap
+npm run electron:build
+```
+
+Output will be in `dist_electron/` (DMG + ZIP).
+
+### Run desktop app in dev mode
+
+```bash
+npm run electron:dev
+```
+
+### Important runtime note
+
+The desktop app still needs the local Supabase backend running on your Mac.
+Use:
+
+```bash
+npm run mac:start
+```
+
+Or at minimum run `npm run local:bootstrap` once and keep Docker/Supabase local stack running.
