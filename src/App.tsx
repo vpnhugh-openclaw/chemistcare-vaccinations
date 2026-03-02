@@ -14,6 +14,9 @@ import SettingsPage from "./pages/Settings";
 import CalculatorsPage from "./pages/Calculators";
 import ClaimsPage from "./pages/Claims";
 import PPASettingsPage from "./pages/PPASettings";
+import EightCpaDashboard from "./pages/EightCpaDashboard";
+import EightCpaNewService from "./pages/EightCpaNewService";
+import EightCpaServiceHistory from "./pages/EightCpaServiceHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,10 @@ const App = () => (
           <Route path="/calculators" element={<CalculatorsPage />} />
           <Route path="/claims" element={<ClaimsPage />} />
           <Route path="/ppa-settings" element={<PPASettingsPage />} />
+          <Route path="/eight-cpa" element={<EightCpaDashboard />} />
+          <Route path="/eight-cpa/new" element={<EightCpaNewService />} />
+          <Route path="/eight-cpa/edit/:id" element={<EightCpaNewService />} />
+          <Route path="/eight-cpa/history" element={<EightCpaServiceHistory />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
