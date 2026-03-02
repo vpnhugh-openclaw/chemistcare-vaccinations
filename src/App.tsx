@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NewConsultation from "./pages/NewConsultation";
@@ -22,33 +22,31 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const router = createBrowserRouter([
+  { path: "/", element: <Index />, errorElement: <ErrorBoundary><NotFound /></ErrorBoundary> },
+  { path: "/consultation", element: <NewConsultation /> },
+  { path: "/patients", element: <Patients /> },
+  { path: "/conditions", element: <ConditionsLibrary /> },
+  { path: "/conditions/:id", element: <ConditionDetail /> },
+  { path: "/prescribing-log", element: <PrescribingLog /> },
+  { path: "/audit", element: <Audit /> },
+  { path: "/calculators", element: <CalculatorsPage /> },
+  { path: "/claims", element: <ClaimsPage /> },
+  { path: "/ppa-settings", element: <PPASettingsPage /> },
+  { path: "/eight-cpa", element: <EightCpaDashboard /> },
+  { path: "/eight-cpa/new", element: <EightCpaNewService /> },
+  { path: "/eight-cpa/edit/:id", element: <EightCpaNewService /> },
+  { path: "/eight-cpa/history", element: <EightCpaServiceHistory /> },
+  { path: "/settings", element: <SettingsPage /> },
+  { path: "*", element: <NotFound /> },
+]);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/consultation" element={<NewConsultation />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/conditions" element={<ConditionsLibrary />} />
-            <Route path="/conditions/:id" element={<ConditionDetail />} />
-            <Route path="/prescribing-log" element={<PrescribingLog />} />
-            <Route path="/audit" element={<Audit />} />
-            <Route path="/calculators" element={<CalculatorsPage />} />
-            <Route path="/claims" element={<ClaimsPage />} />
-            <Route path="/ppa-settings" element={<PPASettingsPage />} />
-            <Route path="/eight-cpa" element={<EightCpaDashboard />} />
-            <Route path="/eight-cpa/new" element={<EightCpaNewService />} />
-            <Route path="/eight-cpa/edit/:id" element={<EightCpaNewService />} />
-            <Route path="/eight-cpa/history" element={<EightCpaServiceHistory />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ErrorBoundary>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </TooltipProvider>
   </QueryClientProvider>
 );
