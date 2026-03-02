@@ -1,1 +1,4 @@
 project_id = "moyonkosvvufpzxxjlle"
+
+[functions.ppa-integration]
+verify_jwt = false

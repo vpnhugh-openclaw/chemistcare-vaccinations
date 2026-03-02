@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, XCircle, AlertTriangle, ArrowUpCircle, Filter } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, ArrowUpCircle, Filter, ExternalLink, Send } from 'lucide-react';
+import { PPASubmitButton } from './PPASubmission';
 import { useToast } from '@/hooks/use-toast';
 
 type ClaimCase = {
@@ -39,6 +40,10 @@ type ClaimProgram = {
   id: string;
   code: string;
   name: string;
+  is_api_supported: boolean;
+  ppa_program_code: string | null;
+  program_rules_url: string | null;
+  category: string | null;
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -63,7 +68,7 @@ export function EligibleCases() {
     setLoading(true);
     const [casesRes, progsRes] = await Promise.all([
       supabase.from('claim_cases').select('*').order('consult_date', { ascending: false }),
-      supabase.from('claim_programs').select('id, code, name').eq('is_active', true),
+      supabase.from('claim_programs').select('id, code, name, is_api_supported, ppa_program_code, program_rules_url, category').eq('is_active', true),
     ]);
     if (casesRes.data) setCases(casesRes.data as ClaimCase[]);
     if (progsRes.data) setPrograms(progsRes.data as ClaimProgram[]);
@@ -204,11 +209,18 @@ export function EligibleCases() {
                     <TableCell className="text-xs text-center">{c.warn_count}</TableCell>
                     <TableCell className="text-xs text-right font-mono">${Number(c.total_amount).toFixed(2)}</TableCell>
                     <TableCell>
-                      {c.status === 'ELIGIBLE_PENDING_REVIEW' && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => { setOverrideCase(c); setJustification(''); }}>
-                          <ArrowUpCircle className="h-3.5 w-3.5" /> Override
-                        </Button>
-                      )}
+                      <div className="flex gap-1 items-center">
+                        {c.status === 'ELIGIBLE_PENDING_REVIEW' && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => { setOverrideCase(c); setJustification(''); }}>
+                            <ArrowUpCircle className="h-3.5 w-3.5" /> Override
+                          </Button>
+                        )}
+                        <PPASubmitButton
+                          claimCase={c}
+                          program={programs.find(p => p.id === c.claim_program_id)}
+                          onComplete={fetchData}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

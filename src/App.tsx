@@ -13,6 +13,7 @@ import Audit from "./pages/Audit";
 import SettingsPage from "./pages/Settings";
 import CalculatorsPage from "./pages/Calculators";
 import ClaimsPage from "./pages/Claims";
+import PPASettingsPage from "./pages/PPASettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/audit" element={<Audit />} />
           <Route path="/calculators" element={<CalculatorsPage />} />
           <Route path="/claims" element={<ClaimsPage />} />
+          <Route path="/ppa-settings" element={<PPASettingsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
