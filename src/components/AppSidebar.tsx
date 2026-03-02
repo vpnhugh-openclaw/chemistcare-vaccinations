@@ -36,7 +36,7 @@ import {
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 const mainItems = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard },
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   {
     title: 'New Consultation',
     url: '/consultation',
@@ -121,7 +121,7 @@ export function AppSidebar() {
                 ) : (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                      <NavLink to={item.url} end={item.url === '/'} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
+                      <NavLink to={item.url} end={item.url === '/dashboard'} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span className="text-[0.875rem]">{item.title}</span>}
                       </NavLink>
