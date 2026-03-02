@@ -11,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
+import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import {
   ArrowLeft, ArrowRight, AlertTriangle, Shield, Plane, Syringe,
   Pill, Package, FileText, Bell, Plus, Trash2, ExternalLink,
-  Globe, User, Heart, CheckCircle, XCircle, Clock,
+  Globe, User, Heart, CheckCircle, XCircle, Clock, Info,
 } from 'lucide-react';
 import type {
   TravelStep, TravelPatientForm, ItineraryLeg, VaccineHistoryEntry,
@@ -28,6 +30,11 @@ import {
   MALARIA_DRUGS, ALTITUDE_DRUGS, TD_ANTIBIOTICS,
 } from '@/types/travel';
 import { evaluateTravelRisks, daysUntilDeparture, tripDuration } from '@/lib/travelRiskEngine';
+import {
+  TD_MEDICATIONS, ALTITUDE_MEDICATIONS, TRAVEL_VACCINES,
+  VACCINE_SCHEDULING_RULES, VACCINE_REFER_FLAGS, VTE_COUNSELLING_ITEMS, VTE_REFER_NOTE,
+  type TravelMedication, type TravelPrescriptionItem,
+} from '@/data/travelPrescribingData';
 
 // ── Helpers ──
 
@@ -71,8 +78,12 @@ export default function TravelConsultation() {
   const [form, setForm] = useState<TravelPatientForm>(emptyForm());
   const [riskFlags, setRiskFlags] = useState<TravelRiskFlag[]>([]);
   const [plannedVaccines, setPlannedVaccines] = useState<PlannedVaccine[]>([]);
-  const [prescribingTab, setPrescribingTab] = useState<PrescribingModule>('malaria');
+   const [prescribingTab, setPrescribingTab] = useState<PrescribingModule>('malaria');
   const [prescribedMeds, setPrescribedMeds] = useState<string[]>([]);
+  const [travelRxItems, setTravelRxItems] = useState<TravelPrescriptionItem[]>([]);
+  const [selectedDosing, setSelectedDosing] = useState<Record<string, string>>({});
+  const [selectedMeds, setSelectedMeds] = useState<Record<string, boolean>>({});
+  const [vaccineSelections, setVaccineSelections] = useState<Record<string, { selected: boolean; date: string; note: string }>>({});
   const [counsellingChecks, setCounsellingChecks] = useState<Record<string, boolean>>({});
   const [pharmacistName, setPharmacistName] = useState('');
   const [pharmacistCredentials, setPharmacistCredentials] = useState('');
@@ -98,6 +109,35 @@ export default function TravelConsultation() {
   const handleEvaluateRisks = () => {
     setRiskFlags(evaluateTravelRisks(form));
     setStep('risk-assessment');
+  };
+
+  // ── Toggle a structured travel medication ──
+  const toggleTravelMed = (med: TravelMedication, checked: boolean) => {
+    setSelectedMeds(prev => ({ ...prev, [med.id]: checked }));
+    if (checked) {
+      const dosing = selectedDosing[med.id] || med.dosingOptions[0]?.value || '';
+      const item: TravelPrescriptionItem = {
+        id: med.id,
+        drug: med.drug,
+        strength: med.strength,
+        dosing,
+        indication: med.indication,
+        notes: med.clinicalNotes.join(' '),
+      };
+      setTravelRxItems(prev => [...prev.filter(r => r.id !== med.id), item]);
+      if (!prescribedMeds.includes(`${med.drug} ${med.strength}`)) {
+        setPrescribedMeds(prev => [...prev, `${med.drug} ${med.strength} — ${dosing}`]);
+      }
+    } else {
+      setTravelRxItems(prev => prev.filter(r => r.id !== med.id));
+      setPrescribedMeds(prev => prev.filter(m => !m.startsWith(med.drug)));
+    }
+  };
+
+  const updateTravelMedDosing = (med: TravelMedication, dosing: string) => {
+    setSelectedDosing(prev => ({ ...prev, [med.id]: dosing }));
+    setTravelRxItems(prev => prev.map(r => r.id === med.id ? { ...r, dosing } : r));
+    setPrescribedMeds(prev => prev.map(m => m.startsWith(med.drug) ? `${med.drug} ${med.strength} — ${dosing}` : m));
   };
 
   // ── Generate default medical kit ──
@@ -135,9 +175,14 @@ export default function TravelConsultation() {
       '',
       '── VACCINATIONS PLANNED ──',
       ...plannedVaccines.map(v => `${v.name} (${v.category}) — ${v.outsideScope ? 'REFERRED' : v.scheduledDate || 'TBD'}${v.contraindicated ? ' ⚠ CONTRAINDICATED: ' + v.contraindicationReason : ''}`),
+      ...Object.entries(vaccineSelections).filter(([, v]) => v.selected).map(([id, v]) => {
+        const vax = TRAVEL_VACCINES.find(tv => tv.id === id);
+        return `${vax?.name || id} — ${v.date || 'Date TBD'}${v.note ? ' — ' + v.note : ''}`;
+      }),
       '',
       '── MEDICATIONS PRESCRIBED ──',
       prescribedMeds.length ? prescribedMeds.join('\n') : 'None',
+      ...travelRxItems.map(r => `  → ${r.drug} ${r.strength}: ${r.dosing} (${r.indication})`),
       '',
       '── COUNSELLING ──',
       ...Object.entries(counsellingChecks).filter(([, v]) => v).map(([k]) => `✓ ${k}`),
@@ -320,8 +365,8 @@ ${pharmacistCredentials}`;
                   <div className="flex items-center gap-2"><Checkbox checked={form.previousOverseasTravel} onCheckedChange={v => updateForm('previousOverseasTravel', !!v)} /><Label className="text-xs">Previous overseas travel</Label></div>
                 </div>
                 <div><Label className="text-xs">BMI</Label><Input type="number" placeholder="e.g. 25.4" value={form.bmi} onChange={e => updateForm('bmi', e.target.value)} className="max-w-[120px]" /></div>
-                <div><Label className="text-xs">Current Medications</Label><Textarea placeholder="List all current medications..." value={form.currentMedications} onChange={e => updateForm('currentMedications', e.target.value)} rows={2} /></div>
-                <div><Label className="text-xs">Allergies</Label><Textarea placeholder="List all allergies (drug and non-drug)..." value={form.allergies} onChange={e => updateForm('allergies', e.target.value)} rows={2} /></div>
+                <div><Label className="text-xs">Current Medications</Label><TagInput placeholder="Type medication and press Enter…" value={parseTagString(form.currentMedications)} onChange={tags => updateForm('currentMedications', tagsToString(tags))} /></div>
+                <div><Label className="text-xs">Allergies</Label><TagInput placeholder="Type allergy and press Enter…" value={parseTagString(form.allergies)} onChange={tags => updateForm('allergies', tagsToString(tags))} /></div>
                 <div><Label className="text-xs">Prior Malaria Prophylaxis</Label><Input placeholder="e.g. Malarone — well tolerated" value={form.priorMalariaProphylaxis} onChange={e => updateForm('priorMalariaProphylaxis', e.target.value)} /></div>
 
                 <Separator />
@@ -535,7 +580,7 @@ ${pharmacistCredentials}`;
                 <TabsTrigger value="vte">VTE</TabsTrigger>
               </TabsList>
 
-              {/* 4A: Malaria */}
+              {/* 4A: Malaria (unchanged structure) */}
               <TabsContent value="malaria" className="space-y-4">
                 <Card>
                   <CardHeader className="pb-3"><CardTitle className="text-sm">Malaria Prevention — ABCD Framework</CardTitle></CardHeader>
@@ -576,32 +621,63 @@ ${pharmacistCredentials}`;
                 </Card>
               </TabsContent>
 
-              {/* 4B: Altitude */}
+              {/* 4B: Altitude – Structured */}
               <TabsContent value="altitude" className="space-y-4">
                 <Card>
                   <CardHeader className="pb-3"><CardTitle className="text-sm">Altitude Illness (AMS) Prevention</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
-                    <ClinicalAlert alert={{ level: 'amber', title: 'Scope Limitation', message: 'Pharmacist can only prescribe for LOW-RISK travellers to elevations >2500m. Moderate/high risk → REFER.' }} />
+                  <CardContent className="space-y-4">
+                    <ClinicalAlert alert={{ level: 'amber', title: 'Scope Limitation', message: 'Pharmacist can only prescribe for LOW-RISK travellers to elevations ≥2500 m. Moderate/high risk → REFER.' }} />
 
-                    <div className="rounded-lg border overflow-hidden">
-                      <table className="w-full text-xs">
-                        <thead><tr className="bg-muted text-left"><th className="p-2 font-medium">Drug</th><th className="p-2 font-medium">Dose</th><th className="p-2 font-medium">Notes</th><th className="p-2"></th></tr></thead>
-                        <tbody>
-                          {ALTITUDE_DRUGS.map(d => (
-                            <tr key={d.drug} className="border-t">
-                              <td className="p-2 font-medium">{d.drug}</td>
-                              <td className="p-2 tabular-nums">{d.dose}</td>
-                              <td className="p-2 text-muted-foreground">{d.notes}</td>
-                              <td className="p-2"><Button size="sm" variant="outline" className="h-6 text-[10px]"
-                                onClick={() => { if (!prescribedMeds.includes(d.drug)) setPrescribedMeds(prev => [...prev, `${d.drug} — ${d.dose}`]); }}>Prescribe</Button></td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {ALTITUDE_MEDICATIONS.map(med => (
+                      <div key={med.id} className={`rounded-lg border p-3 space-y-2 ${selectedMeds[med.id] ? 'border-accent bg-accent/5' : ''}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <Checkbox checked={selectedMeds[med.id] || false} onCheckedChange={v => toggleTravelMed(med, !!v)} />
+                            <div>
+                              <p className="text-sm font-semibold">{med.drug} <span className="font-normal text-muted-foreground">{med.strength}</span></p>
+                              <Badge variant="outline" className="text-[9px] mt-0.5">{med.group}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{med.indication}</p>
+                        {med.dosingOptions.length > 1 ? (
+                          <RadioGroup value={selectedDosing[med.id] || med.dosingOptions[0].value} onValueChange={v => updateTravelMedDosing(med, v)}>
+                            {med.dosingOptions.map(opt => (
+                              <div key={opt.label} className="flex items-center gap-2">
+                                <RadioGroupItem value={opt.value} id={`${med.id}-${opt.label}`} />
+                                <Label htmlFor={`${med.id}-${opt.label}`} className="text-xs"><strong>{opt.label}:</strong> {opt.value}</Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        ) : (
+                          <p className="text-xs bg-muted/50 rounded px-2 py-1"><strong>Dosing:</strong> {med.dosingOptions[0]?.value}</p>
+                        )}
+                        {med.clinicalNotes.length > 0 && (
+                          <div className="text-xs space-y-0.5">
+                            {med.clinicalNotes.map((n, i) => (
+                              <p key={i} className="flex items-start gap-1.5 text-muted-foreground"><Info className="h-3 w-3 mt-0.5 shrink-0 text-accent" />{n}</p>
+                            ))}
+                          </div>
+                        )}
+                        {med.contraindications.length > 0 && (
+                          <div className="text-xs space-y-0.5">
+                            <p className="font-semibold text-destructive">Contraindications:</p>
+                            {med.contraindications.map((c, i) => (
+                              <p key={i} className="flex items-start gap-1.5 text-destructive"><XCircle className="h-3 w-3 mt-0.5 shrink-0" />{c}</p>
+                            ))}
+                          </div>
+                        )}
+                        {med.referFlags && med.referFlags.length > 0 && (
+                          <div className="text-xs space-y-0.5 rounded bg-destructive/5 p-2 border border-destructive/20">
+                            <p className="font-semibold text-destructive">🔴 Refer if:</p>
+                            {med.referFlags.map((r, i) => <p key={i} className="text-destructive ml-4">• {r}</p>)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
 
                     <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3">
-                      <p className="text-xs font-semibold text-destructive mb-1">⚠ Critical Message</p>
+                      <p className="text-xs font-semibold text-destructive mb-1">⚠ Critical</p>
                       <p className="text-xs">Most important treatment for altitude illness is <strong>DESCENT</strong>. Never ascend with symptoms.</p>
                     </div>
 
@@ -616,38 +692,52 @@ ${pharmacistCredentials}`;
                 </Card>
               </TabsContent>
 
-              {/* 4C: Travellers' Diarrhoea */}
+              {/* 4C: Travellers' Diarrhoea – Structured */}
               <TabsContent value="travellers-diarrhoea" className="space-y-4">
                 <Card>
-                  <CardHeader className="pb-3"><CardTitle className="text-sm">Travellers' Diarrhoea Management</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid md:grid-cols-2 gap-3">
-                      <div className="rounded-lg border p-3">
-                        <p className="text-xs font-semibold mb-1">Mild TD</p>
-                        <p className="text-xs text-muted-foreground">ORS + Loperamide 4mg initially, then 2mg after each unformed stool (max 16mg/day)</p>
+                  <CardHeader className="pb-3"><CardTitle className="text-sm">Travellers' Diarrhoea — Structured Prescribing</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {TD_MEDICATIONS.map(med => (
+                      <div key={med.id} className={`rounded-lg border p-3 space-y-2 ${selectedMeds[med.id] ? 'border-accent bg-accent/5' : ''}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <Checkbox checked={selectedMeds[med.id] || false} onCheckedChange={v => toggleTravelMed(med, !!v)} />
+                            <div>
+                              <p className="text-sm font-semibold">{med.drug} <span className="font-normal text-muted-foreground">{med.strength}</span></p>
+                              <Badge variant="outline" className="text-[9px] mt-0.5">{med.group}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{med.indication}</p>
+                        {med.dosingOptions.length > 1 ? (
+                          <RadioGroup value={selectedDosing[med.id] || med.dosingOptions[0].value} onValueChange={v => updateTravelMedDosing(med, v)}>
+                            {med.dosingOptions.map(opt => (
+                              <div key={opt.label} className="flex items-center gap-2">
+                                <RadioGroupItem value={opt.value} id={`${med.id}-${opt.label}`} />
+                                <Label htmlFor={`${med.id}-${opt.label}`} className="text-xs"><strong>{opt.label}:</strong> {opt.value}</Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        ) : (
+                          <p className="text-xs bg-muted/50 rounded px-2 py-1"><strong>Dosing:</strong> {med.dosingOptions[0]?.value}</p>
+                        )}
+                        {med.clinicalNotes.length > 0 && (
+                          <div className="text-xs space-y-0.5">
+                            {med.clinicalNotes.map((n, i) => (
+                              <p key={i} className="flex items-start gap-1.5 text-muted-foreground"><Info className="h-3 w-3 mt-0.5 shrink-0 text-accent" />{n}</p>
+                            ))}
+                          </div>
+                        )}
+                        {med.contraindications.length > 0 && (
+                          <div className="text-xs space-y-0.5">
+                            <p className="font-semibold text-destructive">Contraindications / Warnings:</p>
+                            {med.contraindications.map((c, i) => (
+                              <p key={i} className="flex items-start gap-1.5 text-destructive"><XCircle className="h-3 w-3 mt-0.5 shrink-0" />{c}</p>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="rounded-lg border p-3 border-amber-500/30">
-                        <p className="text-xs font-semibold mb-1">Moderate–Severe TD</p>
-                        <p className="text-xs text-muted-foreground">Fever ≥38°C, bloody stools, severe pain → empirical antibiotics</p>
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg border overflow-hidden">
-                      <table className="w-full text-xs">
-                        <thead><tr className="bg-muted text-left"><th className="p-2 font-medium">Antibiotic</th><th className="p-2 font-medium">Dose</th><th className="p-2 font-medium">Notes</th><th className="p-2"></th></tr></thead>
-                        <tbody>
-                          {TD_ANTIBIOTICS.map(d => (
-                            <tr key={d.drug} className="border-t">
-                              <td className="p-2 font-medium">{d.drug}</td>
-                              <td className="p-2 tabular-nums">{d.dose}</td>
-                              <td className="p-2 text-muted-foreground">{d.notes}</td>
-                              <td className="p-2"><Button size="sm" variant="outline" className="h-6 text-[10px]"
-                                onClick={() => { if (!prescribedMeds.includes(d.drug)) setPrescribedMeds(prev => [...prev, `${d.drug} — ${d.dose}`]); }}>Prescribe</Button></td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    ))}
 
                     <p className="text-xs font-semibold">Prevention Counselling</p>
                     {['"Peel it, boil it, cook it — or forget it"', 'Hand hygiene (soap/sanitiser)', 'Avoid ice, tap water, raw foods', 'Avoid peeled fruit from street stalls'].map(item => (
@@ -660,20 +750,22 @@ ${pharmacistCredentials}`;
                 </Card>
               </TabsContent>
 
-              {/* 4D: VTE */}
+              {/* 4D: VTE – Counselling Only */}
               <TabsContent value="vte" className="space-y-4">
                 <Card>
-                  <CardHeader className="pb-3"><CardTitle className="text-sm">VTE Prevention — Long-Haul Travel</CardTitle></CardHeader>
+                  <CardHeader className="pb-3"><CardTitle className="text-sm">VTE Prevention — Counselling Only</CardTitle></CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-xs font-semibold">Non-Pharmacological Advice (all flights &gt;4 hours)</p>
-                    {['Regular movement and leg exercises', 'Request aisle seating / adequate legroom', 'Avoid alcohol and sedatives', 'Maintain good hydration', 'Wear loose clothing', 'Graduated compression stockings if VTE risk factors present'].map(item => (
+                    {VTE_COUNSELLING_ITEMS.map(item => (
                       <div key={item} className="flex items-center gap-2">
                         <Checkbox checked={counsellingChecks[`vte_${item}`] || false} onCheckedChange={v => setCounsellingChecks(prev => ({ ...prev, [`vte_${item}`]: !!v }))} />
                         <span className="text-xs">{item}</span>
                       </div>
                     ))}
 
-                    <ClinicalAlert alert={{ level: 'amber', title: 'Pharmacological VTE Prophylaxis — Refer', message: 'Pharmacists cannot prescribe VTE pharmacoprophylaxis (apixaban, rivaroxaban, enoxaparin). Refer to GP if pharmacological prophylaxis is indicated.' }} />
+                    <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3">
+                      <p className="text-xs font-semibold text-destructive">{VTE_REFER_NOTE}</p>
+                    </div>
 
                     <a href="https://www.mdcalc.com/calc/2023/padua-prediction-score-risk-vte" target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:underline flex items-center gap-1">
                       <ExternalLink className="h-2.5 w-2.5" /> Padua Prediction Score Calculator
@@ -682,6 +774,44 @@ ${pharmacistCredentials}`;
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Travel Vaccinations sub-module */}
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><Syringe className="h-4 w-4" /> Travel Vaccinations</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <div className="rounded-lg bg-accent/5 border border-accent/20 p-3 space-y-1">
+                  <p className="text-xs font-semibold flex items-center gap-1"><Info className="h-3 w-3" /> Scheduling Rules</p>
+                  {VACCINE_SCHEDULING_RULES.map((r, i) => <p key={i} className="text-xs text-muted-foreground ml-4">• {r}</p>)}
+                </div>
+
+                {TRAVEL_VACCINES.map(vax => {
+                  const sel = vaccineSelections[vax.id] || { selected: false, date: '', note: '' };
+                  return (
+                    <div key={vax.id} className={`rounded-lg border p-3 space-y-2 ${sel.selected ? 'border-accent bg-accent/5' : ''}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox checked={sel.selected} onCheckedChange={v => setVaccineSelections(prev => ({ ...prev, [vax.id]: { ...sel, selected: !!v } }))} />
+                          <span className="text-sm font-medium">{vax.name}</span>
+                          <Badge variant="outline" className="text-[9px]">{vax.type === 'live' ? 'LIVE' : 'INACTIVATED'}</Badge>
+                        </div>
+                        {sel.selected && (
+                          <Input type="date" className="h-7 text-xs w-[130px]" value={sel.date} onChange={e => setVaccineSelections(prev => ({ ...prev, [vax.id]: { ...sel, date: e.target.value } }))} />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{vax.notes}</p>
+                      {sel.selected && (
+                        <Input className="h-7 text-xs" placeholder="Additional notes…" value={sel.note} onChange={e => setVaccineSelections(prev => ({ ...prev, [vax.id]: { ...sel, note: e.target.value } }))} />
+                      )}
+                    </div>
+                  );
+                })}
+
+                <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3 space-y-0.5">
+                  <p className="text-xs font-semibold text-destructive">🔴 Refer for:</p>
+                  {VACCINE_REFER_FLAGS.map((f, i) => <p key={i} className="text-xs text-destructive ml-4">• {f}</p>)}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Prescribed meds summary */}
             {prescribedMeds.length > 0 && (

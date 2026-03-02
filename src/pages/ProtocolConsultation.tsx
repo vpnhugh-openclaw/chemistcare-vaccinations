@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight, FileText, Send, Bell } from 'lucide-react';
+import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { ProtocolBanner } from '@/components/protocols/ProtocolBanner';
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
@@ -206,11 +207,11 @@ export default function ProtocolConsultation() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-foreground">Allergies / Adverse Reactions</Label>
-                <Textarea placeholder="Document known allergies..." value={formData.allergies || ''} onChange={e => update('allergies', e.target.value)} rows={2} />
+                <TagInput placeholder="Type allergy and press Enter…" value={parseTagString(formData.allergies)} onChange={tags => update('allergies', tagsToString(tags))} />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-foreground">Current Medications</Label>
-                <Textarea placeholder="List current medications..." value={formData.medications || ''} onChange={e => update('medications', e.target.value)} rows={2} />
+                <TagInput placeholder="Type medication and press Enter…" value={parseTagString(formData.medications)} onChange={tags => update('medications', tagsToString(tags))} />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-foreground">Contraindications / Interactions Check</Label>
