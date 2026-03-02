@@ -33,7 +33,6 @@ const mainItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'New Consultation', url: '/consultation', icon: FilePlus },
   { title: 'Protocol Consult', url: '/protocol-consultation', icon: Stethoscope },
-  { title: 'Patient Triage', url: '/triage', icon: UserCheck },
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
@@ -46,6 +45,10 @@ const adminItems = [
   { title: 'Audit', url: '/audit', icon: Shield },
   { title: 'PPA Integration', url: '/ppa-settings', icon: Receipt },
   { title: 'Settings', url: '/settings', icon: Settings },
+];
+
+const patientFacingItems = [
+  { title: 'Patient Triage', url: '/triage', icon: UserCheck },
 ];
 
 export function AppSidebar() {
@@ -92,6 +95,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {adminItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                    <NavLink to={item.url} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="text-[0.875rem]">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[0.6875rem] font-medium tracking-wider text-sidebar-foreground/40 uppercase">Patient-Facing</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {patientFacingItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <NavLink to={item.url} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
