@@ -19,12 +19,12 @@ const Dashboard = () => {
 
   return (
     <ClinicalLayout>
-      <div className="p-6 space-y-6 animate-fade-in">
+      <div className="p-5 space-y-5 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Clinical Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">ChemistCare PrescriberOS — Pharmacist Prescriber Workspace</p>
+            <h1>Clinical Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Pharmacist Prescriber Workspace</p>
           </div>
           <Button onClick={() => navigate('/consultation')} className="gap-2">
             <FilePlus className="h-4 w-4" />
@@ -33,7 +33,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: 'Today\'s Consultations', value: '0', icon: Activity, color: 'text-accent' },
             { label: 'Active Patients', value: '0', icon: Users, color: 'text-clinical-safe' },
@@ -41,13 +41,13 @@ const Dashboard = () => {
             { label: 'Scripts This Month', value: '0', icon: ClipboardList, color: 'text-foreground' },
           ].map((stat) => (
             <Card key={stat.label}>
-              <CardContent className="pt-5 pb-4 px-5">
+              <CardContent className="pt-4 pb-3 px-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-                    <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                    <p className="clinical-section-title mb-1">{stat.label}</p>
+                    <p className="text-[1.75rem] font-semibold tabular-nums leading-none">{stat.value}</p>
                   </div>
-                  <stat.icon className={`h-8 w-8 ${stat.color} opacity-30`} />
+                  <stat.icon className={`h-7 w-7 ${stat.color} opacity-20`} />
                 </div>
               </CardContent>
             </Card>
@@ -55,13 +55,13 @@ const Dashboard = () => {
         </div>
 
         {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Quick actions */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-base">Quick Actions</CardTitle>
+              <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2">
               {[
                 { label: 'Start New Consultation', desc: 'Begin structured clinical assessment', icon: FilePlus, action: () => navigate('/consultation') },
                 { label: 'View Conditions Library', desc: 'Browse 22 supported conditions', icon: TrendingUp, action: () => navigate('/conditions') },
@@ -70,10 +70,10 @@ const Dashboard = () => {
                 <button
                   key={a.label}
                   onClick={a.action}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/50 transition-colors text-left"
                 >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/10">
-                    <a.icon className="h-5 w-5 text-accent" />
+                  <div className="flex items-center justify-center w-9 h-9 rounded-md bg-accent/10">
+                    <a.icon className="h-4 w-4 text-accent" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{a.label}</p>
@@ -87,12 +87,12 @@ const Dashboard = () => {
           {/* Safety reminders */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-clinical-warning" />
                 Safety Reminders
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2.5">
               {[
                 'Complete all assessment steps before prescribing',
                 'Red flags always require referral documentation',
@@ -102,7 +102,7 @@ const Dashboard = () => {
               ].map((r, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <CheckCircle className="h-3.5 w-3.5 text-clinical-safe mt-0.5 shrink-0" />
-                  <p className="text-xs text-muted-foreground leading-relaxed">{r}</p>
+                  <p className="text-[0.8125rem] text-muted-foreground leading-snug">{r}</p>
                 </div>
               ))}
             </CardContent>
@@ -112,7 +112,7 @@ const Dashboard = () => {
         {/* Supported conditions summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Supported Conditions</CardTitle>
+            <CardTitle>Supported Conditions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ const Dashboard = () => {
               ].map((cat) => (
                 <Badge key={cat.label} variant="secondary" className="gap-1.5">
                   {cat.label}
-                  <span className="text-accent font-bold">{cat.count}</span>
+                  <span className="text-accent font-semibold tabular-nums">{cat.count}</span>
                 </Badge>
               ))}
               <Badge variant="outline" className="ml-2">22 Total Conditions</Badge>
