@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import NewConsultation from "./pages/NewConsultation";
 import Patients from "./pages/Patients";
@@ -26,7 +27,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
-  { path: "/", element: <Index />, errorElement: <ErrorBoundary><NotFound /></ErrorBoundary> },
+  { path: "/", element: <LandingPage />, errorElement: <ErrorBoundary><NotFound /></ErrorBoundary> },
+  { path: "/dashboard", element: <Index /> },
   { path: "/consultation", element: <NewConsultation /> },
   { path: "/patients", element: <Patients /> },
   { path: "/conditions", element: <ConditionsLibrary /> },
