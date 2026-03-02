@@ -17,12 +17,12 @@
     "mac:start": "bash ./scripts/mac-start.command",
     "mac:stop": "bash ./scripts/mac-stop.command",
     "electron:dev": "concurrently -k \"npm run local:dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run local:build && electron-builder --mac dmg",
+    "electron:build": "npm run local:build && electron-builder --mac dmg --publish never",
     "electron:dist": "npm run local:bootstrap && npm run electron:build",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
     "android:run": "npm run android:sync && npx cap run android",
-    "electron:build:win": "npm run local:build && electron-builder --win nsis portable",
+    "electron:build:win": "npm run local:build && electron-builder --win nsis portable --publish never",
     "electron:dist:win": "npm run local:bootstrap && npm run electron:build:win"
   },
   "dependencies": {
