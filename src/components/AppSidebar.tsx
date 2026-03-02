@@ -6,8 +6,8 @@ import {
   ClipboardList,
   Shield,
   Settings,
-  Stethoscope,
 } from 'lucide-react';
+import logoImg from '@/assets/logo.jpg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -47,9 +47,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sidebar-primary/20">
-            <Stethoscope className="h-4 w-4 text-sidebar-primary" />
-          </div>
+          <img src={logoImg} alt="ChemistCare Logo" className="h-8 w-8 rounded-lg object-cover" />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">ChemistCare</span>
