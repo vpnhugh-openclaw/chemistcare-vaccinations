@@ -6,57 +6,57 @@
 
 @layer base {
   :root {
-    /* Medical-grade design system - Clean, clinical, safety-first */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    /* ChemistCare design system - Teal, clinical, modern */
+    --background: 180 15% 97%;
+    --foreground: 192 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 192 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 192 30% 12%;
 
-    /* Navy blue - authoritative, clinical */
-    --primary: 215 50% 23%;
-    --primary-foreground: 210 40% 98%;
+    /* Deep teal - matches logo */
+    --primary: 190 45% 22%;
+    --primary-foreground: 180 30% 97%;
 
-    --secondary: 210 25% 95%;
-    --secondary-foreground: 215 25% 25%;
+    --secondary: 180 18% 94%;
+    --secondary-foreground: 192 25% 25%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 180 12% 95%;
+    --muted-foreground: 192 12% 48%;
 
-    --accent: 205 75% 48%;
+    --accent: 175 55% 38%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 18% 90%;
-    --input: 210 18% 90%;
-    --ring: 215 50% 23%;
+    --border: 180 14% 89%;
+    --input: 180 14% 89%;
+    --ring: 190 45% 22%;
 
     --radius: 0.5rem;
 
     /* Clinical status colors */
-    --clinical-safe: 152 60% 40%;
-    --clinical-safe-bg: 152 60% 96%;
+    --clinical-safe: 160 55% 40%;
+    --clinical-safe-bg: 160 55% 95%;
     --clinical-warning: 38 92% 50%;
     --clinical-warning-bg: 38 92% 96%;
-    --clinical-danger: 0 72% 51%;
-    --clinical-danger-bg: 0 72% 96%;
-    --clinical-info: 205 75% 48%;
-    --clinical-info-bg: 205 75% 96%;
+    --clinical-danger: 355 70% 50%;
+    --clinical-danger-bg: 355 70% 96%;
+    --clinical-info: 190 55% 45%;
+    --clinical-info-bg: 190 55% 95%;
 
-    /* Sidebar */
-    --sidebar-background: 215 50% 15%;
-    --sidebar-foreground: 210 30% 85%;
-    --sidebar-primary: 205 75% 60%;
+    /* Sidebar - dark teal from logo */
+    --sidebar-background: 192 40% 16%;
+    --sidebar-foreground: 180 20% 80%;
+    --sidebar-primary: 170 60% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 45% 22%;
-    --sidebar-accent-foreground: 210 30% 95%;
-    --sidebar-border: 215 40% 20%;
-    --sidebar-ring: 205 75% 60%;
+    --sidebar-accent: 192 35% 22%;
+    --sidebar-accent-foreground: 180 20% 95%;
+    --sidebar-border: 192 30% 22%;
+    --sidebar-ring: 170 60% 55%;
 
     /* Typography */
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -64,33 +64,33 @@
   }
 
   .dark {
-    --background: 215 25% 9%;
-    --foreground: 210 30% 92%;
-    --card: 215 25% 12%;
-    --card-foreground: 210 30% 92%;
-    --popover: 215 25% 12%;
-    --popover-foreground: 210 30% 92%;
-    --primary: 205 75% 60%;
-    --primary-foreground: 215 50% 10%;
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 210 30% 85%;
-    --muted: 215 20% 16%;
-    --muted-foreground: 215 15% 55%;
-    --accent: 205 75% 48%;
+    --background: 192 25% 9%;
+    --foreground: 180 20% 90%;
+    --card: 192 25% 12%;
+    --card-foreground: 180 20% 90%;
+    --popover: 192 25% 12%;
+    --popover-foreground: 180 20% 90%;
+    --primary: 170 60% 55%;
+    --primary-foreground: 192 40% 10%;
+    --secondary: 192 25% 18%;
+    --secondary-foreground: 180 20% 82%;
+    --muted: 192 20% 16%;
+    --muted-foreground: 192 12% 55%;
+    --accent: 175 55% 42%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 40%;
+    --destructive: 355 60% 42%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 205 75% 60%;
-    --sidebar-background: 215 30% 8%;
-    --sidebar-foreground: 210 20% 75%;
-    --sidebar-primary: 205 75% 60%;
+    --border: 192 20% 20%;
+    --input: 192 20% 20%;
+    --ring: 170 60% 55%;
+    --sidebar-background: 192 35% 8%;
+    --sidebar-foreground: 180 15% 72%;
+    --sidebar-primary: 170 60% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 15%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 215 20% 15%;
-    --sidebar-ring: 205 75% 60%;
+    --sidebar-accent: 192 25% 15%;
+    --sidebar-accent-foreground: 180 15% 88%;
+    --sidebar-border: 192 20% 15%;
+    --sidebar-ring: 170 60% 55%;
   }
 }
 
