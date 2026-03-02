@@ -15,12 +15,13 @@ You can run this app entirely on a local Windows PC without relying on public in
 
 ---
 
-## 1) Prerequisites (Windows)
+## 1) Prerequisites (Windows or macOS)
 
 1. Install **Node.js 20+**
 2. Install **Docker Desktop** and ensure it is running
 3. Install **Supabase CLI**
    - Docs: https://supabase.com/docs/guides/cli
+   - macOS Homebrew: `brew install supabase/tap/supabase`
 
 ---
 
@@ -95,3 +96,11 @@ For pharmacy floor reliability:
 - Keep periodic local backups (`supabase db dump`)
 - Use UPS for host PC to reduce corruption risk
 - Plan a sync/export workflow for when internet is available (future enhancement)
+
+### macOS one-click launcher
+
+You can also run:
+- `scripts/mac-start.command` (starts local backend + app)
+- `scripts/mac-stop.command` (stops local backend)
+
+Tip: move `mac-start.command` to your Desktop for one-click launch.

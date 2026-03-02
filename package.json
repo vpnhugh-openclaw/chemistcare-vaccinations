@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "local:bootstrap": "node scripts/bootstrap-local.mjs",
     "local:dev": "vite --host 0.0.0.0 --port 5173",
-    "local:build": "vite build"
+    "local:build": "vite build",
+    "mac:start": "bash ./scripts/mac-start.command",
+    "mac:stop": "bash ./scripts/mac-stop.command"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
