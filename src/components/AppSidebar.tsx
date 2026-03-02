@@ -78,7 +78,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-[0.8125rem] font-bold text-sidebar-accent-foreground tracking-tight leading-tight">ChemistCare</span>
-              <span className="text-[0.625rem] text-sidebar-foreground/50 font-medium tracking-widest uppercase">PrescriberOS</span>
+              <span className="text-[0.625rem] font-bold text-sidebar-foreground/50 tracking-tight uppercase">Prescriber<span className="text-sidebar-primary">OS</span></span>
             </div>
           )}
         </div>
