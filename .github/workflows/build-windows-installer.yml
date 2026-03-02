@@ -26,8 +26,28 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm network resilience
+        run: |
+          npm config set fetch-retries 5
+          npm config set fetch-retry-factor 2
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          npm config set network-timeout 300000
+
+      - name: Install dependencies (with retry)
+        shell: pwsh
+        run: |
+          $max = 3
+          for ($i = 1; $i -le $max; $i++) {
+            Write-Host "Attempt $i of $max: npm install"
+            npm install --no-audit --no-fund
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            if ($i -lt $max) {
+              Write-Host "Install failed, waiting before retry..."
+              Start-Sleep -Seconds (15 * $i)
+            }
+          }
+          exit 1
 
       - name: Build Windows installer
         run: npm run electron:build:win
