@@ -65,7 +65,7 @@ export function CalculatorsDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" size="sm" className="gap-1.5 border-accent/40 text-accent hover:bg-accent/10 hover:text-accent ml-1">
           <Calculator className="h-4 w-4" />
           <span className="hidden sm:inline">Calculators</span>
         </Button>
