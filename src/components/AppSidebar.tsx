@@ -9,6 +9,8 @@ import {
   Calculator,
   Receipt,
   HeartPulse,
+  Stethoscope,
+  UserCheck,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -30,6 +32,8 @@ import {
 const mainItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'New Consultation', url: '/consultation', icon: FilePlus },
+  { title: 'Protocol Consult', url: '/protocol-consultation', icon: Stethoscope },
+  { title: 'Patient Triage', url: '/triage', icon: UserCheck },
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
