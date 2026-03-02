@@ -1,73 +1,97 @@
-# Welcome to your Lovable project
+# ChemistCare PrescriberOS
 
-## Project info
+Clinical prescribing and pharmacy workflow app.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Local-first PC mode (offline capable)
 
-## How can I edit this code?
+You can run this app entirely on a local Windows PC without relying on public internet services at runtime.
 
-There are several ways of editing your application.
+### Architecture for local mode
+- **Frontend:** Vite React app (localhost)
+- **Backend/Data/Auth:** local Supabase stack in Docker (localhost)
+- **Data location:** your PC (local Postgres container)
 
-**Use Lovable**
+> Note: first-time setup may require internet to install dependencies and pull Docker images. After setup, day-to-day use can run on local network/offline.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 1) Prerequisites (Windows)
 
-**Use your preferred IDE**
+1. Install **Node.js 20+**
+2. Install **Docker Desktop** and ensure it is running
+3. Install **Supabase CLI**
+   - Docs: https://supabase.com/docs/guides/cli
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 2) Setup
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm install
 ```
 
-**Edit a file directly in GitHub**
+Bootstrap local Supabase + local env file:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run local:bootstrap
+```
 
-**Use GitHub Codespaces**
+This command will:
+- start local Supabase containers
+- read local API/anon key from `supabase status -o env`
+- generate `.env.local` with local values
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 3) Run locally
 
-This project is built with:
+```bash
+npm run local:dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Open:
+- App: http://localhost:5173
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 4) Stop local backend
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+supabase stop
+```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 5) Reset local DB (if needed)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+supabase db reset
+```
+
+This reapplies migrations from `supabase/migrations`.
+
+---
+
+## 6) Existing cloud mode
+
+If you want to use hosted Supabase again, remove/rename `.env.local` and use `.env` cloud variables.
+
+---
+
+## Scripts
+
+- `npm run dev` — normal dev mode
+- `npm run local:bootstrap` — prepare local/offline mode env + local Supabase
+- `npm run local:dev` — run app for LAN/local PC access
+- `npm run build` — production build
+- `npm run test` — run tests
+
+---
+
+## Notes for robust offline operations
+
+For pharmacy floor reliability:
+- Keep Docker Desktop set to auto-start on login
+- Keep periodic local backups (`supabase db dump`)
+- Use UPS for host PC to reduce corruption risk
+- Plan a sync/export workflow for when internet is available (future enhancement)
