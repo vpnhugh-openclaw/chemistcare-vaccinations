@@ -66,7 +66,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 /* ── Data ── */
 const steps = [
-  { num: "01", title: "Patient Books Online", desc: "Patients select a ChemistCareOS service via your branded booking portal. Intake forms are auto-collected before arrival." },
+  { num: "01", title: "Patient Books Online", desc: "Patients select a ChemistCare PrescriberOS service via your branded booking portal. Intake forms are auto-collected before arrival." },
   { num: "02", title: "Pre-Consult Snapshot", desc: "Review eligibility flags, allergy alerts, recent dispenses, and GP contact status — before you start the consult." },
   { num: "03", title: "Guided In-Consult Workflow", desc: "Follow protocol step-by-step with decision support, red-flag prompts, and auto-drafted notes in real time." },
   { num: "04", title: "Post-Consult in 60 Seconds", desc: "eScript generated, GP comms drafted, billing recorded, follow-up scheduled — with a complete audit trail." },
@@ -81,10 +81,10 @@ const metrics = [
 
 const faqs = [
   { q: "How long does setup take?", a: "Most pharmacies are live within 48 hours. We handle onboarding, protocol configuration, and staff training remotely — no IT team required." },
-  { q: "How does ChemistCareOS handle data security?", a: "All data is hosted on Australian-based infrastructure with encryption at rest and in transit, role-based access controls, full audit trails, and a defined data retention policy. We are designed to support Privacy Act 1988 and APPs compliance." },
-  { q: "Does it integrate with existing dispensing systems?", a: "ChemistCareOS is designed to complement your existing POS/dispensing system. We provide structured exports and are actively developing direct integrations with major Australian pharmacy platforms." },
+  { q: "How does ChemistCare PrescriberOS handle data security?", a: "All data is hosted on Australian-based infrastructure with encryption at rest and in transit, role-based access controls, full audit trails, and a defined data retention policy. We are designed to support Privacy Act 1988 and APPs compliance." },
+  { q: "Does it integrate with existing dispensing systems?", a: "ChemistCare PrescriberOS is designed to complement your existing POS/dispensing system. We provide structured exports and are actively developing direct integrations with major Australian pharmacy platforms." },
   { q: "What does it cost?", a: "We offer transparent per-pharmacy pricing with no lock-in contracts. Early access partners receive founding-member rates. Book a demo to discuss your specific needs." },
-  { q: "Is this aligned with AHPRA and TGA requirements?", a: "Yes. ChemistCareOS is designed to support compliance with AHPRA professional standards and TGA requirements for pharmacist prescribing under Structured Prescribing Arrangements. Our protocols are reviewed by practising pharmacist prescribers." },
+  { q: "Is this aligned with AHPRA and TGA requirements?", a: "Yes. ChemistCare PrescriberOS is designed to support compliance with AHPRA professional standards and TGA requirements for pharmacist prescribing under Structured Prescribing Arrangements. Our protocols are reviewed by practising pharmacist prescribers." },
 ];
 
 const securityFeatures = [
@@ -155,7 +155,7 @@ function WaitlistForm() {
       </div>
       <button type="submit" disabled={loading}
         className="w-full bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold px-6 py-4 rounded-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 text-base">
-        {loading ? "Joining..." : "Book a 15-min Demo →"}
+        {loading ? "Joining..." : "Join the Waitlist →"}
       </button>
     </form>
   );
@@ -173,7 +173,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Recoleta', serif" }}>
-            ChemistCare<span className="text-[#2dd4bf]">OS</span>
+            ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span>
           </span>
           <div className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-[#94a3b8] hover:text-white text-sm transition-colors">Features</a>
@@ -182,7 +182,7 @@ export default function LandingPage() {
             <a href="#faq" className="text-[#94a3b8] hover:text-white text-sm transition-colors">FAQ</a>
             <button onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold text-sm px-5 py-2 rounded-lg transition-all">
-              Book a Demo
+              Join the Waitlist
             </button>
           </div>
           <button className="md:hidden !text-white" onClick={() => setMenuOpen(!menuOpen)}>
@@ -196,7 +196,7 @@ export default function LandingPage() {
             <a href="#security" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>Security</a>
             <a href="#faq" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>FAQ</a>
             <button onClick={() => { setMenuOpen(false); document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="bg-[#2dd4bf] text-[#0f172a] font-semibold text-sm px-5 py-2.5 rounded-lg w-full">Book a Demo</button>
+              className="bg-[#2dd4bf] text-[#0f172a] font-semibold text-sm px-5 py-2.5 rounded-lg w-full">Join the Waitlist</button>
           </div>
         )}
       </nav>
@@ -213,7 +213,7 @@ export default function LandingPage() {
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 !text-white"
             style={{ fontFamily: "'Recoleta', serif" }}>
-            Start ChemistCareOS Consults{" "}
+            Start ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span> Consults{" "}
             <span className="text-[#2dd4bf]">in Days, Not Weeks</span>
           </motion.h1>
 
@@ -226,11 +226,11 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <button onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
-              Book a 15-min Demo
+              Join the Waitlist
             </button>
             <button onClick={() => navigate("/dashboard")}
               className="border border-white/20 !text-white bg-white/5 px-8 py-4 text-lg font-semibold rounded-xl hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-300">
-              See Workflow →
+              Start Prescribing <span className="text-[#2dd4bf]">Now</span> →
             </button>
           </motion.div>
 
@@ -380,7 +380,7 @@ export default function LandingPage() {
             Ready to Transform Your Prescribing Practice?
           </h2>
           <p className="text-[#94a3b8] text-lg mt-4 max-w-xl mx-auto mb-10">
-            Book a 15-minute demo and see how ChemistCareOS can streamline your clinical workflow from day one.
+            Join the waitlist and be among the first to experience ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span> when we launch.
           </p>
           <WaitlistForm />
           <p className="text-[#475569] text-sm mt-4">No spam • Instant confirmation • Early access rates for founding partners</p>
@@ -393,7 +393,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left">
               <p className="!text-white font-bold text-lg" style={{ fontFamily: "'Recoleta', serif" }}>
-                ChemistCare<span className="text-[#2dd4bf]">OS</span>
+                ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span>
               </p>
               <p className="text-[#64748b] text-sm mt-1">Clinical workflow software for pharmacist prescribers. Built in Australia.</p>
             </div>
@@ -404,7 +404,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap justify-center gap-4 text-[#475569] text-xs">
-            <span>© 2026 ChemistCareOS</span>
+            <span>© 2026 ChemistCare PrescriberOS</span>
             <span>Designed to support AHPRA & TGA compliance</span>
             <span>Privacy Act aligned</span>
             <span>Victorian SPA compatible</span>
