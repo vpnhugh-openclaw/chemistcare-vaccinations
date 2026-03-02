@@ -38,6 +38,7 @@ const mainItems = [
 
 const adminItems = [
   { title: 'Audit', url: '/audit', icon: Shield },
+  { title: 'PPA Integration', url: '/ppa-settings', icon: Receipt },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 

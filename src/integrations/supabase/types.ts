@@ -177,10 +177,14 @@ export type Database = {
           patient_age: number | null
           patient_initials: string | null
           patient_sex: string | null
+          ppa_claim_id: string | null
+          ppa_response: Json | null
+          ppa_submitted_at: string | null
           protocol_completed: boolean
           red_flags_negative: boolean
           rule_set_id: string | null
           status: Database["public"]["Enums"]["claim_case_status"]
+          submission_confirmed_by: string | null
           total_amount: number
           updated_at: string
           warn_count: number
@@ -206,10 +210,14 @@ export type Database = {
           patient_age?: number | null
           patient_initials?: string | null
           patient_sex?: string | null
+          ppa_claim_id?: string | null
+          ppa_response?: Json | null
+          ppa_submitted_at?: string | null
           protocol_completed?: boolean
           red_flags_negative?: boolean
           rule_set_id?: string | null
           status?: Database["public"]["Enums"]["claim_case_status"]
+          submission_confirmed_by?: string | null
           total_amount?: number
           updated_at?: string
           warn_count?: number
@@ -235,10 +243,14 @@ export type Database = {
           patient_age?: number | null
           patient_initials?: string | null
           patient_sex?: string | null
+          ppa_claim_id?: string | null
+          ppa_response?: Json | null
+          ppa_submitted_at?: string | null
           protocol_completed?: boolean
           red_flags_negative?: boolean
           rule_set_id?: string | null
           status?: Database["public"]["Enums"]["claim_case_status"]
+          submission_confirmed_by?: string | null
           total_amount?: number
           updated_at?: string
           warn_count?: number
@@ -264,38 +276,50 @@ export type Database = {
       }
       claim_programs: {
         Row: {
+          category: string | null
           code: string
           created_at: string
           funding_body: string
           gst_rate: number
           id: string
           is_active: boolean
+          is_api_supported: boolean
           jurisdiction: string
           name: string
+          ppa_program_code: string | null
+          program_rules_url: string | null
           standard_fee_ex_gst: number
           updated_at: string
         }
         Insert: {
+          category?: string | null
           code: string
           created_at?: string
           funding_body: string
           gst_rate?: number
           id?: string
           is_active?: boolean
+          is_api_supported?: boolean
           jurisdiction?: string
           name: string
+          ppa_program_code?: string | null
+          program_rules_url?: string | null
           standard_fee_ex_gst?: number
           updated_at?: string
         }
         Update: {
+          category?: string | null
           code?: string
           created_at?: string
           funding_body?: string
           gst_rate?: number
           id?: string
           is_active?: boolean
+          is_api_supported?: boolean
           jurisdiction?: string
           name?: string
+          ppa_program_code?: string | null
+          program_rules_url?: string | null
           standard_fee_ex_gst?: number
           updated_at?: string
         }
@@ -420,6 +444,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integration_audit_log: {
+        Row: {
+          claim_case_id: string | null
+          created_at: string
+          error_message: string | null
+          event_source: string
+          event_type: string
+          id: string
+          program_code: string | null
+          request_summary: string | null
+          response_status: number | null
+          response_summary: string | null
+          user_id: string | null
+        }
+        Insert: {
+          claim_case_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_source?: string
+          event_type: string
+          id?: string
+          program_code?: string | null
+          request_summary?: string | null
+          response_status?: number | null
+          response_summary?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          claim_case_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_source?: string
+          event_type?: string
+          id?: string
+          program_code?: string | null
+          request_summary?: string | null
+          response_status?: number | null
+          response_summary?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ppa_integration_settings: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          is_connected: boolean
+          last_connection_status: string | null
+          last_connection_test_at: string | null
+          pharmacy_name: string
+          ppa_service_provider_id: string | null
+          ppa_user_id: string | null
+          registered_programs: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          id?: string
+          is_connected?: boolean
+          last_connection_status?: string | null
+          last_connection_test_at?: string | null
+          pharmacy_name?: string
+          ppa_service_provider_id?: string | null
+          ppa_user_id?: string | null
+          registered_programs?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          is_connected?: boolean
+          last_connection_status?: string | null
+          last_connection_test_at?: string | null
+          pharmacy_name?: string
+          ppa_service_provider_id?: string | null
+          ppa_user_id?: string | null
+          registered_programs?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
