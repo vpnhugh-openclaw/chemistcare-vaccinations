@@ -18,6 +18,8 @@ import PPASettingsPage from "./pages/PPASettings";
 import EightCpaDashboard from "./pages/EightCpaDashboard";
 import EightCpaNewService from "./pages/EightCpaNewService";
 import EightCpaServiceHistory from "./pages/EightCpaServiceHistory";
+import PatientTriage from "./pages/PatientTriage";
+import ProtocolConsultation from "./pages/ProtocolConsultation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,8 @@ const router = createBrowserRouter([
   { path: "/eight-cpa/edit/:id", element: <EightCpaNewService /> },
   { path: "/eight-cpa/history", element: <EightCpaServiceHistory /> },
   { path: "/settings", element: <SettingsPage /> },
+  { path: "/triage", element: <PatientTriage /> },
+  { path: "/protocol-consultation", element: <ProtocolConsultation /> },
   { path: "*", element: <NotFound /> },
 ]);
 
