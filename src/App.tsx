@@ -12,6 +12,7 @@ import PrescribingLog from "./pages/PrescribingLog";
 import Audit from "./pages/Audit";
 import SettingsPage from "./pages/Settings";
 import CalculatorsPage from "./pages/Calculators";
+import ClaimsPage from "./pages/Claims";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/prescribing-log" element={<PrescribingLog />} />
           <Route path="/audit" element={<Audit />} />
           <Route path="/calculators" element={<CalculatorsPage />} />
+          <Route path="/claims" element={<ClaimsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
