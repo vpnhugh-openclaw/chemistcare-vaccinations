@@ -135,3 +135,34 @@ npm run mac:start
 ```
 
 Or at minimum run `npm run local:bootstrap` once and keep Docker/Supabase local stack running.
+
+## Android app version (Capacitor)
+
+An Android native shell has been added using Capacitor.
+
+### Included
+- `capacitor.config.ts`
+- `android/` native project
+
+### Build/run workflow
+
+```bash
+npm install
+npm run android:sync
+npm run android:open
+```
+
+Then in Android Studio:
+1. Let Gradle sync
+2. Connect Android device or start emulator
+3. Run app
+
+### Useful scripts
+- `npm run android:sync` — builds web app and syncs assets/plugins to Android
+- `npm run android:open` — opens Android Studio project
+- `npm run android:run` — attempts CLI run on connected device/emulator
+
+### Notes
+- This packages the app as a native Android app shell.
+- If your data backend is remote Supabase, internet is still needed for backend calls.
+- Full offline-on-phone mode would require replacing remote Supabase calls with an on-device/local-sync data layer (future phase).
