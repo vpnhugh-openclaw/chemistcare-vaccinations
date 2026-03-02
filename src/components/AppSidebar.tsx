@@ -7,6 +7,7 @@ import {
   Shield,
   Settings,
   Calculator,
+  Receipt,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -32,6 +33,7 @@ const mainItems = [
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
   { title: 'Calculators', url: '/calculators', icon: Calculator },
+  { title: 'Claims & Reporting', url: '/claims', icon: Receipt },
 ];
 
 const adminItems = [
