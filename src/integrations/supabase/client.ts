@@ -2,14 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Fallbacks ensure packaged desktop builds still work even when CI doesn't inject env vars.
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL ||
+  'https://moyonkosvvufpzxxjlle.supabase.co';
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error(
-    'Supabase environment variables are missing. Run `npm run local:bootstrap` for local mode, or configure .env for hosted mode.',
-  );
-}
+const SUPABASE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1veW9ua29zdnZ1ZnB6eHhqbGxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MjQ1MzcsImV4cCI6MjA4ODAwMDUzN30.uEh_a37t1O67v53Iu5WHLeL8nTbyD9txxUvf9YeFMBs';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -19,5 +19,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+  },
 });
