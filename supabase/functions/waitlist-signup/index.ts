@@ -1,8 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
 
-const NOTIFY_EMAIL = "hugh@burkeroadpharmacy.com.au";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -14,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json();
+    const { email, role, pharmacy_name } = await req.json();
 
     if (!email || !email.includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email required" }), {
@@ -27,13 +25,15 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Insert into waitlist
     const { error: insertError } = await supabase
       .from("waitlist_entries")
-      .insert({ email: email.toLowerCase().trim() });
+      .insert({
+        email: email.toLowerCase().trim(),
+        role: role || null,
+        pharmacy_name: pharmacy_name || null,
+      });
 
     if (insertError) {
-      // Duplicate email
       if (insertError.code === "23505") {
         return new Response(
           JSON.stringify({ success: true, message: "You're already on the waitlist!" }),
@@ -43,12 +43,11 @@ Deno.serve(async (req) => {
       throw insertError;
     }
 
-    // Send notification email via Lovable AI Gateway
+    // Send notification via Lovable AI Gateway
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (apiKey) {
       try {
-        // Use the AI gateway to compose a notification
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${apiKey}`,
@@ -59,25 +58,21 @@ Deno.serve(async (req) => {
             messages: [
               {
                 role: "user",
-                content: `Generate a brief, professional plain-text notification email body (no subject line, just the body) for this event: A new person (${email}) just joined the ChemistCare Prescriber OS waitlist. Keep it to 2-3 sentences.`,
+                content: `Generate a brief notification for hugh@burkeroadpharmacy.com.au: New ChemistCareOS waitlist signup from ${email}${role ? `, role: ${role}` : ""}${pharmacy_name ? `, pharmacy: ${pharmacy_name}` : ""}. Keep to 2 sentences.`,
               },
             ],
             max_tokens: 150,
           }),
         });
-        // Log the notification (we can't actually send email without a mail service)
-        const aiResult = await response.json();
-        console.log(`Waitlist notification for ${NOTIFY_EMAIL}:`, aiResult?.choices?.[0]?.message?.content);
       } catch (e) {
-        console.error("AI notification error:", e);
+        console.error("Notification error:", e);
       }
     }
 
-    // Log the signup
-    console.log(`New waitlist signup: ${email}`);
+    console.log(`New waitlist signup: ${email} | role: ${role} | pharmacy: ${pharmacy_name}`);
 
     return new Response(
-      JSON.stringify({ success: true, message: "You're on the list! We'll be in touch." }),
+      JSON.stringify({ success: true, message: "You're on the list! We'll be in touch shortly." }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

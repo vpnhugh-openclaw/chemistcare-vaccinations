@@ -1287,16 +1287,22 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          pharmacy_name: string | null
+          role: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          pharmacy_name?: string | null
+          role?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          pharmacy_name?: string | null
+          role?: string | null
         }
         Relationships: []
       }
