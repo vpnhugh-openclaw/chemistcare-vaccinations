@@ -11,6 +11,7 @@ import ConditionDetail from "./pages/ConditionDetail";
 import PrescribingLog from "./pages/PrescribingLog";
 import Audit from "./pages/Audit";
 import SettingsPage from "./pages/Settings";
+import CalculatorsPage from "./pages/Calculators";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/conditions/:id" element={<ConditionDetail />} />
           <Route path="/prescribing-log" element={<PrescribingLog />} />
           <Route path="/audit" element={<Audit />} />
+          <Route path="/calculators" element={<CalculatorsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
