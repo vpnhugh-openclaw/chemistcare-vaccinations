@@ -53,12 +53,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <img src={logoImg} alt="ChemistCare Logo" className="h-8 w-8 rounded-lg object-cover" />
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">ChemistCare</span>
-              <span className="text-[10px] text-sidebar-foreground/60 font-medium tracking-wider uppercase">PrescriberOS</span>
+              <span className="text-[0.8125rem] font-bold text-sidebar-accent-foreground tracking-tight leading-tight">ChemistCare</span>
+              <span className="text-[0.625rem] text-sidebar-foreground/50 font-medium tracking-widest uppercase">PrescriberOS</span>
             </div>
           )}
         </div>
@@ -66,7 +66,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Clinical</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[0.6875rem] font-medium tracking-wider text-sidebar-foreground/40 uppercase">Clinical</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -74,7 +74,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <NavLink to={item.url} end={item.url === '/'} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="text-[0.875rem]">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -84,7 +84,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[0.6875rem] font-medium tracking-wider text-sidebar-foreground/40 uppercase">Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminItems.map((item) => (
@@ -92,7 +92,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <NavLink to={item.url} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="text-[0.875rem]">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -104,7 +104,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         {!collapsed && (
-          <div className="text-[10px] text-sidebar-foreground/40 leading-relaxed">
+          <div className="text-[0.625rem] text-sidebar-foreground/30 leading-relaxed">
             <p>Australian Pharmacist Prescriber</p>
             <p>Clinical Decision Support v1.0</p>
           </div>
