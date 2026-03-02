@@ -143,7 +143,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight leading-[1.05] mb-8"
+            className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight leading-[1.05] mb-8 !text-white"
             style={{ fontFamily: "'Recoleta', serif" }}>
             From Registrant to Prescriber-Lead:{" "}
             <span className="text-[#2dd4bf]">Your First-Day-Ready OS</span>{" "}
@@ -186,7 +186,7 @@ export default function LandingPage() {
       {/* ─── FEATURES ─── */}
       <Section id="features" className="py-24 md:py-32 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
             Your Clinical Command Centre
           </h2>
           <p className="text-[#94a3b8] text-lg mb-16 max-w-xl mx-auto">Everything you need for safe, efficient, compliant prescribing — in one place.</p>
@@ -204,7 +204,7 @@ export default function LandingPage() {
       {/* ─── HOW IT WORKS ─── */}
       <Section id="how-it-works" className="py-24 md:py-32 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
             Your First 15-Minute Consult — Streamlined
           </h2>
           <p className="text-[#94a3b8] text-lg mb-16">From booking to billing in four clean steps.</p>
@@ -254,7 +254,7 @@ export default function LandingPage() {
       {/* ─── FINAL CTA ─── */}
       <Section id="waitlist" className="py-24 md:py-32 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
             Ready to Launch Your Prescriber-Led Service?
           </h2>
           <p className="text-[#94a3b8] text-lg mt-4 max-w-xl mx-auto mb-10">
