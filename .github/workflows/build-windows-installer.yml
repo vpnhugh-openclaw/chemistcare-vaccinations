@@ -39,7 +39,7 @@ jobs:
         run: |
           $max = 3
           for ($i = 1; $i -le $max; $i++) {
-            Write-Host "Attempt $i of $max: npm install"
+            Write-Host "Attempt $i of ${max}: npm install"
             npm install --no-audit --no-fund
             if ($LASTEXITCODE -eq 0) { exit 0 }
             if ($i -lt $max) {
