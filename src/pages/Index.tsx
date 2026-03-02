@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
+  Calculator,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -19,35 +20,37 @@ const Dashboard = () => {
 
   return (
     <ClinicalLayout>
-      <div className="p-5 space-y-5 animate-fade-in">
+      <div className="p-3 sm:p-5 space-y-4 sm:space-y-5 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1>Clinical Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Pharmacist Prescriber Workspace</p>
+            <h1 className="text-xl sm:text-2xl">Clinical Dashboard</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              ChemistCare Prescriber<span className="text-accent">OS</span> — Pharmacist Prescriber Workspace
+            </p>
           </div>
-          <Button onClick={() => navigate('/consultation')} className="gap-2">
+          <Button onClick={() => navigate('/consultation')} className="gap-2 w-full sm:w-auto">
             <FilePlus className="h-4 w-4" />
             New Consultation
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {[
-            { label: 'Today\'s Consultations', value: '0', icon: Activity, color: 'text-accent' },
+            { label: "Today's Consults", value: '0', icon: Activity, color: 'text-accent' },
             { label: 'Active Patients', value: '0', icon: Users, color: 'text-clinical-safe' },
             { label: 'Pending Follow-ups', value: '0', icon: Clock, color: 'text-clinical-warning' },
             { label: 'Scripts This Month', value: '0', icon: ClipboardList, color: 'text-foreground' },
           ].map((stat) => (
             <Card key={stat.label}>
-              <CardContent className="pt-4 pb-3 px-4">
+              <CardContent className="pt-3 pb-2.5 px-3 sm:pt-4 sm:pb-3 sm:px-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="clinical-section-title mb-1">{stat.label}</p>
-                    <p className="text-[1.75rem] font-semibold tabular-nums leading-none">{stat.value}</p>
+                  <div className="min-w-0">
+                    <p className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1 truncate">{stat.label}</p>
+                    <p className="text-xl sm:text-[1.75rem] font-semibold tabular-nums leading-none">{stat.value}</p>
                   </div>
-                  <stat.icon className={`h-7 w-7 ${stat.color} opacity-20`} />
+                  <stat.icon className={`h-5 w-5 sm:h-7 sm:w-7 ${stat.color} opacity-20 shrink-0`} />
                 </div>
               </CardContent>
             </Card>
@@ -55,29 +58,36 @@ const Dashboard = () => {
         </div>
 
         {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Quick actions */}
           <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-sm sm:text-base">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {[
                 { label: 'Start New Consultation', desc: 'Begin structured clinical assessment', icon: FilePlus, action: () => navigate('/consultation') },
                 { label: 'View Conditions Library', desc: 'Browse 22 supported conditions', icon: TrendingUp, action: () => navigate('/conditions') },
                 { label: 'Patient Records', desc: 'Search and manage patient profiles', icon: Users, action: () => navigate('/patients') },
+                { label: 'Clinical Calculators', desc: 'CrCl, eGFR, Framingham & more', icon: Calculator, action: () => navigate('/calculators'), accent: true },
               ].map((a) => (
                 <button
                   key={a.label}
                   onClick={a.action}
-                  className="w-full flex items-center gap-3 p-3 rounded-md border hover:bg-muted/50 transition-colors text-left"
+                  className={`w-full flex items-center gap-3 p-2.5 sm:p-3 rounded-md border transition-colors text-left ${
+                    a.accent
+                      ? 'border-accent/30 hover:bg-accent/5'
+                      : 'hover:bg-muted/50'
+                  }`}
                 >
-                  <div className="flex items-center justify-center w-9 h-9 rounded-md bg-accent/10">
-                    <a.icon className="h-4 w-4 text-accent" />
+                  <div className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-md ${
+                    a.accent ? 'bg-accent/15' : 'bg-accent/10'
+                  }`}>
+                    <a.icon className={`h-4 w-4 ${a.accent ? 'text-accent' : 'text-accent'}`} />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{a.label}</p>
-                    <p className="text-xs text-muted-foreground">{a.desc}</p>
+                  <div className="min-w-0">
+                    <p className={`text-sm font-medium ${a.accent ? 'text-accent' : ''}`}>{a.label}</p>
+                    <p className="text-xs text-muted-foreground truncate">{a.desc}</p>
                   </div>
                 </button>
               ))}
@@ -86,13 +96,13 @@ const Dashboard = () => {
 
           {/* Safety reminders */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                 <AlertTriangle className="h-4 w-4 text-clinical-warning" />
                 Safety Reminders
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2.5">
+            <CardContent className="space-y-2">
               {[
                 'Complete all assessment steps before prescribing',
                 'Red flags always require referral documentation',
@@ -102,7 +112,7 @@ const Dashboard = () => {
               ].map((r, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <CheckCircle className="h-3.5 w-3.5 text-clinical-safe mt-0.5 shrink-0" />
-                  <p className="text-[0.8125rem] text-muted-foreground leading-snug">{r}</p>
+                  <p className="text-xs sm:text-[0.8125rem] text-muted-foreground leading-snug">{r}</p>
                 </div>
               ))}
             </CardContent>
@@ -111,23 +121,23 @@ const Dashboard = () => {
 
         {/* Supported conditions summary */}
         <Card>
-          <CardHeader>
-            <CardTitle>Supported Conditions</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base">Supported Conditions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {[
                 { label: 'Acute', count: 7 },
                 { label: 'Chronic', count: 10 },
                 { label: 'Preventive', count: 3 },
                 { label: 'Resupply', count: 1 },
               ].map((cat) => (
-                <Badge key={cat.label} variant="secondary" className="gap-1.5">
+                <Badge key={cat.label} variant="secondary" className="gap-1.5 text-xs">
                   {cat.label}
                   <span className="text-accent font-semibold tabular-nums">{cat.count}</span>
                 </Badge>
               ))}
-              <Badge variant="outline" className="ml-2">22 Total Conditions</Badge>
+              <Badge variant="outline" className="sm:ml-2 text-xs">22 Total Conditions</Badge>
             </div>
           </CardContent>
         </Card>

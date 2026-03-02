@@ -181,7 +181,7 @@ const NewConsultation = () => {
                   );
                 })}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 ml-2 pl-2 border-l border-border">
                 <CalculatorsDialog />
                 <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
               </div>
