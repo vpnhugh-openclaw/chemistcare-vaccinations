@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,10 +12,24 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { CONDITIONS, getConditionById } from '@/data/conditions';
 import { CONSULTATION_STEPS, ConsultationStep } from '@/types/clinical';
+import { useAutosave } from '@/hooks/useAutosave';
+import { useNavigationGuard } from '@/hooks/useNavigationGuard';
+import { validateStep, StepChecklist, SaveStatus } from '@/components/ConsultationValidation';
+import { FormPageSkeleton } from '@/components/PageSkeleton';
 import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
-  Shield, Pill, FileText, User, Stethoscope, Brain, Lock,
+  Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
 } from 'lucide-react';
+
+const DRAFT_KEY = 'chemistcare_consultation_draft';
+
+interface DraftState {
+  formData: Record<string, string>;
+  selectedCondition: string;
+  redFlagsChecked: Record<string, boolean>;
+  differentials: { diagnosis: string; reasonExcluded: string }[];
+  currentStep: ConsultationStep;
+}
 
 const NewConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -24,11 +38,52 @@ const NewConsultation = () => {
   const [redFlagsChecked, setRedFlagsChecked] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [differentials, setDifferentials] = useState([{ diagnosis: '', reasonExcluded: '' }]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
 
   const condition = useMemo(() => getConditionById(selectedCondition), [selectedCondition]);
   const stepIndex = CONSULTATION_STEPS.findIndex(s => s.key === currentStep);
   const hasRedFlagTriggered = Object.values(redFlagsChecked).some(Boolean);
   const canProceedFromAssessment = !hasRedFlagTriggered;
+
+  // Draft state for autosave
+  const draftState: DraftState = useMemo(() => ({
+    formData, selectedCondition, redFlagsChecked, differentials, currentStep,
+  }), [formData, selectedCondition, redFlagsChecked, differentials, currentStep]);
+
+  const isDirty = useMemo(() => {
+    return Object.keys(formData).length > 0 || selectedCondition !== '' || differentials.some(d => d.diagnosis.trim());
+  }, [formData, selectedCondition, differentials]);
+
+  const { lastSaved, isSaving, loadDraft, clearDraft, hasDraft } = useAutosave(DRAFT_KEY, draftState, isLoaded && isDirty);
+
+  // Navigation guard
+  useNavigationGuard(isDirty, 'You have unsaved consultation data. Are you sure you want to leave?');
+
+  // Load draft on mount
+  useEffect(() => {
+    if (hasDraft()) {
+      setShowDraftPrompt(true);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  const restoreDraft = useCallback(() => {
+    const draft = loadDraft();
+    if (draft) {
+      setFormData(draft.formData || {});
+      setSelectedCondition(draft.selectedCondition || '');
+      setRedFlagsChecked(draft.redFlagsChecked || {});
+      setDifferentials(draft.differentials?.length ? draft.differentials : [{ diagnosis: '', reasonExcluded: '' }]);
+      setCurrentStep(draft.currentStep || 'patient');
+    }
+    setShowDraftPrompt(false);
+  }, [loadDraft]);
+
+  const discardDraft = useCallback(() => {
+    clearDraft();
+    setShowDraftPrompt(false);
+  }, [clearDraft]);
 
   const updateField = (key: string, value: string) => setFormData(prev => ({ ...prev, [key]: value }));
   const toggleRedFlag = (id: string) => setRedFlagsChecked(prev => ({ ...prev, [id]: !prev[id] }));
@@ -46,64 +101,114 @@ const NewConsultation = () => {
     return 'pending';
   };
 
+  const getStepValidation = (step: ConsultationStep) => {
+    return validateStep(step, formData, condition, redFlagsChecked, differentials);
+  };
+
+  if (!isLoaded) return <ClinicalLayout><FormPageSkeleton /></ClinicalLayout>;
+
   return (
     <ClinicalLayout>
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-3.5rem)]">
         {/* Main content */}
         <div className="flex-1 p-6 overflow-auto">
           <div className="max-w-3xl space-y-6 animate-fade-in">
-            {/* Step indicator */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-2">
-              {CONSULTATION_STEPS.map((step, i) => {
-                const status = getStepStatus(step.key);
-                const Icon = stepIcons[step.key];
-                return (
-                  <div key={step.key} className="flex items-center">
-                    <button
-                      onClick={() => {
-                        if (status === 'complete' || status === 'active') setCurrentStep(step.key);
-                      }}
-                      disabled={status === 'pending' || status === 'blocked'}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-                        status === 'active' ? 'bg-accent/10 text-accent' :
-                        status === 'complete' ? 'text-clinical-safe hover:bg-muted' :
-                        status === 'blocked' ? 'text-clinical-danger' :
-                        'text-muted-foreground'
-                      }`}
-                    >
-                      <div className={`step-indicator w-6 h-6 text-[10px] ${
-                        status === 'active' ? 'step-active' :
-                        status === 'complete' ? 'step-complete' :
-                        status === 'blocked' ? 'step-blocked' : 'step-pending'
-                      }`}>
-                        {status === 'complete' ? <CheckCircle className="h-3.5 w-3.5" /> :
-                         status === 'blocked' ? <Lock className="h-3.5 w-3.5" /> :
-                         <Icon className="h-3.5 w-3.5" />}
-                      </div>
-                      <span className="hidden sm:inline">{step.label}</span>
-                    </button>
-                    {i < CONSULTATION_STEPS.length - 1 && (
-                      <ChevronRight className="h-3 w-3 text-muted-foreground/40 mx-0.5 shrink-0" />
-                    )}
+
+            {/* Draft restore prompt */}
+            {showDraftPrompt && (
+              <Card className="border-accent/40 bg-accent/5">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <RotateCcw className="h-5 w-5 text-accent" />
+                    <div>
+                      <p className="text-sm font-medium">Unsaved draft found</p>
+                      <p className="text-xs text-muted-foreground">Would you like to resume your previous consultation?</p>
+                    </div>
                   </div>
-                );
-              })}
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={discardDraft} className="gap-1.5">
+                      <Trash2 className="h-3.5 w-3.5" /> Discard
+                    </Button>
+                    <Button size="sm" onClick={restoreDraft} className="gap-1.5">
+                      <RotateCcw className="h-3.5 w-3.5" /> Restore Draft
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Save status + step indicator */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 overflow-x-auto pb-2">
+                {CONSULTATION_STEPS.map((step, i) => {
+                  const status = getStepStatus(step.key);
+                  const Icon = stepIcons[step.key];
+                  const validation = getStepValidation(step.key);
+                  return (
+                    <div key={step.key} className="flex items-center">
+                      <button
+                        onClick={() => {
+                          if (status === 'complete' || status === 'active') setCurrentStep(step.key);
+                        }}
+                        disabled={status === 'pending' || status === 'blocked'}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                          status === 'active' ? 'bg-accent/10 text-accent' :
+                          status === 'complete' ? 'text-clinical-safe hover:bg-muted' :
+                          status === 'blocked' ? 'text-clinical-danger' :
+                          'text-muted-foreground'
+                        }`}
+                      >
+                        <div className={`step-indicator w-6 h-6 text-[10px] ${
+                          status === 'active' ? 'step-active' :
+                          status === 'complete' ? 'step-complete' :
+                          status === 'blocked' ? 'step-blocked' : 'step-pending'
+                        }`}>
+                          {status === 'complete' ? <CheckCircle className="h-3.5 w-3.5" /> :
+                           status === 'blocked' ? <Lock className="h-3.5 w-3.5" /> :
+                           <Icon className="h-3.5 w-3.5" />}
+                        </div>
+                        <span className="hidden sm:inline">{step.label}</span>
+                        {status === 'active' && validation.total > 0 && (
+                          <StepChecklist validation={validation} compact />
+                        )}
+                      </button>
+                      {i < CONSULTATION_STEPS.length - 1 && (
+                        <ChevronRight className="h-3 w-3 text-muted-foreground/40 mx-0.5 shrink-0" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
             </div>
 
             {/* Step 1: Patient */}
             {currentStep === 'patient' && (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold">Patient Profile</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Patient Profile</h2>
+                  <StepChecklist validation={getStepValidation('patient')} />
+                </div>
                 <Card>
                   <CardContent className="pt-5 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div><Label className="text-xs">First Name</Label><Input placeholder="First name" value={formData.firstName || ''} onChange={e => updateField('firstName', e.target.value)} /></div>
-                      <div><Label className="text-xs">Last Name</Label><Input placeholder="Last name" value={formData.lastName || ''} onChange={e => updateField('lastName', e.target.value)} /></div>
+                      <div>
+                        <Label className="text-xs">First Name <span className="text-clinical-danger">*</span></Label>
+                        <Input placeholder="First name" value={formData.firstName || ''} onChange={e => updateField('firstName', e.target.value)} />
+                        {!formData.firstName && formData.lastName && <p className="text-xs mt-1" style={{ color: 'hsl(var(--clinical-warning))' }}>Required</p>}
+                      </div>
+                      <div>
+                        <Label className="text-xs">Last Name <span className="text-clinical-danger">*</span></Label>
+                        <Input placeholder="Last name" value={formData.lastName || ''} onChange={e => updateField('lastName', e.target.value)} />
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                      <div><Label className="text-xs">Date of Birth</Label><Input type="date" value={formData.dob || ''} onChange={e => updateField('dob', e.target.value)} /></div>
                       <div>
-                        <Label className="text-xs">Sex</Label>
+                        <Label className="text-xs">Date of Birth <span className="text-clinical-danger">*</span></Label>
+                        <Input type="date" value={formData.dob || ''} onChange={e => updateField('dob', e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Sex <span className="text-clinical-danger">*</span></Label>
                         <Select value={formData.sex || ''} onValueChange={v => updateField('sex', v)}>
                           <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                           <SelectContent>
@@ -140,7 +245,7 @@ const NewConsultation = () => {
 
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Select Presenting Condition</CardTitle>
+                    <CardTitle className="text-sm">Select Presenting Condition <span className="text-clinical-danger">*</span></CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Select value={selectedCondition} onValueChange={setSelectedCondition}>
@@ -157,7 +262,7 @@ const NewConsultation = () => {
                 <div className="flex justify-end">
                   <Button
                     onClick={() => setCurrentStep('assessment')}
-                    disabled={!selectedCondition || !formData.firstName || !formData.lastName || !formData.sex}
+                    disabled={!getStepValidation('patient').complete || !selectedCondition}
                     className="gap-2"
                   >
                     Continue to Assessment <ChevronRight className="h-4 w-4" />
@@ -169,7 +274,10 @@ const NewConsultation = () => {
             {/* Step 2: Assessment */}
             {currentStep === 'assessment' && condition && (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold">Structured Assessment — {condition.name}</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Structured Assessment — {condition.name}</h2>
+                  <StepChecklist validation={getStepValidation('assessment')} />
+                </div>
 
                 <Card>
                   <CardHeader className="pb-3">
@@ -178,7 +286,7 @@ const NewConsultation = () => {
                   <CardContent className="space-y-3">
                     {condition.assessmentFields.map(field => (
                       <div key={field}>
-                        <Label className="text-xs">{field}</Label>
+                        <Label className="text-xs">{field} <span className="text-clinical-danger">*</span></Label>
                         <Input
                           placeholder={`Enter ${field.toLowerCase()}`}
                           value={formData[`assess_${field}`] || ''}
@@ -225,7 +333,7 @@ const NewConsultation = () => {
                       </div>
                       <p className="text-xs text-muted-foreground">A red flag has been identified. You must document a referral before proceeding. Prescribing is not permitted for this consultation.</p>
                       <div>
-                        <Label className="text-xs">Referral Documentation (mandatory)</Label>
+                        <Label className="text-xs">Referral Documentation (mandatory) <span className="text-clinical-danger">*</span></Label>
                         <Textarea
                           placeholder="Document referral details: who referred to, reason, urgency, communication method..."
                           value={formData.referralNotes || ''}
@@ -257,11 +365,14 @@ const NewConsultation = () => {
             {/* Step 3: Differentials */}
             {currentStep === 'differentials' && (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold">Differential Diagnosis</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Differential Diagnosis</h2>
+                  <StepChecklist validation={getStepValidation('differentials')} />
+                </div>
                 <Card>
                   <CardContent className="pt-5 space-y-4">
                     <div>
-                      <Label className="text-xs font-semibold">Working Diagnosis</Label>
+                      <Label className="text-xs font-semibold">Working Diagnosis <span className="text-clinical-danger">*</span></Label>
                       <Input
                         placeholder="State your working diagnosis"
                         value={formData.workingDiagnosis || ''}
@@ -269,7 +380,7 @@ const NewConsultation = () => {
                       />
                     </div>
                     <Separator />
-                    <Label className="text-xs font-semibold">Differentials Considered</Label>
+                    <Label className="text-xs font-semibold">Differentials Considered <span className="text-clinical-danger">*</span></Label>
                     <p className="text-xs text-muted-foreground">List each differential considered and the reason it was excluded.</p>
                     {differentials.map((d, i) => (
                       <div key={i} className="grid grid-cols-2 gap-3">
@@ -309,7 +420,7 @@ const NewConsultation = () => {
                   </Button>
                   <Button
                     onClick={() => setCurrentStep('scope')}
-                    disabled={!formData.workingDiagnosis}
+                    disabled={!getStepValidation('differentials').complete}
                     className="gap-2"
                   >
                     Continue to Scope Validation <ChevronRight className="h-4 w-4" />
@@ -369,12 +480,15 @@ const NewConsultation = () => {
             {/* Step 5: Treatment */}
             {currentStep === 'treatment' && condition && (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold">Therapeutic Decision</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Therapeutic Decision</h2>
+                  <StepChecklist validation={getStepValidation('treatment')} />
+                </div>
                 {condition.therapyOptions.length > 0 ? (
                   <>
                     <Card>
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-sm">Recommended Therapies</CardTitle>
+                        <CardTitle className="text-sm">Recommended Therapies <span className="text-clinical-danger">*</span></CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {condition.therapyOptions.map(t => (
@@ -410,7 +524,7 @@ const NewConsultation = () => {
                     {formData.selectedTherapy && condition.therapyOptions.find(t => t.id === formData.selectedTherapy)?.line !== 'first' && (
                       <Card className="border-clinical-warning">
                         <CardContent className="pt-5">
-                          <Label className="text-xs font-semibold text-clinical-warning">Deviation Justification Required</Label>
+                          <Label className="text-xs font-semibold text-clinical-warning">Deviation Justification Required <span className="text-clinical-danger">*</span></Label>
                           <Textarea
                             placeholder="Explain why first-line therapy is not being used..."
                             value={formData.deviationJustification || ''}
@@ -423,8 +537,14 @@ const NewConsultation = () => {
 
                     <Card>
                       <CardContent className="pt-5 space-y-3">
-                        <div><Label className="text-xs">Follow-up Plan</Label><Textarea placeholder="Document follow-up plan..." value={formData.followUpPlan || ''} onChange={e => updateField('followUpPlan', e.target.value)} className="h-20" /></div>
-                        <div><Label className="text-xs">Safety Net Advice</Label><Textarea placeholder="Document safety net advice given to patient..." value={formData.safetyNet || ''} onChange={e => updateField('safetyNet', e.target.value)} className="h-16" /></div>
+                        <div>
+                          <Label className="text-xs">Follow-up Plan <span className="text-clinical-danger">*</span></Label>
+                          <Textarea placeholder="Document follow-up plan..." value={formData.followUpPlan || ''} onChange={e => updateField('followUpPlan', e.target.value)} className="h-20" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Safety Net Advice <span className="text-clinical-danger">*</span></Label>
+                          <Textarea placeholder="Document safety net advice given to patient..." value={formData.safetyNet || ''} onChange={e => updateField('safetyNet', e.target.value)} className="h-16" />
+                        </div>
                       </CardContent>
                     </Card>
                   </>
@@ -549,7 +669,7 @@ const NewConsultation = () => {
                     <Button variant="outline" className="gap-2">
                       <FileText className="h-4 w-4" /> Export GP Letter
                     </Button>
-                    <Button className="gap-2">
+                    <Button className="gap-2" onClick={() => clearDraft()}>
                       <CheckCircle className="h-4 w-4" /> Finalise Consultation
                     </Button>
                   </div>
@@ -628,13 +748,17 @@ const NewConsultation = () => {
               <div className="space-y-1">
                 {CONSULTATION_STEPS.map(s => {
                   const status = getStepStatus(s.key);
+                  const validation = getStepValidation(s.key);
                   return (
-                    <div key={s.key} className="flex items-center gap-2">
-                      {status === 'complete' ? <CheckCircle className="h-3 w-3 text-clinical-safe" /> :
-                       status === 'active' ? <div className="h-3 w-3 rounded-full bg-accent" /> :
-                       status === 'blocked' ? <XCircle className="h-3 w-3 text-clinical-danger" /> :
-                       <div className="h-3 w-3 rounded-full bg-muted-foreground/20" />}
-                      <span className={status === 'active' ? 'font-medium' : 'text-muted-foreground'}>{s.label}</span>
+                    <div key={s.key} className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {status === 'complete' ? <CheckCircle className="h-3 w-3 text-clinical-safe" /> :
+                         status === 'active' ? <div className="h-3 w-3 rounded-full bg-accent" /> :
+                         status === 'blocked' ? <XCircle className="h-3 w-3 text-clinical-danger" /> :
+                         <div className="h-3 w-3 rounded-full bg-muted-foreground/20" />}
+                        <span className={status === 'active' ? 'font-medium' : 'text-muted-foreground'}>{s.label}</span>
+                      </div>
+                      {validation.total > 0 && <StepChecklist validation={validation} compact />}
                     </div>
                   );
                 })}
