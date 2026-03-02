@@ -11,6 +11,7 @@ import {
   HeartPulse,
   Stethoscope,
   UserCheck,
+  Plane,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -33,6 +34,7 @@ const mainItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'New Consultation', url: '/consultation', icon: FilePlus },
   { title: 'Protocol Consult', url: '/protocol-consultation', icon: Stethoscope },
+  { title: 'Travel Medicine', url: '/travel-consultation', icon: Plane },
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
