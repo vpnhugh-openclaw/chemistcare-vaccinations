@@ -8,6 +8,7 @@ import {
   Settings,
   Calculator,
   Receipt,
+  HeartPulse,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -34,6 +35,7 @@ const mainItems = [
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
   { title: 'Calculators', url: '/calculators', icon: Calculator },
   { title: 'Claims & Reporting', url: '/claims', icon: Receipt },
+  { title: '8CPA / PPA Services', url: '/eight-cpa', icon: HeartPulse },
 ];
 
 const adminItems = [
