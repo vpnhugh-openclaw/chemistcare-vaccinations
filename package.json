@@ -21,7 +21,9 @@
     "electron:dist": "npm run local:bootstrap && npm run electron:build",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
-    "android:run": "npm run android:sync && npx cap run android"
+    "android:run": "npm run android:sync && npx cap run android",
+    "electron:build:win": "npm run local:build && electron-builder --win nsis portable",
+    "electron:dist:win": "npm run local:bootstrap && npm run electron:build:win"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
@@ -127,6 +129,31 @@
     "dmg": {
       "title": "ChemistCare PrescriberOS",
       "artifactName": "ChemistCare-PrescriberOS-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "ChemistCare-PrescriberOS-${version}-Setup-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ChemistCare PrescriberOS"
     }
   }
 }

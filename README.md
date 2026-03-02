@@ -166,3 +166,37 @@ Then in Android Studio:
 - This packages the app as a native Android app shell.
 - If your data backend is remote Supabase, internet is still needed for backend calls.
 - Full offline-on-phone mode would require replacing remote Supabase calls with an on-device/local-sync data layer (future phase).
+
+## Windows 11 all-in-one installer (.exe)
+
+### Option A (recommended): GitHub Actions build (no local Windows setup needed)
+
+A workflow is included at:
+- `.github/workflows/build-windows-installer.yml`
+
+How to use:
+1. Push to `main` (or trigger manually from Actions tab)
+2. Open GitHub → **Actions** → **Build Windows Installer**
+3. Download artifact: `chemistcare-windows-installer`
+4. Distribute the generated `.exe` installer
+
+### Option B: Build directly on Windows
+
+On a Windows 11 machine:
+
+```bash
+npm install
+npm run electron:build:win
+```
+
+Installer output:
+- `dist/ChemistCare-PrescriberOS-<version>-Setup-x64.exe`
+- `dist/ChemistCare-PrescriberOS-<version>-Setup-x64-portable.exe`
+
+### Runtime prerequisites for local-first mode
+
+If you want full local backend (no cloud dependency), target PCs still need:
+- Docker Desktop
+- Supabase CLI
+
+Then run local backend bootstrap once using project scripts.
