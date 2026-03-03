@@ -206,7 +206,12 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center pt-16 px-4">
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #2dd4bf 1px, transparent 0)", backgroundSize: "40px 40px" }} />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+            className="mb-8">
+            <img src={logoImg} alt="ChemistCare PrescriberOS" className="h-20 md:h-28 w-auto mx-auto" />
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
             className="inline-block rounded-full bg-[#2dd4bf]/10 border border-[#2dd4bf]/20 text-[#2dd4bf] text-sm font-medium px-4 py-1.5 mb-8">
             Now Available in Victoria • Early Access 2026
           </motion.div>
