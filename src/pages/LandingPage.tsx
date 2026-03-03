@@ -219,8 +219,8 @@ export default function LandingPage() {
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 !text-white"
             style={{ fontFamily: "'Recoleta', serif" }}>
-            Start ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span> Consults{" "}
-            <span className="text-[#2dd4bf]">in Days, Not Weeks</span>
+            Start Your<br />ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span><br />Consults{" "}
+            <span className="text-[#2dd4bf]">Today</span>
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
@@ -299,7 +299,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Workflow</p>
           <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
-            Your First Consult — Streamlined
+            Your First Consult, Streamlined
           </h2>
           <p className="text-[#94a3b8] text-lg mb-16">From booking to billing in four steps.</p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
