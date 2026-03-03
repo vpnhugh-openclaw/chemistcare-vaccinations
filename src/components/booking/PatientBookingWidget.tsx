@@ -26,7 +26,7 @@ interface Props {
 
 export function PatientBookingWidget({ pharmacySlug, onBookingComplete }: Props) {
   return (
-    <div className="max-w-xl mx-auto rounded-2xl shadow-lg border border-border overflow-hidden bg-background p-6">
+    <div className="max-w-xl mx-auto rounded-2xl shadow-lg border border-border overflow-hidden bg-background px-6 sm:px-8 py-8">
       <PatientBookingFlow pharmacySlug={pharmacySlug} onBookingComplete={onBookingComplete} />
     </div>
   );
