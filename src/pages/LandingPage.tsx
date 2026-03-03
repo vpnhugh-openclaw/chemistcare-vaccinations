@@ -414,19 +414,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ─── MEDIA LOGOS ─── */}
-      <Section className="py-16 px-4 border-y border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[#64748b] text-xs font-medium tracking-wide uppercase mb-8">As referenced by leading industry & government bodies</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            {["ABC News", "AJP", "PSA", "Pharmacy Guild", "Better Health Channel"].map(name => (
-              <span key={name} className="text-[#475569] text-sm font-semibold tracking-wide uppercase opacity-60 hover:opacity-100 transition-opacity">
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      </Section>
 
       {/* ─── VIDEO SOCIAL PROOF ─── */}
       <Section className="py-24 md:py-32 px-4">
@@ -440,8 +427,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               "https://www.youtube.com/embed/bN94eaY-QDE",
-              "https://www.youtube.com/embed/Xsn3XCPSCMY",
-              "https://www.youtube.com/embed/w1g3t7013hs",
+              "https://www.youtube.com/embed/XnFnxe5y0_k",
+              "https://www.youtube.com/embed/GbVFtOOmEQ4",
             ].map((url, i) => (
               <motion.div key={url} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
