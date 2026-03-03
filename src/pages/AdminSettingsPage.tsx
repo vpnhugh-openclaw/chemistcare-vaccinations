@@ -14,7 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Copy, ExternalLink, AlertTriangle, ChevronDown, Plus, Trash2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { defaultAdminSettings, AdminSettings } from '@/data/admin-settings';
-import { pharmacyServices as initialServices, PharmacyService, EligibilityQuestion } from '@/data/booking-data';
+import { pharmacyServices as initialServices, PharmacyService, EligibilityQuestion, ServiceAvailability } from '@/data/booking-data';
 
 const AdminSettingsPage = () => {
   const [settings, setSettings] = useState<AdminSettings>({ ...defaultAdminSettings });
@@ -221,6 +221,51 @@ const AdminSettingsPage = () => {
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{[10, 15, 20, 30, 45, 60].map(n => <SelectItem key={n} value={String(n)}>{n} min</SelectItem>)}</SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              {/* ── Service Availability ── */}
+              <div>
+                <Label className="font-medium">Service Availability</Label>
+                <p className="text-xs text-muted-foreground mb-2">Set which days and times this service is offered.</p>
+                <div className="space-y-2">
+                  {editService.availability.map((day, di) => (
+                    <div key={day.day} className="flex items-center gap-2 flex-wrap">
+                      <span className="w-20 text-xs font-medium">{day.day}</span>
+                      <Switch
+                        checked={day.available}
+                        onCheckedChange={v => {
+                          const avail = [...editService.availability];
+                          avail[di] = { ...avail[di], available: v };
+                          setEditService({ ...editService, availability: avail });
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground w-10">{day.available ? 'On' : 'Off'}</span>
+                      <Input
+                        type="time"
+                        value={day.open}
+                        disabled={!day.available}
+                        className="w-24 h-8 text-xs"
+                        onChange={e => {
+                          const avail = [...editService.availability];
+                          avail[di] = { ...avail[di], open: e.target.value };
+                          setEditService({ ...editService, availability: avail });
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground">to</span>
+                      <Input
+                        type="time"
+                        value={day.close}
+                        disabled={!day.available}
+                        className="w-24 h-8 text-xs"
+                        onChange={e => {
+                          const avail = [...editService.availability];
+                          avail[di] = { ...avail[di], close: e.target.value };
+                          setEditService({ ...editService, availability: avail });
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
 
