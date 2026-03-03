@@ -3,6 +3,7 @@ import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { AppointmentSlot } from '@/data/booking-data';
 import { AppointmentCard } from './AppointmentCard';
+import { cn } from '@/lib/utils';
 
 interface Props {
   selectedDate: Date;
@@ -28,9 +29,17 @@ export function WeekView({ selectedDate, onDateChange, appointments, onAppointme
           const dateStr = format(day, 'yyyy-MM-dd');
           const dayAppts = appointments.filter(a => a.date === dateStr);
           const isToday = isSameDay(day, new Date());
+          const hasBookings = dayAppts.length > 0;
           return (
             <div key={dateStr} className="min-h-[10rem]">
-              <div className={`text-center text-xs font-medium mb-2 py-1 rounded ${isToday ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
+              <div className={cn(
+                'text-center text-xs font-medium mb-2 py-1.5 rounded-md transition-colors',
+                isToday
+                  ? 'bg-primary text-primary-foreground'
+                  : hasBookings
+                    ? 'bg-accent/15 text-accent border border-accent/25'
+                    : 'text-muted-foreground',
+              )}>
                 <div>{format(day, 'EEE')}</div>
                 <div className="text-sm font-semibold">{format(day, 'd')}</div>
               </div>
