@@ -52,11 +52,33 @@ function StepIndicator({ current }: { current: number }) {
   );
 }
 
-/* ─── SLOT GENERATION ─── */
-function generateSlots(date: Date): string[] {
+/* ─── SLOT GENERATION (uses per-service availability intersected with pharmacy hours) ─── */
+function generateSlots(date: Date, service: PharmacyService | null): string[] {
   const dayName = format(date, 'EEEE');
+  // Check pharmacy-wide hours
   const wh = defaultAdminSettings.workingHours.find(d => d.day === dayName);
   if (!wh || wh.closed) return [];
+
+  // Check service-specific availability
+  if (service?.availability) {
+    const svcDay = service.availability.find(d => d.day === dayName);
+    if (!svcDay || !svcDay.available) return [];
+    // Use the tighter window: intersection of pharmacy hours and service hours
+    const [poh, pom] = wh.open.split(':').map(Number);
+    const [pch, pcm] = wh.close.split(':').map(Number);
+    const [soh, som] = svcDay.open.split(':').map(Number);
+    const [sch, scm] = svcDay.close.split(':').map(Number);
+    const startMin = Math.max(poh * 60 + pom, soh * 60 + som);
+    const endMin = Math.min(pch * 60 + pcm, sch * 60 + scm);
+    if (startMin >= endMin) return [];
+    const interval = defaultAdminSettings.slotIntervalMinutes;
+    const slots: string[] = [];
+    for (let m = startMin; m < endMin; m += interval) {
+      slots.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
+    }
+    return slots;
+  }
+
   const [oh, om] = wh.open.split(':').map(Number);
   const [ch, cm] = wh.close.split(':').map(Number);
   const interval = defaultAdminSettings.slotIntervalMinutes;
@@ -286,14 +308,12 @@ export function PatientBookingFlow({ pharmacySlug, onBookingComplete }: PatientB
               <div className="flex-1">
                 <p className="text-sm font-medium mb-3">{format(selectedDate, 'EEEE, d MMMM yyyy')}</p>
                 {(() => {
-                  const dayName = format(selectedDate, 'EEEE');
-                  const wh = defaultAdminSettings.workingHours.find(d => d.day === dayName);
-                  if (!wh || wh.closed) return <p className="text-sm text-muted-foreground">The pharmacy is closed on this day.</p>;
-                  const slots = generateSlots(selectedDate);
+                  const availableSlots = generateSlots(selectedDate, selectedService);
+                  if (availableSlots.length === 0) return <p className="text-sm text-muted-foreground">This service is not available on this day.</p>;
                   const booked = getBookedTimes(selectedDate);
                   return (
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-60 overflow-y-auto">
-                      {slots.map(s => {
+                      {availableSlots.map(s => {
                         const isBooked = booked.has(s);
                         return (
                           <Button
