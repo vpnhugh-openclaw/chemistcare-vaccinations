@@ -15,7 +15,7 @@ import {
   Plane,
   ChevronDown,
 } from 'lucide-react';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/chemistcare-logo.png';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
