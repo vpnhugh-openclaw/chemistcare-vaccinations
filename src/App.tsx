@@ -23,6 +23,8 @@ import PatientTriage from "./pages/PatientTriage";
 import ProtocolConsultation from "./pages/ProtocolConsultation";
 import TravelConsultation from "./pages/TravelConsultation";
 import CalendarPage from "./pages/CalendarPage";
+import BookingPage from "./pages/BookingPage";
+import AdminSettingsPage from "./pages/AdminSettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,8 @@ const router = createBrowserRouter([
   { path: "/protocol-consultation", element: <ProtocolConsultation /> },
   { path: "/travel-consultation", element: <TravelConsultation /> },
   { path: "/calendar", element: <CalendarPage /> },
+  { path: "/book/:pharmacySlug", element: <BookingPage /> },
+  { path: "/admin/settings", element: <AdminSettingsPage /> },
   { path: "*", element: <NotFound /> },
 ]);
 
