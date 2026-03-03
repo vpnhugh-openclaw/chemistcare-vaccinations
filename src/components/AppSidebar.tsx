@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  CalendarDays,
   FilePlus,
   Users,
   BookOpen,
@@ -37,6 +38,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 
 const mainItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Calendar', url: '/calendar', icon: CalendarDays },
   {
     title: 'New Consultation',
     url: '/consultation',
