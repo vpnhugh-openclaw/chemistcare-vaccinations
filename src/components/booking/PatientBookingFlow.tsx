@@ -329,7 +329,7 @@ export function PatientBookingFlow({ pharmacySlug, onBookingComplete }: PatientB
             <div><Label className="text-sm">First Name *</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} /></div>
             <div><Label className="text-sm">Last Name *</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} /></div>
           </div>
-          <div><Label className="text-sm">Date of Birth *</Label><Input type="date" value={dob} onChange={e => setDob(e.target.value)} /></div>
+          <div><Label className="text-sm">Date of Birth *</Label><Input placeholder="DD/MM/YYYY" value={dob} onChange={e => setDob(e.target.value)} /></div>
           <div><Label className="text-sm">Email *</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} /></div>
           <div><Label className="text-sm">Mobile Phone *</Label><Input value={phone} onChange={e => setPhone(e.target.value)} /></div>
           <div>
