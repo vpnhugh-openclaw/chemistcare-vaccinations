@@ -4,7 +4,7 @@ import { motion, useInView } from "framer-motion";
 import {
   ShieldCheck, FileCheck, TrendingUp, Check, Menu, X,
   Lock, Server, Eye, ClipboardList, ChevronDown, ChevronUp,
-  Stethoscope, BarChart3, Zap
+  Stethoscope, BarChart3, Zap, ExternalLink, Play
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -245,6 +245,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── SOCIAL PROOF STATS STRIP ─── */}
+      <Section className="py-16 px-4 border-y border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { value: "62,000+", label: "Services across 800+ VIC chemists", source: "Chemist Care Now / Vic Health", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
+              { value: "23,000+", label: "Pilot services in first 12 months — no serious safety concerns", source: "Vic Pilot Summary", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
+              { value: "12,000+", label: "NSW trial consultations milestone", source: "NSW Health", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
+              { value: "18", label: "National Scope of Practice Review recommendations", source: "Australian Govt", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
+            ].map((s, i) => (
+              <motion.div key={s.value} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="text-center bg-white/[0.03] border border-white/10 rounded-xl p-6">
+                <p className="text-3xl md:text-4xl font-black !text-white tabular-nums mb-2">{s.value}</p>
+                <p className="text-[#94a3b8] text-sm leading-snug mb-3">{s.label}</p>
+                <a href={s.href} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[#2dd4bf] text-xs font-medium hover:underline">
+                  {s.source} <ExternalLink size={10} />
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
       {/* ─── FEATURES ─── */}
       <Section id="features" className="py-24 md:py-32 px-4">
         <div className="max-w-6xl mx-auto text-center">
@@ -353,6 +377,79 @@ export default function LandingPage() {
                 <p className="!text-white text-sm font-semibold">{t.author}</p>
                 <p className="text-[#64748b] text-sm">{t.location}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ─── IN THE MEDIA / POLICY MOMENTUM ─── */}
+      <Section className="py-24 md:py-32 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">In the Media</p>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+              Policy Momentum Is Building
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Chemist Care Now Expanding", summary: "Victoria is expanding its pharmacist prescribing program to treat more conditions across 800+ pharmacies.", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
+              { title: "VIC Pilot Summary Report", summary: "23,000+ services delivered safely in the first 12 months with no serious safety concerns reported.", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
+              { title: "Community Pharmacist Program", summary: "Victoria's community pharmacist program continues to expand access to healthcare across the state.", href: "https://www.health.vic.gov.au/primary-care/community-pharmacist-program" },
+              { title: "National Scope of Practice Review", summary: "18 recommendations from the Australian Government to expand pharmacist scope of practice nationally.", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
+              { title: "NSW Trial Hits 12,000 Consultations", summary: "NSW pharmacist prescribing pilot reaches a major milestone with 12,000+ patient consultations.", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
+              { title: "Queensland Pharmacist Prescribing", summary: "Queensland announces expanded scope of practice for pharmacists to improve community healthcare access.", href: "https://statements.qld.gov.au/statements/102216" },
+            ].map((item, i) => (
+              <motion.a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="group bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-[#2dd4bf]/30 transition-all duration-300 block">
+                <h3 className="text-base font-bold !text-white mb-2 group-hover:text-[#2dd4bf] transition-colors" style={{ fontFamily: "'Recoleta', serif" }}>{item.title}</h3>
+                <p className="text-[#94a3b8] text-sm leading-relaxed mb-4">{item.summary}</p>
+                <span className="inline-flex items-center gap-1.5 text-[#2dd4bf] text-sm font-medium">
+                  Read more <ExternalLink size={12} />
+                </span>
+              </motion.a>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ─── MEDIA LOGOS ─── */}
+      <Section className="py-16 px-4 border-y border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[#64748b] text-xs font-medium tracking-wide uppercase mb-8">As referenced by leading industry & government bodies</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            {["ABC News", "AJP", "PSA", "Pharmacy Guild", "Better Health Channel"].map(name => (
+              <span key={name} className="text-[#475569] text-sm font-semibold tracking-wide uppercase opacity-60 hover:opacity-100 transition-opacity">
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ─── VIDEO SOCIAL PROOF ─── */}
+      <Section className="py-24 md:py-32 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">See the Buzz</p>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+              See What the Buzz Is About
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              "https://www.youtube.com/embed/bN94eaY-QDE",
+              "https://www.youtube.com/embed/Xsn3XCPSCMY",
+              "https://www.youtube.com/embed/w1g3t7013hs",
+            ].map((url, i) => (
+              <motion.div key={url} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                  <iframe src={url} title={`Video ${i + 1}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
+                    className="absolute inset-0 w-full h-full" loading="lazy" />
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
