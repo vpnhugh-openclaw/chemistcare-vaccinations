@@ -22,6 +22,7 @@ import EightCpaServiceHistory from "./pages/EightCpaServiceHistory";
 import PatientTriage from "./pages/PatientTriage";
 import ProtocolConsultation from "./pages/ProtocolConsultation";
 import TravelConsultation from "./pages/TravelConsultation";
+import CalendarPage from "./pages/CalendarPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
   { path: "/triage", element: <PatientTriage /> },
   { path: "/protocol-consultation", element: <ProtocolConsultation /> },
   { path: "/travel-consultation", element: <TravelConsultation /> },
+  { path: "/calendar", element: <CalendarPage /> },
   { path: "*", element: <NotFound /> },
 ]);
 
