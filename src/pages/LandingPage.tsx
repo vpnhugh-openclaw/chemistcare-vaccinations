@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logoImg from "@/assets/chemistcare-logo.png";
 
 /* ── Animated Section wrapper ── */
 function Section({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
@@ -172,9 +173,9 @@ export default function LandingPage() {
       {/* ─── NAVBAR ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Recoleta', serif" }}>
-            ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span>
-          </span>
+          <div className="flex items-center gap-2.5">
+            <img src={logoImg} alt="ChemistCare Logo" className="h-9 w-auto" />
+          </div>
           <div className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-[#94a3b8] hover:text-white text-sm transition-colors">Features</a>
             <a href="#how-it-works" className="text-[#94a3b8] hover:text-white text-sm transition-colors">How It Works</a>
