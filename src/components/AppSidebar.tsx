@@ -14,6 +14,7 @@ import {
   UserCheck,
   Plane,
   Mic,
+  MessageSquare,
   ChevronDown,
 } from 'lucide-react';
 import logoImg from '@/assets/chemistcare-logo.png';
@@ -56,6 +57,7 @@ const mainItems = [
   { title: 'Clinical Scribe', url: '/scribe', icon: Mic },
   { title: 'Claims & Reporting', url: '/claims', icon: Receipt },
   { title: '8CPA / PPA Services', url: '/eight-cpa', icon: HeartPulse },
+  { title: 'Patient Messaging', url: '/messaging', icon: MessageSquare },
 ];
 
 const adminItems = [
