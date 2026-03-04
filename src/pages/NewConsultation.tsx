@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,14 @@ import { useAutosave } from '@/hooks/useAutosave';
 import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 import { validateStep, StepChecklist, SaveStatus } from '@/components/ConsultationValidation';
 import { FormPageSkeleton } from '@/components/PageSkeleton';
+import { ConsultStatusBar } from '@/components/consult/ConsultStatusBar';
+import { LiveNotePreview } from '@/components/consult/LiveNotePreview';
+import { EvidenceDrawer } from '@/components/consult/EvidenceDrawer';
+import { ReviewPanel } from '@/components/consult/ReviewPanel';
+import { ConsultStatus, transitionConsult } from '@/lib/consultStateMachine';
+import { useConsultAudit } from '@/hooks/useConsultAudit';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
@@ -31,10 +39,15 @@ interface DraftState {
   redFlagsChecked: Record<string, boolean>;
   differentials: { diagnosis: string; reasonExcluded: string }[];
   currentStep: ConsultationStep;
+  pinnedEvidence: { question: string; answer: string; sources: string[] }[];
 }
 
 const NewConsultation = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { logEvent } = useConsultAudit();
+
   const [currentStep, setCurrentStep] = useState<ConsultationStep>('patient');
   const [selectedCondition, setSelectedCondition] = useState(searchParams.get('condition') || '');
   const [redFlagsChecked, setRedFlagsChecked] = useState<Record<string, boolean>>({});
@@ -42,6 +55,11 @@ const NewConsultation = () => {
   const [differentials, setDifferentials] = useState([{ diagnosis: '', reasonExcluded: '' }]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [consultStatus, setConsultStatus] = useState<ConsultStatus>('draft');
+  const [consultId, setConsultId] = useState<string | undefined>();
+  const [finalisedAt, setFinalisedAt] = useState<string | undefined>();
+  const [pinnedEvidence, setPinnedEvidence] = useState<{ question: string; answer: string; sources: string[] }[]>([]);
+  const [attemptedProgress, setAttemptedProgress] = useState(false);
 
   const condition = useMemo(() => getConditionById(selectedCondition), [selectedCondition]);
   const stepIndex = CONSULTATION_STEPS.findIndex(s => s.key === currentStep);
@@ -50,17 +68,30 @@ const NewConsultation = () => {
 
   // Draft state for autosave
   const draftState: DraftState = useMemo(() => ({
-    formData, selectedCondition, redFlagsChecked, differentials, currentStep,
-  }), [formData, selectedCondition, redFlagsChecked, differentials, currentStep]);
+    formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence,
+  }), [formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence]);
 
   const isDirty = useMemo(() => {
-    return Object.keys(formData).length > 0 || selectedCondition !== '' || differentials.some(d => d.diagnosis.trim());
-  }, [formData, selectedCondition, differentials]);
+    return consultStatus !== 'finalised' && consultStatus !== 'discarded' &&
+      (Object.keys(formData).length > 0 || selectedCondition !== '' || differentials.some(d => d.diagnosis.trim()));
+  }, [formData, selectedCondition, differentials, consultStatus]);
 
   const { lastSaved, isSaving, loadDraft, clearDraft, hasDraft } = useAutosave(DRAFT_KEY, draftState, isLoaded && isDirty);
 
   // Navigation guard
   useNavigationGuard(isDirty, 'You have unsaved consultation data. Are you sure you want to leave?');
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleNextStep();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [currentStep, formData, selectedCondition]);
 
   // Load draft on mount
   useEffect(() => {
@@ -78,6 +109,7 @@ const NewConsultation = () => {
       setRedFlagsChecked(draft.redFlagsChecked || {});
       setDifferentials(draft.differentials?.length ? draft.differentials : [{ diagnosis: '', reasonExcluded: '' }]);
       setCurrentStep(draft.currentStep || 'patient');
+      setPinnedEvidence(draft.pinnedEvidence || []);
     }
     setShowDraftPrompt(false);
   }, [loadDraft]);
@@ -107,14 +139,159 @@ const NewConsultation = () => {
     return validateStep(step, formData, condition, redFlagsChecked, differentials);
   };
 
+  // Compute all validation blockers for status bar
+  const validationBlockers = useMemo(() => {
+    const blockers: string[] = [];
+    CONSULTATION_STEPS.forEach(s => {
+      const v = getStepValidation(s.key);
+      blockers.push(...v.missing);
+    });
+    return blockers;
+  }, [formData, condition, redFlagsChecked, differentials]);
+
+  const handleNextStep = () => {
+    const steps = CONSULTATION_STEPS;
+    const currentIdx = steps.findIndex(s => s.key === currentStep);
+    const validation = getStepValidation(currentStep);
+
+    if (!validation.complete && currentStep === 'patient') {
+      setAttemptedProgress(true);
+      toast({
+        title: 'Required fields missing',
+        description: validation.missing.join(', '),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (currentIdx < steps.length - 1) {
+      // For assessment step, check red flag blocking
+      if (currentStep === 'assessment' && hasRedFlagTriggered) {
+        setCurrentStep('documentation');
+        return;
+      }
+      setCurrentStep(steps[currentIdx + 1].key);
+    }
+  };
+
+  const handlePinEvidence = (evidence: { question: string; answer: string; sources: string[] }) => {
+    setPinnedEvidence(prev => [...prev, evidence]);
+    toast({ title: 'Evidence pinned to consult' });
+    if (consultId) {
+      logEvent(consultId, 'evidence_pinned', { metadata: { question: evidence.question } });
+    }
+  };
+
+  const handleFinalise = async (): Promise<{ success: boolean; consultId?: string; error?: string }> => {
+    // Transition: draft/validated → submitting
+    const nextStatus = transitionConsult(consultStatus, 'SUBMIT') || transitionConsult(consultStatus, 'VALIDATE');
+    if (!nextStatus && consultStatus !== 'draft') {
+      return { success: false, error: `Cannot finalise from status: ${consultStatus}` };
+    }
+
+    setConsultStatus('submitting');
+
+    try {
+      const consultData = {
+        status: 'finalised',
+        patient_first_name: formData.firstName || null,
+        patient_last_name: formData.lastName || null,
+        patient_dob: formData.dob || null,
+        patient_sex: formData.sex || null,
+        patient_pregnancy_status: formData.pregnancy || null,
+        patient_allergies: formData.allergies || null,
+        patient_medications: formData.medications || null,
+        patient_comorbidities: formData.comorbidities || null,
+        gp_name: formData.gpName || null,
+        gp_clinic: formData.gpClinic || null,
+        gp_phone: formData.gpPhone || null,
+        condition_id: selectedCondition || null,
+        condition_name: condition?.name || null,
+        red_flags_checked: redFlagsChecked,
+        red_flag_triggered: hasRedFlagTriggered,
+        referral_notes: formData.referralNotes || null,
+        assessment_data: Object.fromEntries(
+          Object.entries(formData).filter(([k]) => k.startsWith('assess_'))
+        ),
+        working_diagnosis: formData.workingDiagnosis || null,
+        differentials: differentials.filter(d => d.diagnosis.trim()),
+        selected_therapy_id: formData.selectedTherapy || null,
+        deviation_justification: formData.deviationJustification || null,
+        follow_up_plan: formData.followUpPlan || null,
+        safety_net_advice: formData.safetyNet || null,
+        clinical_notes: formData.clinicalNotes || null,
+        pinned_evidence: pinnedEvidence,
+        finalised_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await (supabase.from('consultations') as any)
+        .insert(consultData)
+        .select('id, finalised_at')
+        .single();
+
+      if (error) throw error;
+
+      const newId = data.id;
+      setConsultId(newId);
+      setFinalisedAt(data.finalised_at);
+      setConsultStatus('finalised');
+
+      // Audit
+      await logEvent(newId, 'finalise_succeeded');
+
+      // Clear draft
+      clearDraft();
+
+      return { success: true, consultId: newId };
+    } catch (err: any) {
+      setConsultStatus('validated');
+      const errorMsg = err?.message || 'Unknown error';
+
+      if (consultId) {
+        await logEvent(consultId, 'finalise_failed', { errorReason: errorMsg });
+      }
+
+      return { success: false, error: errorMsg };
+    }
+  };
+
+  const handleDiscard = () => {
+    // Clear all state
+    setFormData({});
+    setSelectedCondition('');
+    setRedFlagsChecked({});
+    setDifferentials([{ diagnosis: '', reasonExcluded: '' }]);
+    setCurrentStep('patient');
+    setPinnedEvidence([]);
+    setConsultStatus('draft');
+    setConsultId(undefined);
+    setFinalisedAt(undefined);
+    setAttemptedProgress(false);
+    clearDraft();
+
+    if (consultId) {
+      logEvent(consultId, 'draft_discarded');
+    }
+  };
+
   if (!isLoaded) return <ClinicalLayout><FormPageSkeleton /></ClinicalLayout>;
 
   return (
     <ClinicalLayout>
-      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-3.5rem)]">
+      {/* Sticky status bar */}
+      <ConsultStatusBar
+        status={consultStatus}
+        currentStep={currentStep}
+        conditionName={condition?.name}
+        lastSaved={lastSaved}
+        isSaving={isSaving}
+        validationBlockers={validationBlockers}
+      />
+
+      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-6.5rem)]">
         {/* Main content */}
-        <div className="flex-1 p-6 overflow-auto">
-          <div className="max-w-3xl space-y-6 animate-fade-in">
+        <div className="flex-1 p-4 sm:p-6 overflow-auto">
+          <div className="max-w-3xl space-y-5 animate-fade-in">
 
             {/* Draft restore prompt */}
             {showDraftPrompt && (
@@ -139,7 +316,7 @@ const NewConsultation = () => {
               </Card>
             )}
 
-            {/* Save status + step indicator */}
+            {/* Step indicator + tools */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 overflow-x-auto pb-2">
                 {CONSULTATION_STEPS.map((step, i) => {
@@ -181,9 +358,9 @@ const NewConsultation = () => {
                   );
                 })}
               </div>
-              <div className="flex items-center gap-3 ml-2 pl-2 border-l border-border">
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
+                <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
                 <CalculatorsDialog />
-                <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
               </div>
             </div>
 
@@ -196,32 +373,52 @@ const NewConsultation = () => {
                 </div>
                 <Card>
                   <CardContent className="pt-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label className="text-xs">First Name <span className="text-clinical-danger">*</span></Label>
-                        <Input placeholder="First name" value={formData.firstName || ''} onChange={e => updateField('firstName', e.target.value)} />
-                        {!formData.firstName && formData.lastName && <p className="text-xs mt-1" style={{ color: 'hsl(var(--clinical-warning))' }}>Required</p>}
+                        <Input
+                          placeholder="First name"
+                          value={formData.firstName || ''}
+                          onChange={e => updateField('firstName', e.target.value)}
+                          className={attemptedProgress && !formData.firstName ? 'border-clinical-danger' : ''}
+                        />
+                        {attemptedProgress && !formData.firstName && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
                       </div>
                       <div>
                         <Label className="text-xs">Last Name <span className="text-clinical-danger">*</span></Label>
-                        <Input placeholder="Last name" value={formData.lastName || ''} onChange={e => updateField('lastName', e.target.value)} />
+                        <Input
+                          placeholder="Last name"
+                          value={formData.lastName || ''}
+                          onChange={e => updateField('lastName', e.target.value)}
+                          className={attemptedProgress && !formData.lastName ? 'border-clinical-danger' : ''}
+                        />
+                        {attemptedProgress && !formData.lastName && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
                         <Label className="text-xs">Date of Birth <span className="text-clinical-danger">*</span></Label>
-                        <Input type="date" value={formData.dob || ''} onChange={e => updateField('dob', e.target.value)} />
+                        <Input
+                          type="date"
+                          value={formData.dob || ''}
+                          onChange={e => updateField('dob', e.target.value)}
+                          className={attemptedProgress && !formData.dob ? 'border-clinical-danger' : ''}
+                        />
+                        {attemptedProgress && !formData.dob && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
                       </div>
                       <div>
                         <Label className="text-xs">Sex <span className="text-clinical-danger">*</span></Label>
                         <Select value={formData.sex || ''} onValueChange={v => updateField('sex', v)}>
-                          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                          <SelectTrigger className={attemptedProgress && !formData.sex ? 'border-clinical-danger' : ''}>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="female">Female</SelectItem>
                             <SelectItem value="male">Male</SelectItem>
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
+                        {attemptedProgress && !formData.sex && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
                       </div>
                       <div>
                         <Label className="text-xs">Pregnancy Status</Label>
@@ -240,7 +437,7 @@ const NewConsultation = () => {
                     <div><Label className="text-xs">Current Medications</Label><TagInput placeholder="Type medication and press Enter…" value={parseTagString(formData.medications)} onChange={tags => updateField('medications', tagsToString(tags))} /></div>
                     <div><Label className="text-xs">Comorbidities</Label><TagInput placeholder="Type comorbidity and press Enter…" value={parseTagString(formData.comorbidities)} onChange={tags => updateField('comorbidities', tagsToString(tags))} /></div>
                     <Separator />
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div><Label className="text-xs">GP Name</Label><Input placeholder="Dr." value={formData.gpName || ''} onChange={e => updateField('gpName', e.target.value)} /></div>
                       <div><Label className="text-xs">GP Clinic</Label><Input placeholder="Clinic name" value={formData.gpClinic || ''} onChange={e => updateField('gpClinic', e.target.value)} /></div>
                       <div><Label className="text-xs">GP Phone</Label><Input placeholder="Phone" value={formData.gpPhone || ''} onChange={e => updateField('gpPhone', e.target.value)} /></div>
@@ -254,20 +451,31 @@ const NewConsultation = () => {
                   </CardHeader>
                   <CardContent>
                     <Select value={selectedCondition} onValueChange={setSelectedCondition}>
-                      <SelectTrigger><SelectValue placeholder="Select a condition..." /></SelectTrigger>
+                      <SelectTrigger className={attemptedProgress && !selectedCondition ? 'border-clinical-danger' : ''}>
+                        <SelectValue placeholder="Select a condition..." />
+                      </SelectTrigger>
                       <SelectContent>
                         {CONDITIONS.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name} ({c.classification})</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {attemptedProgress && !selectedCondition && <p className="text-xs mt-1 text-clinical-danger">Required — select a condition</p>}
                   </CardContent>
                 </Card>
 
                 <div className="flex justify-end">
                   <Button
-                    onClick={() => setCurrentStep('assessment')}
-                    disabled={!getStepValidation('patient').complete || !selectedCondition}
+                    onClick={() => {
+                      const v = getStepValidation('patient');
+                      if (!v.complete || !selectedCondition) {
+                        setAttemptedProgress(true);
+                        toast({ title: 'Required fields missing', description: v.missing.concat(!selectedCondition ? ['Condition selection'] : []).join(', '), variant: 'destructive' });
+                        return;
+                      }
+                      setAttemptedProgress(false);
+                      setCurrentStep('assessment');
+                    }}
                     className="gap-2"
                   >
                     Continue to Assessment <ChevronRight className="h-4 w-4" />
@@ -336,11 +544,11 @@ const NewConsultation = () => {
                         <XCircle className="h-5 w-5" />
                         <span className="text-sm font-semibold">Prescribing Blocked — Red Flag Detected</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">A red flag has been identified. You must document a referral before proceeding. Prescribing is not permitted for this consultation.</p>
+                      <p className="text-xs text-muted-foreground">A red flag has been identified. You must document a referral before proceeding.</p>
                       <div>
                         <Label className="text-xs">Referral Documentation (mandatory) <span className="text-clinical-danger">*</span></Label>
                         <Textarea
-                          placeholder="Document referral details: who referred to, reason, urgency, communication method..."
+                          placeholder="Document referral details..."
                           value={formData.referralNotes || ''}
                           onChange={e => updateField('referralNotes', e.target.value)}
                           className="h-24"
@@ -388,7 +596,7 @@ const NewConsultation = () => {
                     <Label className="text-xs font-semibold">Differentials Considered <span className="text-clinical-danger">*</span></Label>
                     <p className="text-xs text-muted-foreground">List each differential considered and the reason it was excluded.</p>
                     {differentials.map((d, i) => (
-                      <div key={i} className="grid grid-cols-2 gap-3">
+                      <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Input
                           placeholder="Differential diagnosis"
                           value={d.diagnosis}
@@ -513,7 +721,7 @@ const NewConsultation = () => {
                                 className="accent-[hsl(var(--accent))]"
                               />
                               <div className="flex-1">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <span className="text-sm font-semibold">{t.medicineName} {t.dose}</span>
                                   <span className={`clinical-badge ${t.line === 'first' ? 'clinical-badge-safe' : 'clinical-badge-info'}`}>{t.line}-line</span>
                                   {t.authorityRequired && <span className="clinical-badge clinical-badge-danger">PBS Authority</span>}
@@ -556,7 +764,7 @@ const NewConsultation = () => {
                 ) : (
                   <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">
-                      <p className="text-sm">Therapy options for this condition are being developed. Proceed to documentation for non-pharmacological management.</p>
+                      <p className="text-sm">Therapy options for this condition are being developed.</p>
                     </CardContent>
                   </Card>
                 )}
@@ -566,209 +774,62 @@ const NewConsultation = () => {
                     <ChevronLeft className="h-4 w-4" /> Back
                   </Button>
                   <Button onClick={() => setCurrentStep('documentation')} className="gap-2">
-                    Generate Documentation <ChevronRight className="h-4 w-4" />
+                    Review & Finalise <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* Step 6: Documentation */}
+            {/* Step 6: Documentation / Review */}
             {currentStep === 'documentation' && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-bold">Clinical Documentation</h2>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">OSCE-Style Structured Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-xs">
-                    <div>
-                      <p className="clinical-section-title">Patient</p>
-                      <p className="font-medium">{formData.firstName} {formData.lastName} · DOB: {formData.dob} · Sex: {formData.sex}</p>
-                      {formData.allergies && <p className="text-clinical-danger mt-1">Allergies: {formData.allergies}</p>}
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="clinical-section-title">Presenting Condition</p>
-                      <p className="font-medium">{condition?.name || selectedCondition}</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="clinical-section-title">Assessment Findings</p>
-                      {condition?.assessmentFields.map(f => formData[`assess_${f}`] && (
-                        <p key={f}><span className="text-muted-foreground">{f}:</span> {formData[`assess_${f}`]}</p>
-                      ))}
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="clinical-section-title">Clinical Reasoning</p>
-                      <p><span className="text-muted-foreground">Working Diagnosis:</span> <span className="font-medium">{formData.workingDiagnosis || '—'}</span></p>
-                      {differentials.filter(d => d.diagnosis).map((d, i) => (
-                        <p key={i}><span className="text-muted-foreground">Differential {i + 1}:</span> {d.diagnosis} — <span className="italic">Excluded: {d.reasonExcluded}</span></p>
-                      ))}
-                    </div>
-                    {formData.selectedTherapy && condition && (
-                      <>
-                        <Separator />
-                        <div>
-                          <p className="clinical-section-title">Treatment</p>
-                          {(() => {
-                            const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-                            return t ? (
-                              <div>
-                                <p className="font-medium">{t.medicineName} {t.dose} — {t.frequency} for {t.duration}</p>
-                                <p className="text-muted-foreground">Qty: {t.maxQuantity} | Repeats: {t.repeats} | PBS: {t.pbsRestriction || 'N/A'}</p>
-                              </div>
-                            ) : null;
-                          })()}
-                        </div>
-                      </>
-                    )}
-                    {formData.followUpPlan && (
-                      <>
-                        <Separator />
-                        <div>
-                          <p className="clinical-section-title">Follow-up Plan</p>
-                          <p>{formData.followUpPlan}</p>
-                        </div>
-                      </>
-                    )}
-                    {formData.safetyNet && (
-                      <>
-                        <Separator />
-                        <div>
-                          <p className="clinical-section-title">Safety Net Advice</p>
-                          <p>{formData.safetyNet}</p>
-                        </div>
-                      </>
-                    )}
-                    {hasRedFlagTriggered && formData.referralNotes && (
-                      <>
-                        <Separator />
-                        <div>
-                          <p className="clinical-section-title text-clinical-danger">Referral (Red Flag Triggered)</p>
-                          <p>{formData.referralNotes}</p>
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-5 space-y-3">
-                    <Label className="text-xs font-semibold">Additional Clinical Notes</Label>
-                    <Textarea
-                      placeholder="Any additional clinical notes for the encounter record..."
-                      value={formData.clinicalNotes || ''}
-                      onChange={e => updateField('clinicalNotes', e.target.value)}
-                      className="h-24"
-                    />
-                  </CardContent>
-                </Card>
-
-                <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setCurrentStep(hasRedFlagTriggered ? 'assessment' : 'treatment')} className="gap-2">
-                    <ChevronLeft className="h-4 w-4" /> Back
-                  </Button>
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="gap-2">
-                      <FileText className="h-4 w-4" /> Export GP Letter
-                    </Button>
-                    <Button className="gap-2" onClick={() => clearDraft()}>
-                      <CheckCircle className="h-4 w-4" /> Finalise Consultation
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <ReviewPanel
+                formData={formData}
+                condition={condition}
+                differentials={differentials}
+                hasRedFlagTriggered={hasRedFlagTriggered}
+                consultStatus={consultStatus}
+                consultId={consultId}
+                finalisedAt={finalisedAt}
+                onFinalise={handleFinalise}
+                onDiscard={handleDiscard}
+                pinnedEvidence={pinnedEvidence}
+              />
             )}
           </div>
         </div>
 
-        {/* Right panel: Clinical reasoning summary */}
+        {/* Right panel: Live Note Preview */}
         <div className="hidden lg:block w-80 border-l bg-muted/30 p-4 overflow-auto">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Clinical Reasoning Summary</h3>
+          <LiveNotePreview
+            formData={formData}
+            condition={condition}
+            differentials={differentials}
+            hasRedFlagTriggered={hasRedFlagTriggered}
+            redFlagsChecked={redFlagsChecked}
+            pinnedEvidence={pinnedEvidence}
+          />
 
-          <div className="space-y-4 text-xs">
-            <div>
-              <p className="font-medium text-muted-foreground mb-1">Patient</p>
-              <p className="font-semibold">{formData.firstName || '—'} {formData.lastName || ''}</p>
-              {formData.sex && <p className="text-muted-foreground capitalize">{formData.sex}{formData.dob ? ` · DOB: ${formData.dob}` : ''}</p>}
-            </div>
+          <Separator className="my-4" />
 
-            <Separator />
-
-            <div>
-              <p className="font-medium text-muted-foreground mb-1">Condition</p>
-              <p className="font-semibold">{condition?.name || 'Not selected'}</p>
-              {condition && <span className={`clinical-badge mt-1 ${
-                condition.classification === 'acute' ? 'clinical-badge-danger' :
-                condition.classification === 'chronic' ? 'clinical-badge-info' :
-                condition.classification === 'preventive' ? 'clinical-badge-safe' : 'clinical-badge-warning'
-              }`}>{condition.classification}</span>}
-            </div>
-
-            <Separator />
-
-            <div>
-              <p className="font-medium text-muted-foreground mb-1">Red Flags</p>
-              {hasRedFlagTriggered ? (
-                <div className="p-2 rounded bg-clinical-danger-bg">
-                  <p className="font-semibold text-clinical-danger flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> TRIGGERED — Prescribing Blocked
-                  </p>
-                  {Object.entries(redFlagsChecked).filter(([, v]) => v).map(([id]) => {
-                    const rf = condition?.redFlags.find(r => r.id === id);
-                    return rf ? <p key={id} className="text-clinical-danger mt-1">• {rf.description}</p> : null;
-                  })}
+          {/* Step Progress */}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Step Progress</h3>
+          <div className="space-y-1 text-xs">
+            {CONSULTATION_STEPS.map(s => {
+              const status = getStepStatus(s.key);
+              const validation = getStepValidation(s.key);
+              return (
+                <div key={s.key} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {status === 'complete' ? <CheckCircle className="h-3 w-3 text-clinical-safe" /> :
+                     status === 'active' ? <div className="h-3 w-3 rounded-full bg-accent" /> :
+                     status === 'blocked' ? <XCircle className="h-3 w-3 text-clinical-danger" /> :
+                     <div className="h-3 w-3 rounded-full bg-muted-foreground/20" />}
+                    <span className={status === 'active' ? 'font-medium' : 'text-muted-foreground'}>{s.label}</span>
+                  </div>
+                  {validation.total > 0 && <StepChecklist validation={validation} compact />}
                 </div>
-              ) : (
-                <p className="text-clinical-safe flex items-center gap-1"><CheckCircle className="h-3 w-3" /> No red flags</p>
-              )}
-            </div>
-
-            <Separator />
-
-            <div>
-              <p className="font-medium text-muted-foreground mb-1">Diagnosis</p>
-              <p className="font-semibold">{formData.workingDiagnosis || '—'}</p>
-            </div>
-
-            {formData.selectedTherapy && condition && (
-              <>
-                <Separator />
-                <div>
-                  <p className="font-medium text-muted-foreground mb-1">Selected Therapy</p>
-                  {(() => {
-                    const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-                    return t ? <p className="font-semibold">{t.medicineName} {t.dose}</p> : <p>—</p>;
-                  })()}
-                </div>
-              </>
-            )}
-
-            <Separator />
-
-            <div>
-              <p className="font-medium text-muted-foreground mb-1">Step Progress</p>
-              <div className="space-y-1">
-                {CONSULTATION_STEPS.map(s => {
-                  const status = getStepStatus(s.key);
-                  const validation = getStepValidation(s.key);
-                  return (
-                    <div key={s.key} className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        {status === 'complete' ? <CheckCircle className="h-3 w-3 text-clinical-safe" /> :
-                         status === 'active' ? <div className="h-3 w-3 rounded-full bg-accent" /> :
-                         status === 'blocked' ? <XCircle className="h-3 w-3 text-clinical-danger" /> :
-                         <div className="h-3 w-3 rounded-full bg-muted-foreground/20" />}
-                        <span className={status === 'active' ? 'font-medium' : 'text-muted-foreground'}>{s.label}</span>
-                      </div>
-                      {validation.total > 0 && <StepChecklist validation={validation} compact />}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>

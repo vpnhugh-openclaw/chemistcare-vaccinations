@@ -445,6 +445,164 @@ export type Database = {
           },
         ]
       }
+      consult_audit_events: {
+        Row: {
+          consult_id: string
+          created_at: string
+          error_reason: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          step: string | null
+          user_id: string | null
+          validation_result: Json | null
+        }
+        Insert: {
+          consult_id: string
+          created_at?: string
+          error_reason?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          step?: string | null
+          user_id?: string | null
+          validation_result?: Json | null
+        }
+        Update: {
+          consult_id?: string
+          created_at?: string
+          error_reason?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          step?: string | null
+          user_id?: string | null
+          validation_result?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consult_audit_events_consult_id_fkey"
+            columns: ["consult_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultations: {
+        Row: {
+          assessment_data: Json | null
+          clinical_notes: string | null
+          condition_id: string | null
+          condition_name: string | null
+          created_at: string
+          created_by: string | null
+          deviation_justification: string | null
+          differentials: Json | null
+          finalised_at: string | null
+          follow_up_plan: string | null
+          full_note_text: string | null
+          gp_clinic: string | null
+          gp_letter_text: string | null
+          gp_name: string | null
+          gp_phone: string | null
+          id: string
+          patient_allergies: string | null
+          patient_comorbidities: string | null
+          patient_dob: string | null
+          patient_first_name: string | null
+          patient_last_name: string | null
+          patient_medications: string | null
+          patient_pregnancy_status: string | null
+          patient_sex: string | null
+          patient_summary_text: string | null
+          pinned_evidence: Json | null
+          red_flag_triggered: boolean | null
+          red_flags_checked: Json | null
+          referral_notes: string | null
+          safety_net_advice: string | null
+          scope_validation_passed: boolean | null
+          selected_therapy_id: string | null
+          status: string
+          updated_at: string
+          working_diagnosis: string | null
+        }
+        Insert: {
+          assessment_data?: Json | null
+          clinical_notes?: string | null
+          condition_id?: string | null
+          condition_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          deviation_justification?: string | null
+          differentials?: Json | null
+          finalised_at?: string | null
+          follow_up_plan?: string | null
+          full_note_text?: string | null
+          gp_clinic?: string | null
+          gp_letter_text?: string | null
+          gp_name?: string | null
+          gp_phone?: string | null
+          id?: string
+          patient_allergies?: string | null
+          patient_comorbidities?: string | null
+          patient_dob?: string | null
+          patient_first_name?: string | null
+          patient_last_name?: string | null
+          patient_medications?: string | null
+          patient_pregnancy_status?: string | null
+          patient_sex?: string | null
+          patient_summary_text?: string | null
+          pinned_evidence?: Json | null
+          red_flag_triggered?: boolean | null
+          red_flags_checked?: Json | null
+          referral_notes?: string | null
+          safety_net_advice?: string | null
+          scope_validation_passed?: boolean | null
+          selected_therapy_id?: string | null
+          status?: string
+          updated_at?: string
+          working_diagnosis?: string | null
+        }
+        Update: {
+          assessment_data?: Json | null
+          clinical_notes?: string | null
+          condition_id?: string | null
+          condition_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          deviation_justification?: string | null
+          differentials?: Json | null
+          finalised_at?: string | null
+          follow_up_plan?: string | null
+          full_note_text?: string | null
+          gp_clinic?: string | null
+          gp_letter_text?: string | null
+          gp_name?: string | null
+          gp_phone?: string | null
+          id?: string
+          patient_allergies?: string | null
+          patient_comorbidities?: string | null
+          patient_dob?: string | null
+          patient_first_name?: string | null
+          patient_last_name?: string | null
+          patient_medications?: string | null
+          patient_pregnancy_status?: string | null
+          patient_sex?: string | null
+          patient_summary_text?: string | null
+          pinned_evidence?: Json | null
+          red_flag_triggered?: boolean | null
+          red_flags_checked?: Json | null
+          referral_notes?: string | null
+          safety_net_advice?: string | null
+          scope_validation_passed?: boolean | null
+          selected_therapy_id?: string | null
+          status?: string
+          updated_at?: string
+          working_diagnosis?: string | null
+        }
+        Relationships: []
+      }
       eight_cpa_action_plan_items: {
         Row: {
           created_at: string
