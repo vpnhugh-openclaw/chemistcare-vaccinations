@@ -19,6 +19,7 @@ import { FormPageSkeleton } from '@/components/PageSkeleton';
 import { ConsultStatusBar } from '@/components/consult/ConsultStatusBar';
 import { LiveNotePreview } from '@/components/consult/LiveNotePreview';
 import { EvidenceDrawer } from '@/components/consult/EvidenceDrawer';
+import { ScribeRecorder } from '@/components/scribe/ScribeRecorder';
 import { ReviewPanel } from '@/components/consult/ReviewPanel';
 import { ConsultStatus, transitionConsult } from '@/lib/consultStateMachine';
 import { useConsultAudit } from '@/hooks/useConsultAudit';
@@ -363,6 +364,11 @@ const NewConsultation = () => {
                 <CalculatorsDialog />
               </div>
             </div>
+
+            {/* Scribe recorder - compact mode inside consultation */}
+            <ScribeRecorder compact className="px-1" onTranscriptChange={(text) => {
+              if (text) setFormData(prev => ({ ...prev, clinicalNotes: text }));
+            }} />
 
             {/* Step 1: Patient */}
             {currentStep === 'patient' && (

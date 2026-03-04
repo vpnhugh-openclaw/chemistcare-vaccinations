@@ -13,6 +13,7 @@ import {
   Stethoscope,
   UserCheck,
   Plane,
+  Mic,
   ChevronDown,
 } from 'lucide-react';
 import logoImg from '@/assets/chemistcare-logo.png';
@@ -52,6 +53,7 @@ const mainItems = [
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
   { title: 'Calculators', url: '/calculators', icon: Calculator },
+  { title: 'Clinical Scribe', url: '/scribe', icon: Mic },
   { title: 'Claims & Reporting', url: '/claims', icon: Receipt },
   { title: '8CPA / PPA Services', url: '/eight-cpa', icon: HeartPulse },
 ];
