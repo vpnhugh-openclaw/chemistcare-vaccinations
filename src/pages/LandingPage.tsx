@@ -365,8 +365,8 @@ export default function LandingPage() {
               <h2 className="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-6" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
                 Unseen admin destroys clinical capacity
               </h2>
-              <p className="text-lg text-[#94a3b8] leading-relaxed mb-8">
-                Australian pharmacist prescribers spend more time on paperwork than patients. Documentation, compliance checks, GP letters, billing — it all adds up. ChemistCare PrescriberOS gives you that time back.
+              <p className="text-lg text-[#94a3b8] leading-relaxed mb-8">Australian pharmacist prescribers spend more time on paperwork than patients. Documentation, compliance checks, GP letters, billing... it all adds up. ChemistCare PrescriberOS gives you that time back.
+
               </p>
               <div className="space-y-5">
                 {[
