@@ -10,6 +10,65 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImg from "@/assets/chemistcare-logo.png";
+import { Mic, Brain, FileText, MessageSquare, Languages, Sparkles } from "lucide-react";
+
+/* ── Scrolling Marquee Banner ── */
+function MarqueeBanner({ items, bgClass, textClass, speed = 30 }: { items: string[]; bgClass: string; textClass: string; speed?: number }) {
+  const content = [...items, ...items, ...items];
+  return (
+    <div className={`overflow-hidden ${bgClass} py-3 relative`}>
+      <div
+        className="flex whitespace-nowrap"
+        style={{
+          animation: `marquee ${speed}s linear infinite`,
+          width: "fit-content",
+        }}
+      >
+        {content.map((item, i) => (
+          <span key={i} className={`inline-flex items-center gap-3 mx-8 text-sm font-semibold tracking-wide uppercase ${textClass}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── AI Feature Marquee with icons ── */
+function AIMarqueeBanner() {
+  const features = [
+    { icon: Mic, text: "Real-Time Speech-to-Text Transcription" },
+    { icon: Brain, text: "AI-Powered Clinical Note Generation" },
+    { icon: FileText, text: "Auto-Generated SOAP Notes" },
+    { icon: MessageSquare, text: "Smart GP Letter Drafting" },
+    { icon: Languages, text: "Multi-Language Voice Recognition" },
+    { icon: Sparkles, text: "Intelligent Red-Flag Detection" },
+    { icon: Mic, text: "Live Consult Transcription" },
+    { icon: Brain, text: "Evidence-Based Decision Support" },
+    { icon: FileText, text: "Automated Audit Documentation" },
+    { icon: MessageSquare, text: "AI Patient Summary Generation" },
+  ];
+  const content = [...features, ...features, ...features];
+  return (
+    <div className="overflow-hidden bg-gradient-to-r from-[#2dd4bf]/10 via-[#2dd4bf]/5 to-[#2dd4bf]/10 border-y border-[#2dd4bf]/20 py-4 relative">
+      <div
+        className="flex whitespace-nowrap"
+        style={{
+          animation: `marquee 40s linear infinite`,
+          width: "fit-content",
+        }}
+      >
+        {content.map((item, i) => (
+          <span key={i} className="inline-flex items-center gap-2 mx-8 text-sm font-medium text-[#2dd4bf]">
+            <item.icon size={16} className="shrink-0" />
+            {item.text}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /* ── Animated counter ── */
 function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
@@ -240,6 +299,19 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── SCROLLING BANNER — Australia's First ─── */}
+      <MarqueeBanner
+        items={[
+          "Australia's First Pharmacist Prescribing Software Package",
+          "Made by Pharmacists for Pharmacists",
+          "Australia's First Pharmacist Prescribing Software Package",
+          "Made by Pharmacists for Pharmacists",
+        ]}
+        bgClass="bg-[#2dd4bf]"
+        textClass="text-[#0f172a]"
+        speed={25}
+      />
+
       {/* ─── TRUST BADGES BAR ─── */}
       <div className="border-y border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-6">
@@ -370,6 +442,9 @@ export default function LandingPage() {
           </div>
         </div>
       </Section>
+
+      {/* ─── AI FEATURES SCROLLING BANNER ─── */}
+      <AIMarqueeBanner />
 
       {/* ─── HOW IT WORKS ─── */}
       <Section id="how-it-works" className="py-24 md:py-32 px-6">
