@@ -339,7 +339,7 @@ export default function LandingPage() {
               { target: 62000, suffix: "+", label: "Services across 800+ VIC pharmacies", source: "Vic Health", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
               { target: 23000, suffix: "+", label: "Pilot services — zero serious safety concerns", source: "Vic Pilot Summary", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
               { target: 12000, suffix: "+", label: "NSW trial consultations milestone", source: "NSW Health", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
-              { target: 18, suffix: "", label: "National Scope of Practice recommendations", source: "Australian Government", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
+              { target: 22, suffix: "", label: "National Scope of Practice recommendations", source: "Australian Government", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
             ].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="text-center bg-white/[0.03] border border-white/10 rounded-2xl p-8">
@@ -553,7 +553,7 @@ export default function LandingPage() {
               { title: "Chemist Care Now Expanding", summary: "Victoria is expanding its pharmacist prescribing program to treat more conditions across 800+ pharmacies.", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
               { title: "VIC Pilot Summary Report", summary: "23,000+ services delivered safely in the first 12 months with no serious safety concerns reported.", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
               { title: "Community Pharmacist Program", summary: "Victoria's program continues to expand access to healthcare across the state.", href: "https://www.health.vic.gov.au/primary-care/community-pharmacist-program" },
-              { title: "National Scope of Practice Review", summary: "18 recommendations from the Australian Government to expand pharmacist scope of practice nationally.", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
+              { title: "National Scope of Practice Review", summary: "22 recommendations from the Australian Government to expand pharmacist scope of practice nationally.", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
               { title: "NSW Trial Hits 12,000 Consults", summary: "NSW pharmacist prescribing pilot reaches a major milestone with 12,000+ patient consultations.", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
               { title: "Queensland Pharmacist Prescribing", summary: "Queensland announces expanded scope of practice for pharmacists to improve community healthcare.", href: "https://statements.qld.gov.au/statements/102216" },
             ].map((item, i) => (
