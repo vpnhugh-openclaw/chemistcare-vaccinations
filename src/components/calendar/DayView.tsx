@@ -23,7 +23,7 @@ export function DayView({ selectedDate, onDateChange, appointments, onAppointmen
   const dayAppts = appointments.filter(a => a.date === dateStr);
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-8 lg:gap-12">
       {/* Sidebar */}
       <div className="w-64 shrink-0 hidden md:block space-y-4">
         <Calendar
