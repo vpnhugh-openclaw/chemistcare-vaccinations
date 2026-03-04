@@ -27,8 +27,11 @@ export function AnatomyDialog() {
         <div className="flex-1 px-4 pb-4 min-h-0">
           <iframe
             src="https://www.humanatomy.app/web.html"
+            width="100%"
+            height="100%"
             className="w-full h-full rounded-md border"
-            allow="fullscreen"
+            allow="accelerometer; camera; fullscreen; gyroscope; web-share"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
             title="Anatomy Reference"
           />
         </div>
