@@ -222,22 +222,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0f172a] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif", scrollBehavior: "smooth" }}>
 
-      {/* ─── SCROLLING BANNER — Australia's First ─── */}
-      <MarqueeBanner
-        items={[
-          "Australia's First Pharmacist Prescribing Software Package",
-          "Made by Pharmacists for Pharmacists",
-          "Australia's First Pharmacist Prescribing Software Package",
-          "Made by Pharmacists for Pharmacists",
-        ]}
-        bgClass="bg-[#2dd4bf]"
-        textClass="text-[#0f172a]"
-        speed={25}
-      />
-
-      {/* ─── AI FEATURES SCROLLING BANNER ─── */}
-      <AIMarqueeBanner />
-
       {/* ─── NAVBAR ─── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0f172a]/95 backdrop-blur-xl border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
@@ -274,8 +258,24 @@ export default function LandingPage() {
         </AnimatePresence>
       </nav>
 
+      {/* ─── SCROLLING BANNERS (below fixed navbar) ─── */}
+      <div className="pt-[72px]">
+        <MarqueeBanner
+          items={[
+            "Australia's First Pharmacist Prescribing Software Package",
+            "Made by Pharmacists for Pharmacists",
+            "Australia's First Pharmacist Prescribing Software Package",
+            "Made by Pharmacists for Pharmacists",
+          ]}
+          bgClass="bg-[#2dd4bf]"
+          textClass="text-[#0f172a]"
+          speed={25}
+        />
+        <AIMarqueeBanner />
+      </div>
+
       {/* ─── HERO ─── */}
-      <section className="relative min-h-[90vh] flex items-center pt-[72px]">
+      <section className="relative min-h-[80vh] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #2dd4bf 1px, transparent 0)", backgroundSize: "40px 40px" }} />
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2dd4bf]/[0.04] rounded-full blur-[120px]" />
