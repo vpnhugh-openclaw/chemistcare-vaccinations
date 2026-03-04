@@ -222,6 +222,22 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0f172a] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif", scrollBehavior: "smooth" }}>
 
+      {/* ─── SCROLLING BANNER — Australia's First ─── */}
+      <MarqueeBanner
+        items={[
+          "Australia's First Pharmacist Prescribing Software Package",
+          "Made by Pharmacists for Pharmacists",
+          "Australia's First Pharmacist Prescribing Software Package",
+          "Made by Pharmacists for Pharmacists",
+        ]}
+        bgClass="bg-[#2dd4bf]"
+        textClass="text-[#0f172a]"
+        speed={25}
+      />
+
+      {/* ─── AI FEATURES SCROLLING BANNER ─── */}
+      <AIMarqueeBanner />
+
       {/* ─── NAVBAR ─── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0f172a]/95 backdrop-blur-xl border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
@@ -299,18 +315,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── SCROLLING BANNER — Australia's First ─── */}
-      <MarqueeBanner
-        items={[
-          "Australia's First Pharmacist Prescribing Software Package",
-          "Made by Pharmacists for Pharmacists",
-          "Australia's First Pharmacist Prescribing Software Package",
-          "Made by Pharmacists for Pharmacists",
-        ]}
-        bgClass="bg-[#2dd4bf]"
-        textClass="text-[#0f172a]"
-        speed={25}
-      />
 
       {/* ─── TRUST BADGES BAR ─── */}
       <div className="border-y border-white/5">
@@ -443,8 +447,6 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ─── AI FEATURES SCROLLING BANNER ─── */}
-      <AIMarqueeBanner />
 
       {/* ─── HOW IT WORKS ─── */}
       <Section id="how-it-works" className="py-24 md:py-32 px-6">
