@@ -29,6 +29,10 @@ import {
   TRAVEL_STEPS, MEDICAL_CONDITIONS, VACCINE_LIST,
   MALARIA_DRUGS, ALTITUDE_DRUGS, TD_ANTIBIOTICS,
 } from '@/types/travel';
+
+const CONDITION_LABELS: Partial<Record<MedicalCondition, string>> = {
+  vte_dvt_history: 'DVT History',
+};
 import { evaluateTravelRisks, daysUntilDeparture, tripDuration } from '@/lib/travelRiskEngine';
 import {
   TD_MEDICATIONS, ALTITUDE_MEDICATIONS, TRAVEL_VACCINES,
@@ -377,7 +381,7 @@ ${pharmacistCredentials}`;
                       <Checkbox checked={form.medicalConditions.includes(c)} onCheckedChange={v => {
                         updateForm('medicalConditions', v ? [...form.medicalConditions, c] : form.medicalConditions.filter(x => x !== c));
                       }} />
-                      <Label className="text-xs capitalize">{c.replace(/_/g, ' ')}</Label>
+                      <Label className="text-xs capitalize">{CONDITION_LABELS[c] || c.replace(/_/g, ' ')}</Label>
                     </div>
                   ))}
                 </div>
