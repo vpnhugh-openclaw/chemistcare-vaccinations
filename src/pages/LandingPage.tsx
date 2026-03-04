@@ -262,10 +262,8 @@ export default function LandingPage() {
       <div className="pt-[72px]">
         <MarqueeBanner
           items={[
-            "Australia's First Full Scope of Practice Software",
-            "Made by Pharmacists for Pharmacists",
-            "Australia's First Full Scope of Practice Software",
-            "Made by Pharmacists for Pharmacists",
+            "Australia's First Full Scope of Practice AI Software Made by Pharmacists for Pharmacists",
+            "Australia's First Full Scope of Practice AI Software Made by Pharmacists for Pharmacists",
           ]}
           bgClass="bg-[#2dd4bf]"
           textClass="text-[#0f172a]"
