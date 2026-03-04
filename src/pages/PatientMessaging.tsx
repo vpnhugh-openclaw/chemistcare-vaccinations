@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, Send, Clock, CheckCircle2, XCircle, ArrowDownToLine, Phone } from 'lucide-react';
+import { SmsAnalytics } from '@/components/messaging/SmsAnalytics';
 
 type SmsMessage = {
   id: string;
@@ -166,6 +167,8 @@ const PatientMessaging = () => {
             <Phone className="h-3 w-3" /> Twilio SMS
           </Badge>
         </div>
+
+        <SmsAnalytics messages={messages} />
 
         <Tabs defaultValue="send" className="space-y-4">
           <TabsList>
