@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight, FileText, Send, Bell } from 'lucide-react';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
+import { AnatomyDialog } from '@/components/AnatomyDialog';
 import { ProtocolBanner } from '@/components/protocols/ProtocolBanner';
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
 import { SmartPrescribingPad } from '@/components/protocols/SmartPrescribingPad';
@@ -119,7 +120,8 @@ export default function ProtocolConsultation() {
       <div className="p-4 lg:p-6 space-y-4 max-w-4xl">
         <div className="flex items-center justify-between">
           <ProtocolBanner name={meta.name} version={meta.version} jurisdiction="Victoria" effectiveDate={meta.effective} sourceUrl={meta.url} />
-          <CalculatorsDialog />
+           <CalculatorsDialog />
+           <AnatomyDialog />
         </div>
 
         {/* Step indicators */}

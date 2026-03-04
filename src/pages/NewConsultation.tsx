@@ -30,6 +30,7 @@ import {
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
 } from 'lucide-react';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
+import { AnatomyDialog } from '@/components/AnatomyDialog';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
@@ -362,6 +363,7 @@ const NewConsultation = () => {
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
                 <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
                 <CalculatorsDialog />
+                <AnatomyDialog />
               </div>
             </div>
 
