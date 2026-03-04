@@ -23,14 +23,14 @@ export function DayView({ selectedDate, onDateChange, appointments, onAppointmen
   const dayAppts = appointments.filter(a => a.date === dateStr);
 
   return (
-    <div className="flex gap-8 lg:gap-12">
+    <div className="flex gap-6 lg:gap-10">
       {/* Sidebar */}
-      <div className="w-64 shrink-0 hidden md:block space-y-4">
+      <div className="w-[260px] shrink-0 hidden md:block space-y-4 overflow-hidden">
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={(d) => d && onDateChange(d)}
-          className={cn("p-3 pointer-events-auto rounded-lg border")}
+          className={cn("p-2 pointer-events-auto rounded-lg border w-full [&_table]:w-full")}
         />
         <Button variant="outline" size="sm" className="w-full" onClick={() => onDateChange(new Date())}>Today</Button>
         <p className="text-sm text-muted-foreground text-center">{dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''} today</p>
