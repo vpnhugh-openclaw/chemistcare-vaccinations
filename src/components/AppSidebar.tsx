@@ -49,7 +49,7 @@ const mainItems = [
       { title: 'Travel Medicine', url: '/travel-consultation', icon: Plane },
     ],
   },
-  { title: 'Protocol Consult', url: '/protocol-consultation', icon: Stethoscope },
+  
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
   { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
