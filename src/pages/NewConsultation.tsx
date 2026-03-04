@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { AnatomyDialog } from '@/components/AnatomyDialog';
+import { DrugInteractionsDialog } from '@/components/DrugInteractionsDialog';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
@@ -364,6 +365,7 @@ const NewConsultation = () => {
                 <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
                 <CalculatorsDialog />
                 <AnatomyDialog />
+                <DrugInteractionsDialog />
               </div>
             </div>
 
