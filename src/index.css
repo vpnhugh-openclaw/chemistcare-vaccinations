@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,91 +6,109 @@
 
 @layer base {
   :root {
-    /* ChemistCare clinical design system */
-    --background: 200 12% 96%;
-    --foreground: 210 25% 11%;
+    /* ChemistCare Style Guide — chemistcare.com.au */
 
+    /* Background: Cloud White #F8FBFC → hsl(192 33% 98%) */
+    --background: 192 33% 98%;
+    /* Foreground: Primary text #0F172A → hsl(222 47% 11%) */
+    --foreground: 222 47% 11%;
+
+    /* Card: Clean White #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 210 25% 11%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 25% 11%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Deep teal – clinical primary */
-    --primary: 190 45% 20%;
-    --primary-foreground: 0 0% 98%;
+    /* Primary: ChemistCare Teal #2F8F9D → hsl(186 54% 40%) */
+    --primary: 186 54% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 14% 93%;
-    --secondary-foreground: 210 20% 22%;
+    /* Secondary: Cool Grey #EDF2F5 → hsl(210 25% 95%) */
+    --secondary: 210 25% 95%;
+    /* Secondary foreground: Secondary text #475569 → hsl(215 16% 37%) */
+    --secondary-foreground: 215 16% 37%;
 
-    --muted: 200 10% 94%;
-    --muted-foreground: 210 10% 42%;
+    /* Muted: Soft Teal Mist #E6F4F4 → hsl(180 38% 93%) */
+    --muted: 180 38% 93%;
+    /* Muted foreground: Tertiary text #94A3B8 → hsl(215 16% 65%) */
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 188 42% 32%;
+    /* Accent: Healthcare Blue #3B82F6 → hsl(217 91% 60%) */
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 48%;
+    /* Destructive: Clinical Red #E63946 → hsl(355 77% 56%) */
+    --destructive: 355 77% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 12% 87%;
-    --input: 210 12% 87%;
-    --ring: 190 45% 20%;
+    /* Border: light cool grey */
+    --border: 210 18% 87%;
+    --input: 210 18% 87%;
+    /* Ring: ChemistCare Teal */
+    --ring: 186 54% 40%;
 
-    --radius: 0.5rem;
+    /* Radius: 10px for cards, 8px for buttons */
+    --radius: 0.625rem;
 
-    /* Clinical status */
-    --clinical-safe: 158 50% 36%;
-    --clinical-safe-bg: 158 40% 94%;
-    --clinical-warning: 38 88% 48%;
-    --clinical-warning-bg: 38 70% 95%;
-    --clinical-danger: 355 65% 46%;
+    /* Clinical status tokens */
+    /* Prescription Green #1FA971 → hsl(155 68% 39%) */
+    --clinical-safe: 155 68% 39%;
+    --clinical-safe-bg: 155 40% 94%;
+    /* Safety Yellow #F6D860 → hsl(46 90% 67%) */
+    --clinical-warning: 46 90% 50%;
+    --clinical-warning-bg: 46 70% 95%;
+    /* Clinical Red #E63946 */
+    --clinical-danger: 355 77% 56%;
     --clinical-danger-bg: 355 55% 95%;
-    --clinical-info: 200 50% 42%;
-    --clinical-info-bg: 200 45% 94%;
+    /* Healthcare Blue for info */
+    --clinical-info: 217 91% 60%;
+    --clinical-info-bg: 217 60% 95%;
 
-    /* Sidebar – darker, more refined */
-    --sidebar-background: 198 38% 12%;
-    --sidebar-foreground: 200 15% 68%;
-    --sidebar-primary: 188 42% 48%;
+    /* Sidebar: Deep Medical Teal #1E5E66 → hsl(186 55% 26%) */
+    --sidebar-background: 186 55% 14%;
+    --sidebar-foreground: 180 15% 68%;
+    --sidebar-primary: 186 54% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 198 30% 18%;
-    --sidebar-accent-foreground: 200 15% 92%;
-    --sidebar-border: 198 25% 18%;
-    --sidebar-ring: 188 42% 48%;
+    --sidebar-accent: 186 45% 20%;
+    --sidebar-accent-foreground: 180 15% 92%;
+    --sidebar-border: 186 35% 20%;
+    --sidebar-ring: 186 54% 50%;
 
     /* Typography */
-    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'Manrope', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
   .dark {
-    --background: 210 20% 8%;
-    --foreground: 200 15% 88%;
-    --card: 210 20% 11%;
-    --card-foreground: 200 15% 88%;
-    --popover: 210 20% 11%;
-    --popover-foreground: 200 15% 88%;
-    --primary: 188 50% 48%;
-    --primary-foreground: 210 30% 8%;
-    --secondary: 210 18% 16%;
-    --secondary-foreground: 200 15% 80%;
-    --muted: 210 15% 14%;
-    --muted-foreground: 210 10% 50%;
-    --accent: 188 42% 38%;
+    --background: 222 30% 8%;
+    --foreground: 210 20% 90%;
+    --card: 222 25% 11%;
+    --card-foreground: 210 20% 90%;
+    --popover: 222 25% 11%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 186 54% 48%;
+    --primary-foreground: 222 30% 8%;
+    --secondary: 222 20% 16%;
+    --secondary-foreground: 210 15% 78%;
+    --muted: 222 18% 14%;
+    --muted-foreground: 215 12% 50%;
+    --accent: 217 80% 55%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 355 55% 40%;
+    --destructive: 355 65% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 15% 18%;
-    --input: 210 15% 18%;
-    --ring: 188 50% 48%;
-    --sidebar-background: 210 25% 6%;
-    --sidebar-foreground: 200 12% 60%;
-    --sidebar-primary: 188 42% 48%;
+    --border: 222 18% 18%;
+    --input: 222 18% 18%;
+    --ring: 186 54% 48%;
+    --sidebar-background: 222 30% 6%;
+    --sidebar-foreground: 210 12% 60%;
+    --sidebar-primary: 186 54% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 13%;
-    --sidebar-accent-foreground: 200 12% 85%;
-    --sidebar-border: 210 18% 13%;
-    --sidebar-ring: 188 42% 48%;
+    --sidebar-accent: 222 22% 13%;
+    --sidebar-accent-foreground: 210 12% 85%;
+    --sidebar-border: 222 20% 13%;
+    --sidebar-ring: 186 54% 48%;
   }
 }
 
@@ -108,27 +126,32 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Headings use Manrope */
   h1 {
-    @apply text-2xl font-semibold text-foreground;
+    font-family: var(--font-heading);
+    @apply text-2xl font-bold text-foreground;
     letter-spacing: -0.01em;
-    line-height: 1.25;
+    line-height: 1.1;
   }
 
   h2 {
+    font-family: var(--font-heading);
     font-size: 1.175rem;
     @apply font-semibold text-foreground;
-    line-height: 1.3;
+    line-height: 1.2;
     margin-bottom: 0.75rem;
   }
 
   h3 {
+    font-family: var(--font-heading);
     font-size: 1.0625rem;
     @apply font-semibold text-foreground;
     letter-spacing: 0.01em;
-    line-height: 1.35;
+    line-height: 1.2;
   }
 
   h4, h5, h6 {
+    font-family: var(--font-heading);
     @apply font-semibold text-foreground;
   }
 
@@ -143,14 +166,16 @@
 }
 
 @layer components {
-  /* Clinical panels – reduced padding, softer shadows */
+  /* Clinical panels – ChemistCare card style */
   .clinical-panel {
     @apply bg-card border border-border rounded-lg p-4;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   }
 
   .clinical-section-title {
+    font-family: var(--font-heading);
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     @apply text-muted-foreground mb-2;
@@ -185,8 +210,8 @@
   }
 
   .step-active {
-    background-color: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 
   .step-complete {

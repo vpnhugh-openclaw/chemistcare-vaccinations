@@ -31,7 +31,7 @@ function FeatureCard({ icon: Icon, title, body, delay }: { icon: React.ElementTy
       <div className="bg-[#2dd4bf]/10 rounded-xl p-3 inline-flex mb-5">
         <Icon size={28} className="text-[#2dd4bf]" />
       </div>
-      <h3 className="text-xl font-bold !text-white mb-3" style={{ fontFamily: "'Recoleta', serif" }}>{title}</h3>
+      <h3 className="text-xl font-bold !text-white mb-3" style={{ fontFamily: "'Manrope', sans-serif" }}>{title}</h3>
       <p className="text-[#94a3b8] leading-relaxed text-[0.9375rem]">{body}</p>
     </motion.div>
   );
@@ -136,7 +136,7 @@ function WaitlistForm() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2dd4bf]/10 mb-4">
           <Check size={32} className="text-[#2dd4bf]" />
         </div>
-        <h3 className="text-2xl font-bold !text-white mb-2" style={{ fontFamily: "'Recoleta', serif" }}>You're on the list!</h3>
+        <h3 className="text-2xl font-bold !text-white mb-2" style={{ fontFamily: "'Manrope', sans-serif" }}>You're on the list!</h3>
         <p className="text-[#94a3b8]">We'll be in touch shortly with early access details.</p>
       </div>
     );
@@ -168,7 +168,7 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", scrollBehavior: "smooth" }}>
+    <div className="min-h-screen bg-[#0f172a] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif", scrollBehavior: "smooth" }}>
 
       {/* ─── NAVBAR ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5">
@@ -218,7 +218,7 @@ export default function LandingPage() {
 
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 !text-white"
-            style={{ fontFamily: "'Recoleta', serif" }}>
+            style={{ fontFamily: "'Manrope', sans-serif" }}>
             Start Your<br />ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span><br />Consults{" "}
             <span className="text-[#2dd4bf]">Today</span>
           </motion.h1>
@@ -279,7 +279,7 @@ export default function LandingPage() {
       <Section id="features" className="py-24 md:py-32 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Platform Capabilities</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
             Your Clinical Command Centre
           </h2>
           <p className="text-[#94a3b8] text-lg mb-16 max-w-xl mx-auto">Everything you need for safe, efficient prescribing — in one place.</p>
@@ -298,7 +298,7 @@ export default function LandingPage() {
       <Section id="how-it-works" className="py-24 md:py-32 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Workflow</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
             Your First Consult, Streamlined
           </h2>
           <p className="text-[#94a3b8] text-lg mb-16">From booking to billing in four steps.</p>
@@ -317,7 +317,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Live Dashboard</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               Real-Time Practice Intelligence
             </h2>
           </div>
@@ -343,7 +343,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Security & Privacy</p>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               Built for Clinical-Grade Trust
             </h2>
             <p className="text-[#94a3b8] text-lg max-w-2xl mx-auto">Designed to support compliance with Privacy Act 1988, AHPRA professional standards, and TGA requirements for pharmacist prescribing.</p>
@@ -368,7 +368,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Early Feedback</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               What Early Partners Say
             </h2>
           </div>
@@ -393,7 +393,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">In the Media</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               Policy Momentum Is Building
             </h2>
           </div>
@@ -409,7 +409,7 @@ export default function LandingPage() {
               <motion.a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 className="group bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-[#2dd4bf]/30 transition-all duration-300 block">
-                <h3 className="text-base font-bold !text-white mb-2 group-hover:text-[#2dd4bf] transition-colors" style={{ fontFamily: "'Recoleta', serif" }}>{item.title}</h3>
+                <h3 className="text-base font-bold !text-white mb-2 group-hover:text-[#2dd4bf] transition-colors" style={{ fontFamily: "'Manrope', sans-serif" }}>{item.title}</h3>
                 <p className="text-[#94a3b8] text-sm leading-relaxed mb-4">{item.summary}</p>
                 <span className="inline-flex items-center gap-1.5 text-[#2dd4bf] text-sm font-medium">
                   Read more <ExternalLink size={12} />
@@ -426,7 +426,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">See the Buzz</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               See What the Buzz Is About
             </h2>
           </div>
@@ -453,7 +453,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Common Questions</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
               Frequently Asked Questions
             </h2>
           </div>
@@ -466,7 +466,7 @@ export default function LandingPage() {
       {/* ─── FINAL CTA / WAITLIST ─── */}
       <Section id="waitlist" className="py-24 md:py-32 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Recoleta', serif" }}>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
             Ready to Transform Your Prescribing Practice?
           </h2>
           <p className="text-[#94a3b8] text-lg mt-4 max-w-xl mx-auto mb-10">
@@ -482,7 +482,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left">
-              <p className="!text-white font-bold text-lg" style={{ fontFamily: "'Recoleta', serif" }}>
+              <p className="!text-white font-bold text-lg" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span>
               </p>
               <p className="text-[#64748b] text-sm mt-1">Clinical workflow software for pharmacist prescribers. Built in Australia.</p>
