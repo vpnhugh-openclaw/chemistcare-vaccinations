@@ -415,7 +415,7 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
               Your clinical command centre
             </h2>
-            <p className="text-lg text-[#94a3b8] max-w-xl mx-auto">Everything you need for safe, efficient prescribing — in one place.</p>
+            <p className="text-lg text-[#94a3b8] max-w-xl mx-auto">Everything you need for safe, efficient prescribing in one place.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -525,8 +525,8 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
-            { quote: "This gives me the clinical structure I need after completing my prescriber training. Consultations are now half the time with zero second-guessing.", author: "Pharmacist Prescriber", location: "Blackshaws Road Pharmacy, Melbourne" },
-            { quote: "Protocol playbooks, billing, documentation — all in one screen. We scaled our prescribing service in the first month. Nothing else comes close for pharmacy.", author: "Anne Bui", location: "Burke Road Compounding Pharmacy, Victoria" }].
+            { quote: "This gave me the clinical structure I needed after completing my prescriber training. Consultations are now half the time with zero second-guessing.", author: "Pharmacist Prescriber", location: "Burke Road Pharmacy, Melbourne" },
+            { quote: "Protocol playbooks, billing, documentation — all in one screen. We scaled our prescribing service in the first month. Nothing else comes close for pharmacy.", author: "Pharmacy Owner", location: "Community Pharmacy, Victoria" }].
             map((t) =>
             <div key={t.location} className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 md:p-10">
                 <Zap size={20} className="text-[#2dd4bf] mb-6" />
