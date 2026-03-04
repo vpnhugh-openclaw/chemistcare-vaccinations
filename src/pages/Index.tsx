@@ -13,6 +13,7 @@ import {
   Clock,
   CheckCircle,
   Calculator,
+  Mic,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -70,6 +71,7 @@ const Dashboard = () => {
                 { label: 'View Conditions Library', desc: 'Browse 22 supported conditions', icon: TrendingUp, action: () => navigate('/conditions') },
                 { label: 'Patient Records', desc: 'Search and manage patient profiles', icon: Users, action: () => navigate('/patients') },
                 { label: 'Clinical Calculators', desc: 'CrCl, eGFR, Framingham & more', icon: Calculator, action: () => navigate('/calculators'), accent: true },
+                { label: 'Clinical Scribe', desc: 'Record & transcribe consultations in real-time', icon: Mic, action: () => navigate('/scribe') },
               ].map((a) => (
                 <button
                   key={a.label}

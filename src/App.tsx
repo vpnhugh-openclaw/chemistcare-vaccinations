@@ -25,6 +25,7 @@ import TravelConsultation from "./pages/TravelConsultation";
 import CalendarPage from "./pages/CalendarPage";
 import BookingPage from "./pages/BookingPage";
 import AdminSettingsPage from "./pages/AdminSettingsPage";
+import ScribePage from "./pages/ScribePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const router = createBrowserRouter([
   { path: "/calendar", element: <CalendarPage /> },
   { path: "/book/:pharmacySlug", element: <BookingPage /> },
   { path: "/admin/settings", element: <AdminSettingsPage /> },
+  { path: "/scribe", element: <ScribePage /> },
   { path: "*", element: <NotFound /> },
 ]);
 
