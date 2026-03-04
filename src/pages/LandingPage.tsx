@@ -285,7 +285,7 @@ export default function LandingPage() {
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-xl md:text-2xl text-[#94a3b8] max-w-2xl mb-10 leading-relaxed">Protocol-driven prescribing, automated documentation, and practice-ready workflow, so you consult and prescribe confidently, not just compliantly.
+            className="text-xl md:text-2xl text-[#94a3b8] max-w-2xl mb-10 leading-relaxed">Protocol-driven prescribing, automated documentation, and practice-ready workflow — so you consult and prescribe{' '}
               <strong className="text-white">confidently</strong>, not just compliantly.
             </motion.p>
 
