@@ -525,8 +525,8 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
-            { quote: "This gave me the clinical structure I needed after completing my prescriber training. Consultations are now half the time with zero second-guessing.", author: "Pharmacist Prescriber", location: "Burke Road Pharmacy, Melbourne" },
-            { quote: "Protocol playbooks, billing, documentation — all in one screen. We scaled our prescribing service in the first month. Nothing else comes close for pharmacy.", author: "Pharmacy Owner", location: "Community Pharmacy, Victoria" }].
+            { quote: "This gives me the clinical structure I need after completing my prescriber training. Consultations are now half the time with zero second-guessing.", author: "Pharmacist Prescriber", location: "Blackshaws Road Pharmacy, Melbourne" },
+            { quote: "Protocol playbooks, billing, documentation — all in one screen. We scaled our prescribing service in the first month. Nothing else comes close for pharmacy.", author: "Anne Bui", location: "Burke Road Compounding Pharmacy, Victoria" }].
             map((t) =>
             <div key={t.location} className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 md:p-10">
                 <Zap size={20} className="text-[#2dd4bf] mb-6" />
