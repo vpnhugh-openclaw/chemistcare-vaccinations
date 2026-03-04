@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.elevenlabs-scribe-token]
 verify_jwt = false
+
+[functions.twilio-inbound]
+verify_jwt = false
+
+[functions.send-followup-sms]
+verify_jwt = false
