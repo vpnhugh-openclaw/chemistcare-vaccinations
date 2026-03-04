@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mic, MicOff, Copy, Check, Loader2, Square } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Mic, MicOff, Copy, Check, Loader2, Square, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -31,6 +34,8 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
   const [partialText, setPartialText] = useState('');
   const [copied, setCopied] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [consentType, setConsentType] = useState<'written' | 'verbal' | ''>('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -49,6 +54,17 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
       stopRecording();
     };
   }, []);
+
+  const requestConsent = useCallback(() => {
+    setConsentType('');
+    setShowConsentDialog(true);
+  }, []);
+
+  const handleConsentConfirm = useCallback(() => {
+    if (!consentType) return;
+    setShowConsentDialog(false);
+    startRecording();
+  }, [consentType]);
 
   const startRecording = useCallback(async () => {
     setIsConnecting(true);
@@ -196,15 +212,58 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
     return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
+  const consentDialog = (
+    <Dialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Patient Consent Required
+          </DialogTitle>
+          <DialogDescription>
+            Before recording, please confirm that the patient has provided consent to have this consultation audio recorded and transcribed.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-3">
+          <Label className="text-sm font-medium mb-3 block">How was consent obtained?</Label>
+          <RadioGroup value={consentType} onValueChange={(v) => setConsentType(v as 'written' | 'verbal')}>
+            <div className="flex items-center space-x-2 p-2 rounded-md border hover:bg-muted/50 transition-colors">
+              <RadioGroupItem value="written" id="consent-written" />
+              <Label htmlFor="consent-written" className="cursor-pointer flex-1">
+                <span className="font-medium">Written consent</span>
+                <span className="block text-xs text-muted-foreground">Signed consent form obtained from patient or carer</span>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2 p-2 rounded-md border hover:bg-muted/50 transition-colors mt-2">
+              <RadioGroupItem value="verbal" id="consent-verbal" />
+              <Label htmlFor="consent-verbal" className="cursor-pointer flex-1">
+                <span className="font-medium">Verbal consent</span>
+                <span className="block text-xs text-muted-foreground">Patient or carer verbally agreed to recording</span>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => setShowConsentDialog(false)}>Cancel</Button>
+          <Button onClick={handleConsentConfirm} disabled={!consentType} className="gap-1.5">
+            <ShieldCheck className="h-4 w-4" />
+            Confirm & Record
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (compact) {
     return (
       <div className={cn('space-y-2', className)}>
+        {consentDialog}
         <div className="flex items-center gap-2">
           {!isConnected ? (
             <Button
               size="sm"
-              variant="outline"
-              onClick={startRecording}
+              variant="destructive"
+              onClick={requestConsent}
               disabled={isConnecting}
               className="gap-1.5"
             >
@@ -245,6 +304,8 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
   }
 
   return (
+    <>
+    {consentDialog}
     <Card className={cn('', className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base flex items-center gap-2">
@@ -270,7 +331,7 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
         {/* Controls */}
         <div className="flex items-center gap-2">
           {!isConnected ? (
-            <Button onClick={startRecording} disabled={isConnecting} className="gap-2">
+            <Button variant="destructive" onClick={requestConsent} disabled={isConnecting} className="gap-2">
               {isConnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
               {isConnecting ? 'Connecting...' : 'Start Recording'}
             </Button>
@@ -310,5 +371,6 @@ export function ScribeRecorder({ compact = false, onTranscriptChange, className 
         </ScrollArea>
       </CardContent>
     </Card>
+    </>
   );
 }
