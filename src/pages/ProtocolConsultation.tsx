@@ -12,7 +12,7 @@ import { ArrowLeft, ArrowRight, FileText, Send, Bell } from 'lucide-react';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { AnatomyDialog } from '@/components/AnatomyDialog';
-import { DrugInteractionsDialog } from '@/components/DrugInteractionsDialog';
+
 import { ProtocolBanner } from '@/components/protocols/ProtocolBanner';
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
 import { SmartPrescribingPad } from '@/components/protocols/SmartPrescribingPad';
@@ -123,7 +123,7 @@ export default function ProtocolConsultation() {
           <ProtocolBanner name={meta.name} version={meta.version} jurisdiction="Victoria" effectiveDate={meta.effective} sourceUrl={meta.url} />
            <CalculatorsDialog />
            <AnatomyDialog />
-           <DrugInteractionsDialog />
+           
         </div>
 
         {/* Step indicators */}

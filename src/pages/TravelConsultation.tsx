@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { AnatomyDialog } from '@/components/AnatomyDialog';
-import { DrugInteractionsDialog } from '@/components/DrugInteractionsDialog';
+
 import { ClinicalAlert } from '@/components/protocols/ClinicalAlert';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import {
@@ -228,7 +228,7 @@ ${pharmacistCredentials}`;
           <div className="flex items-center gap-2">
             <CalculatorsDialog />
             <AnatomyDialog />
-            <DrugInteractionsDialog />
+            
             {daysToDep !== null && (
               <Badge variant={daysToDep < 14 ? 'destructive' : 'secondary'} className="tabular-nums">
                 <Clock className="h-3 w-3 mr-1" /> {daysToDep}d to departure
