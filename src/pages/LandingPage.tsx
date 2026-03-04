@@ -1,53 +1,52 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, useInView } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck, FileCheck, TrendingUp, Check, Menu, X,
   Lock, Server, Eye, ClipboardList, ChevronDown, ChevronUp,
-  Stethoscope, BarChart3, Zap, ExternalLink, Play
+  Stethoscope, BarChart3, Zap, ExternalLink, Play, ArrowRight,
+  BookOpen, Pill, Globe, HeartPulse, Users, Clock, CheckCircle2,
+  Sparkles, Shield, Activity, BadgeCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImg from "@/assets/chemistcare-logo.png";
 
-/* ── Animated Section wrapper ── */
+/* ── Animated counter ── */
+function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+
+  useEffect(() => {
+    if (!inView) return;
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [inView, target]);
+
+  return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>;
+}
+
+/* ── Section wrapper with fade-in ── */
 function Section({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   return (
-    <motion.section id={id} ref={ref} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: "easeOut" }} className={className}>
+    <motion.section id={id} ref={ref} initial={{ opacity: 0, y: 32 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: "easeOut" }} className={className}>
       {children}
     </motion.section>
-  );
-}
-
-/* ── Feature Card ── */
-function FeatureCard({ icon: Icon, title, body, delay }: { icon: React.ElementType; title: string; body: string; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:-translate-y-1 hover:border-[#2dd4bf]/30 transition-all duration-300">
-      <div className="bg-[#2dd4bf]/10 rounded-xl p-3 inline-flex mb-5">
-        <Icon size={28} className="text-[#2dd4bf]" />
-      </div>
-      <h3 className="text-xl font-bold !text-white mb-3" style={{ fontFamily: "'Manrope', sans-serif" }}>{title}</h3>
-      <p className="text-[#94a3b8] leading-relaxed text-[0.9375rem]">{body}</p>
-    </motion.div>
-  );
-}
-
-/* ── Step Card ── */
-function StepCard({ num, title, desc, delay }: { num: string; title: string; desc: string; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay }}
-      className="relative bg-white/[0.04] border border-white/10 rounded-2xl p-6 text-left">
-      <span className="absolute top-4 right-4 text-5xl font-black text-white/[0.06] select-none">{num}</span>
-      <h3 className="text-lg font-bold !text-white mb-2 pr-12">{title}</h3>
-      <p className="text-sm text-[#94a3b8] leading-relaxed">{desc}</p>
-    </motion.div>
   );
 }
 
@@ -55,44 +54,56 @@ function StepCard({ num, title, desc, delay }: { num: string; title: string; des
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-white/10">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-5 text-left">
-        <span className="!text-white font-semibold text-[0.9375rem] pr-4">{q}</span>
-        {open ? <ChevronUp size={18} className="text-[#2dd4bf] shrink-0" /> : <ChevronDown size={18} className="text-[#94a3b8] shrink-0" />}
+    <div className="border-b border-[#e8e0d4]">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between py-6 text-left group">
+        <span className="text-[#1a1a2e] font-semibold text-lg pr-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>{q}</span>
+        <ChevronDown size={20} className={`text-[#2F8F9D] shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && <p className="text-[#94a3b8] text-sm leading-relaxed pb-5 pr-8">{a}</p>}
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}>
+            <p className="text-[#475569] text-base leading-relaxed pb-6">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 /* ── Data ── */
-const steps = [
-  { num: "01", title: "Patient Books Online", desc: "Patients select a ChemistCare PrescriberOS service via your branded booking portal. Intake forms are auto-collected before arrival." },
-  { num: "02", title: "Pre-Consult Snapshot", desc: "Review eligibility flags, allergy alerts, recent dispenses, and GP contact status — before you start the consult." },
-  { num: "03", title: "Guided In-Consult Workflow", desc: "Follow protocol step-by-step with decision support, red-flag prompts, and auto-drafted notes in real time." },
-  { num: "04", title: "Post-Consult in 60 Seconds", desc: "eScript generated, GP comms drafted, billing recorded, follow-up scheduled — with a complete audit trail." },
-];
-
-const metrics = [
-  { value: "12", label: "Consults Today" },
-  { value: "$1,840", label: "Revenue Generated" },
-  { value: "3", label: "GP Referrals Sent" },
-  { value: "5", label: "Follow-ups Scheduled" },
+const howItWorksSteps = [
+  {
+    num: "01",
+    title: "Patient books online",
+    desc: "Patients select a prescribing service through your branded booking portal. Intake forms, eligibility checks, and consent are auto-collected before arrival.",
+    icon: BookOpen,
+  },
+  {
+    num: "02",
+    title: "Pre-consult snapshot",
+    desc: "Review allergy alerts, dispense history, eligibility flags, and GP contact status — everything you need before the consult begins.",
+    icon: ClipboardList,
+  },
+  {
+    num: "03",
+    title: "Guided prescribing workflow",
+    desc: "Follow protocol step-by-step with real-time decision support, red-flag prompts, and auto-drafted clinical notes as you consult.",
+    icon: Stethoscope,
+  },
+  {
+    num: "04",
+    title: "Post-consult in 60 seconds",
+    desc: "eScript generated, GP letter drafted, billing recorded, follow-up scheduled — complete with audit-ready documentation.",
+    icon: CheckCircle2,
+  },
 ];
 
 const faqs = [
   { q: "How long does setup take?", a: "Most pharmacies are live within 48 hours. We handle onboarding, protocol configuration, and staff training remotely — no IT team required." },
-  { q: "How does ChemistCare PrescriberOS handle data security?", a: "All data is hosted on Australian-based infrastructure with encryption at rest and in transit, role-based access controls, full audit trails, and a defined data retention policy. We are designed to support Privacy Act 1988 and APPs compliance." },
-  { q: "Does it integrate with existing dispensing systems?", a: "ChemistCare PrescriberOS is designed to complement your existing POS/dispensing system. We provide structured exports and are actively developing direct integrations with major Australian pharmacy platforms." },
-  { q: "What does it cost?", a: "We offer transparent per-pharmacy pricing with no lock-in contracts. Early access partners receive founding-member rates. Book a demo to discuss your specific needs." },
-  { q: "Is this aligned with AHPRA and TGA requirements?", a: "Yes. ChemistCare PrescriberOS is designed to support compliance with AHPRA professional standards and TGA requirements for pharmacist prescribing under Structured Prescribing Arrangements. Our protocols are reviewed by practising pharmacist prescribers." },
-];
-
-const securityFeatures = [
-  { icon: Server, title: "Australian Data Residency", desc: "All patient and clinical data hosted on Australian-based infrastructure." },
-  { icon: Lock, title: "Encryption at Rest & In Transit", desc: "AES-256 encryption for stored data, TLS 1.3 for all data in transit." },
-  { icon: Eye, title: "Role-Based Access Controls", desc: "Granular permissions ensuring staff only access data relevant to their role." },
-  { icon: ClipboardList, title: "Audit Trails & Data Retention", desc: "Comprehensive activity logging with configurable data retention policies." },
+  { q: "How does ChemistCare handle data security?", a: "All data is hosted on Australian-based infrastructure with AES-256 encryption at rest and TLS 1.3 in transit. We implement role-based access controls, full audit trails, and configurable data retention policies." },
+  { q: "Does it integrate with existing dispensing systems?", a: "ChemistCare PrescriberOS complements your existing POS/dispensing system. We provide structured exports and are actively developing direct integrations with major Australian pharmacy platforms." },
+  { q: "What does it cost?", a: "We offer transparent per-pharmacy pricing with no lock-in contracts. Early access partners receive founding-member rates. Contact us to discuss your specific needs." },
+  { q: "Is this aligned with AHPRA and TGA requirements?", a: "Yes. ChemistCare PrescriberOS supports compliance with AHPRA professional standards and TGA requirements for pharmacist prescribing under Structured Prescribing Arrangements. Our protocols are reviewed by practising pharmacist prescribers." },
 ];
 
 const roles = [
@@ -104,8 +115,8 @@ const roles = [
   { value: "other", label: "Other" },
 ];
 
-/* ── Enhanced Waitlist Form ── */
-function WaitlistForm() {
+/* ── Waitlist Form ── */
+function WaitlistForm({ variant = "light" }: { variant?: "light" | "dark" }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [pharmacyName, setPharmacyName] = useState("");
@@ -133,32 +144,52 @@ function WaitlistForm() {
   if (submitted) {
     return (
       <div className="text-center py-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2dd4bf]/10 mb-4">
-          <Check size={32} className="text-[#2dd4bf]" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2F8F9D]/10 mb-4">
+          <Check size={32} className="text-[#2F8F9D]" />
         </div>
-        <h3 className="text-2xl font-bold !text-white mb-2" style={{ fontFamily: "'Manrope', sans-serif" }}>You're on the list!</h3>
-        <p className="text-[#94a3b8]">We'll be in touch shortly with early access details.</p>
+        <h3 className="text-2xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>You're on the list!</h3>
+        <p className="text-[#475569]">We'll be in touch shortly with early access details.</p>
       </div>
     );
   }
 
+  const isDark = variant === "dark";
+
   return (
     <form onSubmit={handleSubmit} className="max-w-lg mx-auto space-y-3">
       <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@pharmacy.com.au" required
-        className="w-full rounded-xl px-5 py-3.5 bg-white/10 border border-white/20 !text-white placeholder:text-white/40 focus:border-[#2dd4bf]/50 outline-none text-[0.9375rem] transition-colors" />
+        className={`w-full rounded-xl px-5 py-4 border outline-none text-base transition-colors ${isDark ? "bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#2F8F9D]" : "bg-white border-[#e8e0d4] text-[#1a1a2e] placeholder:text-[#94a3b8] focus:border-[#2F8F9D] shadow-sm"}`} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <select value={role} onChange={e => setRole(e.target.value)}
-          className="rounded-xl px-5 py-3.5 bg-white/10 border border-white/20 !text-white outline-none text-[0.9375rem] transition-colors focus:border-[#2dd4bf]/50 appearance-none">
-          {roles.map(r => <option key={r.value} value={r.value} className="bg-[#0f172a] text-white">{r.label}</option>)}
+          className={`rounded-xl px-5 py-4 border outline-none text-base transition-colors appearance-none ${isDark ? "bg-white/10 border-white/20 text-white focus:border-[#2F8F9D]" : "bg-white border-[#e8e0d4] text-[#1a1a2e] focus:border-[#2F8F9D] shadow-sm"}`}>
+          {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
         </select>
         <input type="text" value={pharmacyName} onChange={e => setPharmacyName(e.target.value)} placeholder="Pharmacy name (optional)"
-          className="rounded-xl px-5 py-3.5 bg-white/10 border border-white/20 !text-white placeholder:text-white/40 focus:border-[#2dd4bf]/50 outline-none text-[0.9375rem] transition-colors" />
+          className={`rounded-xl px-5 py-4 border outline-none text-base transition-colors ${isDark ? "bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#2F8F9D]" : "bg-white border-[#e8e0d4] text-[#1a1a2e] placeholder:text-[#94a3b8] focus:border-[#2F8F9D] shadow-sm"}`} />
       </div>
       <button type="submit" disabled={loading}
-        className="w-full bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold px-6 py-4 rounded-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 text-base">
-        {loading ? "Joining..." : "Join the Waitlist →"}
+        className="w-full bg-[#2F8F9D] hover:bg-[#1E5E66] text-white font-semibold px-6 py-4 rounded-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 text-base shadow-lg shadow-[#2F8F9D]/20">
+        {loading ? "Joining..." : "Join the Waitlist"}
       </button>
     </form>
+  );
+}
+
+/* ── Logo Ticker (Heidi-style) ── */
+function LogoTicker() {
+  const partners = [
+    "Vic Health", "PSA", "AHPRA", "TGA", "PBS", "Guild"
+  ];
+  return (
+    <div className="overflow-hidden py-8">
+      <div className="flex animate-[scroll_20s_linear_infinite] gap-16 items-center">
+        {[...partners, ...partners].map((name, i) => (
+          <div key={i} className="shrink-0 text-[#94a3b8]/60 text-sm font-semibold tracking-widest uppercase whitespace-nowrap">
+            {name}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -166,108 +197,145 @@ function WaitlistForm() {
 export default function LandingPage() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif", scrollBehavior: "smooth" }}>
+    <div className="min-h-screen bg-[#faf8f5] text-[#1a1a2e]" style={{ fontFamily: "'Inter', system-ui, sans-serif", scrollBehavior: "smooth" }}>
 
       {/* ─── NAVBAR ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#faf8f5]/95 backdrop-blur-xl shadow-sm" : "bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src={logoImg} alt="ChemistCare Logo" className="h-9 w-auto" />
+            <img src={logoImg} alt="ChemistCare" className="h-10 w-auto" />
           </div>
-          <div className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-[#94a3b8] hover:text-white text-sm transition-colors">Features</a>
-            <a href="#how-it-works" className="text-[#94a3b8] hover:text-white text-sm transition-colors">How It Works</a>
-            <a href="#security" className="text-[#94a3b8] hover:text-white text-sm transition-colors">Security</a>
-            <a href="#faq" className="text-[#94a3b8] hover:text-white text-sm transition-colors">FAQ</a>
-            <button onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}
-              className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold text-sm px-5 py-2 rounded-lg transition-all">
-              Join the Waitlist
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#features" className="text-[#475569] hover:text-[#1a1a2e] text-sm font-medium transition-colors">Features</a>
+            <a href="#how-it-works" className="text-[#475569] hover:text-[#1a1a2e] text-sm font-medium transition-colors">How It Works</a>
+            <a href="#security" className="text-[#475569] hover:text-[#1a1a2e] text-sm font-medium transition-colors">Security</a>
+            <a href="#faq" className="text-[#475569] hover:text-[#1a1a2e] text-sm font-medium transition-colors">FAQ</a>
+          </div>
+          <div className="hidden md:flex items-center gap-3">
+            <button onClick={() => navigate("/dashboard")}
+              className="text-[#475569] hover:text-[#1a1a2e] text-sm font-medium transition-colors px-4 py-2">
+              Log in
+            </button>
+            <button onClick={() => navigate("/dashboard")}
+              className="bg-[#2F8F9D] hover:bg-[#1E5E66] text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all shadow-sm">
+              Start Prescribing Now
             </button>
           </div>
-          <button className="md:hidden !text-white" onClick={() => setMenuOpen(!menuOpen)}>
+          <button className="md:hidden text-[#1a1a2e]" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-        {menuOpen && (
-          <div className="md:hidden bg-[#0f172a] border-t border-white/5 px-4 py-4 flex flex-col gap-3">
-            <a href="#features" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>Features</a>
-            <a href="#how-it-works" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>How It Works</a>
-            <a href="#security" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>Security</a>
-            <a href="#faq" className="text-[#94a3b8] text-sm py-2" onClick={() => setMenuOpen(false)}>FAQ</a>
-            <button onClick={() => { setMenuOpen(false); document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="bg-[#2dd4bf] text-[#0f172a] font-semibold text-sm px-5 py-2.5 rounded-lg w-full">Join the Waitlist</button>
-          </div>
-        )}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#faf8f5] border-t border-[#e8e0d4] px-6 py-4 flex flex-col gap-3">
+              <a href="#features" className="text-[#475569] text-sm py-2" onClick={() => setMenuOpen(false)}>Features</a>
+              <a href="#how-it-works" className="text-[#475569] text-sm py-2" onClick={() => setMenuOpen(false)}>How It Works</a>
+              <a href="#security" className="text-[#475569] text-sm py-2" onClick={() => setMenuOpen(false)}>Security</a>
+              <a href="#faq" className="text-[#475569] text-sm py-2" onClick={() => setMenuOpen(false)}>FAQ</a>
+              <button onClick={() => { setMenuOpen(false); navigate("/dashboard"); }}
+                className="bg-[#2F8F9D] text-white font-semibold text-sm px-5 py-3 rounded-lg w-full mt-2">Start Prescribing Now</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* ─── HERO ─── */}
-      <section className="relative min-h-screen flex items-center pt-16 px-4">
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #2dd4bf 1px, transparent 0)", backgroundSize: "40px 40px" }} />
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
-            className="mb-8">
-            <img src={logoImg} alt="ChemistCare PrescriberOS" className="h-20 md:h-28 w-auto mx-auto" />
-          </motion.div>
+      <section className="relative min-h-[90vh] flex items-center pt-[72px]">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2F8F9D]/[0.04] rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#E6F4F4]/60 rounded-full blur-[100px]" />
+        </div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
-            className="inline-block rounded-full bg-[#2dd4bf]/10 border border-[#2dd4bf]/20 text-[#2dd4bf] text-sm font-medium px-4 py-1.5 mb-8">
-            Now Available in Victoria • Early Access 2026
-          </motion.div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 md:py-32">
+          <div className="max-w-4xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#E6F4F4] text-[#2F8F9D] text-sm font-medium px-4 py-2 mb-8">
+              <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2F8F9D] opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-[#2F8F9D]" /></span>
+              Now Available in Victoria · Early Access 2026
+            </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 !text-white"
-            style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Start Your<br />ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span><br />Consults{" "}
-            <span className="text-[#2dd4bf]">Today</span>
-          </motion.h1>
+            <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] font-bold leading-[1.05] tracking-tight text-[#1a1a2e] mb-8"
+              style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Your partner for full scope pharmacy prescribing
+            </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-lg md:text-xl text-[#94a3b8] max-w-2xl mx-auto mb-10 leading-relaxed">
-            The clinical and workflow platform built for pharmacist prescribers. Protocol-driven prescribing, automated documentation, and practice-ready workflows — so you prescribe <strong className="!text-white">confidently</strong>, not just compliantly.
-          </motion.p>
+            <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
+              className="text-xl md:text-2xl text-[#475569] max-w-2xl mb-10 leading-relaxed">
+              Protocol-driven prescribing, automated documentation, and practice-ready workflows — so you prescribe confidently, not just compliantly.
+            </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <button onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}
-              className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
-              Join the Waitlist
-            </button>
-            <button onClick={() => navigate("/dashboard")}
-              className="border border-white/20 !text-white bg-white/5 px-8 py-4 text-lg font-semibold rounded-xl hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-300">
-              Start Prescribing <span className="text-[#2dd4bf]">Now</span> →
-            </button>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.55 }}
-            className="flex flex-wrap justify-center gap-3">
-            {["Designed to support AHPRA & TGA compliance", "PBS-aligned protocols", "Privacy Act ready", "Victorian SPA compatible"].map(b => (
-              <span key={b} className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-[#94a3b8] text-xs px-3 py-1.5 rounded-full">
-                <Check size={12} className="text-[#2dd4bf]" />{b}
-              </span>
-            ))}
-          </motion.div>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
+              className="flex flex-col sm:flex-row items-start gap-4">
+              <button onClick={() => navigate("/dashboard")}
+                className="bg-[#2F8F9D] hover:bg-[#1E5E66] text-white px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-[#2F8F9D]/20 flex items-center gap-2">
+                Start Prescribing Now <ArrowRight size={20} />
+              </button>
+              <button onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" })}
+                className="border-2 border-[#2F8F9D] text-[#2F8F9D] bg-transparent px-8 py-4 text-lg font-semibold rounded-xl hover:bg-[#2F8F9D]/5 transition-all duration-300">
+                Join the Waitlist
+              </button>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ─── SOCIAL PROOF STATS STRIP ─── */}
-      <Section className="py-16 px-4 border-y border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ─── TRUST BADGES BAR ─── */}
+      <div className="border-y border-[#e8e0d4] bg-[#faf8f5]">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
             {[
-              { value: "62,000+", label: "Services across 800+ VIC chemists", source: "Chemist Care Now / Vic Health", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
-              { value: "23,000+", label: "Pilot services in first 12 months — no serious safety concerns", source: "Vic Pilot Summary", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
-              { value: "12,000+", label: "NSW trial consultations milestone", source: "NSW Health", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
-              { value: "18", label: "National Scope of Practice Review recommendations", source: "Australian Govt", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
+              { icon: ShieldCheck, label: "AHPRA Aligned" },
+              { icon: Lock, label: "AES-256 Encrypted" },
+              { icon: Server, label: "Australian Data Residency" },
+              { icon: FileCheck, label: "Privacy Act Compliant" },
+              { icon: BadgeCheck, label: "Victorian SPA Compatible" },
+            ].map(b => (
+              <div key={b.label} className="flex items-center gap-2 text-[#475569] text-sm">
+                <b.icon size={16} className="text-[#2F8F9D]" />
+                <span className="font-medium">{b.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── STATS STRIP (Heidi-style "Real world impact") ─── */}
+      <Section className="py-24 md:py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">Real-World Impact</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e]" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Pharmacist prescribing is already transforming healthcare
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { target: 62000, suffix: "+", label: "Services across 800+ VIC pharmacies", source: "Vic Health", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
+              { target: 23000, suffix: "+", label: "Pilot services — zero serious safety concerns", source: "Vic Pilot Summary", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
+              { target: 12000, suffix: "+", label: "NSW trial consultations milestone", source: "NSW Health", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
+              { target: 18, suffix: "", label: "National Scope of Practice recommendations", source: "Australian Government", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
             ].map((s, i) => (
-              <motion.div key={s.value} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="text-center bg-white/[0.03] border border-white/10 rounded-xl p-6">
-                <p className="text-3xl md:text-4xl font-black !text-white tabular-nums mb-2">{s.value}</p>
-                <p className="text-[#94a3b8] text-sm leading-snug mb-3">{s.label}</p>
+              <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="text-center">
+                <p className="text-5xl md:text-6xl font-bold text-[#1a1a2e] tabular-nums mb-3" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+                  <AnimatedCounter target={s.target} suffix={s.suffix} />
+                </p>
+                <p className="text-[#475569] text-base leading-snug mb-3">{s.label}</p>
                 <a href={s.href} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#2dd4bf] text-xs font-medium hover:underline">
-                  {s.source} <ExternalLink size={10} />
+                  className="inline-flex items-center gap-1 text-[#2F8F9D] text-sm font-medium hover:underline">
+                  {s.source} <ExternalLink size={12} />
                 </a>
               </motion.div>
             ))}
@@ -275,143 +343,217 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ─── FEATURES ─── */}
-      <Section id="features" className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Platform Capabilities</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Your Clinical Command Centre
-          </h2>
-          <p className="text-[#94a3b8] text-lg mb-16 max-w-xl mx-auto">Everything you need for safe, efficient prescribing — in one place.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureCard delay={0} icon={Stethoscope} title="Protocol-Driven Prescribing"
-              body="Victoria-approved clinical playbooks for UTI, shingles, OCP, skin conditions, and more. Instant eligibility screening, red-flag alerts, and real-time decision support." />
-            <FeatureCard delay={0.1} icon={FileCheck} title="One-Click Documentation"
-              body="Auto-generated SOAP notes, GP referral comms, and audit-ready logs. Reduce post-consult admin by up to 50% with structured, compliant records." />
-            <FeatureCard delay={0.2} icon={BarChart3} title="Practice Growth Engine"
-              body="Smart patient intake, real-time revenue dashboards, automated follow-ups, and configurable service menus. Turn your credential into a measurable business asset." />
-          </div>
-        </div>
-      </Section>
-
-      {/* ─── HOW IT WORKS ─── */}
-      <Section id="how-it-works" className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Workflow</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Your First Consult, Streamlined
-          </h2>
-          <p className="text-[#94a3b8] text-lg mb-16">From booking to billing in four steps.</p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {steps.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.1} />)}
-          </div>
-          <div className="mt-12 inline-flex items-center gap-2 bg-[#2dd4bf]/10 border border-[#2dd4bf]/20 text-[#2dd4bf] rounded-full px-6 py-3 font-semibold text-sm">
-            <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2dd4bf] opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2dd4bf]" /></span>
-            Live Demo — UTI Consult · Step 3 of 4 · Est. 4 min remaining
-          </div>
-        </div>
-      </Section>
-
-      {/* ─── DASHBOARD PREVIEW ─── */}
-      <Section className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Live Dashboard</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Real-Time Practice Intelligence
-            </h2>
-          </div>
-          <div className="max-w-3xl mx-auto rounded-2xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-white/10 p-10">
-            <p className="text-sm font-semibold text-[#2dd4bf] mb-6 tracking-wide uppercase">Today's Overview</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {metrics.map(m => (
-                <div key={m.label} className="text-center">
-                  <p className="text-4xl md:text-5xl font-black !text-white tabular-nums">{m.value}</p>
-                  <p className="text-sm text-[#64748b] font-medium mt-1">{m.label}</p>
+      {/* ─── PROBLEM / SOLUTION SECTION (Heidi-style "A care partner for the full clinical day") ─── */}
+      <Section className="py-24 md:py-32 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e] leading-[1.1] mb-6" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+                Unseen admin destroys clinical capacity
+              </h2>
+              <p className="text-lg text-[#475569] leading-relaxed mb-8">
+                Australian pharmacist prescribers spend more time on paperwork than patients. Documentation, compliance checks, GP letters, billing — it all adds up. ChemistCare PrescriberOS gives you that time back.
+              </p>
+              <div className="space-y-5">
+                {[
+                  { icon: Clock, text: "Cut post-consult admin by up to 50%" },
+                  { icon: Shield, text: "Protocol-guided workflows reduce clinical risk" },
+                  { icon: TrendingUp, text: "Track revenue, volume, and outcomes in real time" },
+                  { icon: Users, text: "Built specifically for Australian pharmacist prescribers" },
+                ].map(item => (
+                  <div key={item.text} className="flex items-start gap-4">
+                    <div className="shrink-0 w-10 h-10 rounded-lg bg-[#E6F4F4] flex items-center justify-center">
+                      <item.icon size={20} className="text-[#2F8F9D]" />
+                    </div>
+                    <p className="text-[#1a1a2e] text-base font-medium pt-2">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="relative">
+              <div className="bg-gradient-to-br from-[#E6F4F4] to-[#f0fafa] rounded-3xl p-10 md:p-14">
+                <div className="space-y-6">
+                  {[
+                    { metric: "12", label: "Consults Today", color: "#2F8F9D" },
+                    { metric: "$1,840", label: "Revenue Generated", color: "#1FA971" },
+                    { metric: "3", label: "GP Referrals Sent", color: "#3B82F6" },
+                    { metric: "5", label: "Follow-ups Scheduled", color: "#F6D860" },
+                  ].map(m => (
+                    <div key={m.label} className="flex items-center justify-between bg-white rounded-xl px-6 py-4 shadow-sm">
+                      <span className="text-[#475569] text-sm font-medium">{m.label}</span>
+                      <span className="text-2xl font-bold tabular-nums" style={{ color: m.color }}>{m.metric}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="border-t border-white/10 mt-8 pt-4 text-center">
-              <p className="text-[#475569] text-xs">Simulated dashboard • Updated in real time when live</p>
+                <p className="text-center text-[#94a3b8] text-xs mt-6">Simulated dashboard · Updated in real time when live</p>
+              </div>
             </div>
           </div>
         </div>
       </Section>
 
-      {/* ─── SECURITY & COMPLIANCE ─── */}
-      <Section id="security" className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* ─── FEATURES (Heidi-style product cards) ─── */}
+      <Section id="features" className="py-24 md:py-32 px-6">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Security & Privacy</p>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Built for Clinical-Grade Trust
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">Platform</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e] mb-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Your clinical command centre
             </h2>
-            <p className="text-[#94a3b8] text-lg max-w-2xl mx-auto">Designed to support compliance with Privacy Act 1988, AHPRA professional standards, and TGA requirements for pharmacist prescribing.</p>
+            <p className="text-lg text-[#475569] max-w-xl mx-auto">Everything you need for safe, efficient prescribing — in one place.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {securityFeatures.map((sf, i) => (
-              <motion.div key={sf.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 text-center">
-                <div className="bg-[#2dd4bf]/10 rounded-xl p-3 inline-flex mb-4">
-                  <sf.icon size={24} className="text-[#2dd4bf]" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: Stethoscope, title: "Protocol-Driven Prescribing", body: "Victoria-approved clinical playbooks for UTI, shingles, OCP, skin conditions, and more. Instant eligibility screening, red-flag alerts, and real-time decision support.", color: "#2F8F9D" },
+              { icon: FileCheck, title: "One-Click Documentation", body: "Auto-generated SOAP notes, GP referral letters, and audit-ready logs. Reduce post-consult admin by up to 50% with structured, compliant records.", color: "#1FA971" },
+              { icon: BarChart3, title: "Practice Growth Engine", body: "Smart patient intake, real-time revenue dashboards, automated follow-ups, and configurable service menus. Turn your credential into a business asset.", color: "#3B82F6" },
+            ].map((f, i) => (
+              <motion.div key={f.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }}
+                className="bg-white rounded-2xl p-8 border border-[#e8e0d4] hover:-translate-y-1 hover:shadow-lg transition-all duration-300 group">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${f.color}10` }}>
+                  <f.icon size={28} style={{ color: f.color }} />
                 </div>
-                <h3 className="text-sm font-bold !text-white mb-2">{sf.title}</h3>
-                <p className="text-xs text-[#94a3b8] leading-relaxed">{sf.desc}</p>
+                <h3 className="text-xl font-bold text-[#1a1a2e] mb-3" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>{f.title}</h3>
+                <p className="text-[#475569] leading-relaxed">{f.body}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </Section>
 
-      {/* ─── SOCIAL PROOF ─── */}
-      <Section className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Early Feedback</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              What Early Partners Say
+      {/* ─── HOW IT WORKS (Heidi "How it works" style — step-by-step with vertical line) ─── */}
+      <Section id="how-it-works" className="py-24 md:py-32 px-6 bg-[#E6F4F4]/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">How It Works</p>
+            <h2 className="text-4xl md:text-[3.5rem] font-bold text-[#1a1a2e] mb-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              From booking to billing, streamlined
+            </h2>
+            <p className="text-lg text-[#475569] max-w-2xl mx-auto">From the first click to the final note, ChemistCare is fast, secure, and designed around how you care.</p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            {howItWorksSteps.map((step, i) => (
+              <motion.div key={step.num} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}
+                className="relative flex gap-8 pb-16 last:pb-0">
+                {/* Vertical line */}
+                {i < howItWorksSteps.length - 1 && (
+                  <div className="absolute left-7 top-16 bottom-0 w-px bg-[#2F8F9D]/20" />
+                )}
+                {/* Step number circle */}
+                <div className="shrink-0 w-14 h-14 rounded-full bg-[#2F8F9D] flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#2F8F9D]/20 relative z-10">
+                  {step.num}
+                </div>
+                <div className="pt-2">
+                  <h3 className="text-xl md:text-2xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>{step.title}</h3>
+                  <p className="text-[#475569] text-base leading-relaxed">{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-16">
+            <button onClick={() => navigate("/dashboard")}
+              className="bg-[#2F8F9D] hover:bg-[#1E5E66] text-white px-8 py-4 text-base font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-[#2F8F9D]/20 inline-flex items-center gap-2">
+              See it in action <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </Section>
+
+      {/* ─── SECURITY & COMPLIANCE (Heidi "Your duty of care, built in" style) ─── */}
+      <Section id="security" className="py-24 md:py-32 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">Security & Privacy</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e] mb-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Your duty of care, built in
+            </h2>
+            <p className="text-lg text-[#475569] max-w-2xl mx-auto">We hold ourselves to the highest standard there is: the one you set when you care for patients.</p>
+          </div>
+
+          {/* Trust badges row */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            {["Privacy Act", "AHPRA Standards", "TGA Compliant", "APPs Aligned", "AES-256"].map(badge => (
+              <div key={badge} className="bg-[#faf8f5] border border-[#e8e0d4] rounded-lg px-5 py-3 text-sm font-medium text-[#475569]">
+                {badge}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Server, title: "Australian Data Residency", desc: "All patient and clinical data hosted on Australian-based infrastructure." },
+              { icon: Lock, title: "Encryption at Rest & Transit", desc: "AES-256 encryption for stored data, TLS 1.3 for all data in transit." },
+              { icon: Eye, title: "Role-Based Access Controls", desc: "Granular permissions ensuring staff only access data relevant to their role." },
+              { icon: ClipboardList, title: "Audit Trails & Retention", desc: "Comprehensive activity logging with configurable data retention policies." },
+            ].map((sf, i) => (
+              <motion.div key={sf.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="bg-[#faf8f5] border border-[#e8e0d4] rounded-2xl p-8 text-center hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 rounded-xl bg-[#E6F4F4] flex items-center justify-center mx-auto mb-5">
+                  <sf.icon size={24} className="text-[#2F8F9D]" />
+                </div>
+                <h3 className="font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>{sf.title}</h3>
+                <p className="text-sm text-[#475569] leading-relaxed">{sf.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ─── SOCIAL PROOF / TESTIMONIALS ─── */}
+      <Section className="py-24 md:py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">Early Feedback</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e]" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              What early partners say
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               { quote: "This gave me the clinical structure I needed after completing my prescriber training. Consultations are now half the time with zero second-guessing.", author: "Pharmacist Prescriber", location: "Burke Road Pharmacy, Melbourne" },
               { quote: "Protocol playbooks, billing, documentation — all in one screen. We scaled our prescribing service in the first month. Nothing else comes close for pharmacy.", author: "Pharmacy Owner", location: "Community Pharmacy, Victoria" },
             ].map(t => (
-              <div key={t.location} className="bg-white/[0.03] border border-white/10 rounded-2xl p-8">
-                <Zap size={20} className="text-[#2dd4bf] mb-4" />
-                <p className="text-[#cbd5e1] leading-relaxed text-[0.9375rem] mb-4 italic">"{t.quote}"</p>
-                <p className="!text-white text-sm font-semibold">{t.author}</p>
-                <p className="text-[#64748b] text-sm">{t.location}</p>
+              <div key={t.location} className="bg-white rounded-2xl p-8 md:p-10 border border-[#e8e0d4] shadow-sm">
+                <div className="text-[#2F8F9D] mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                </div>
+                <p className="text-[#1a1a2e] leading-relaxed text-lg mb-6 italic">"{t.quote}"</p>
+                <div>
+                  <p className="text-[#1a1a2e] font-semibold">{t.author}</p>
+                  <p className="text-[#94a3b8] text-sm">{t.location}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </Section>
 
-      {/* ─── IN THE MEDIA / POLICY MOMENTUM ─── */}
-      <Section className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* ─── POLICY MOMENTUM / MEDIA ─── */}
+      <Section className="py-24 md:py-32 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">In the Media</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Policy Momentum Is Building
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">In the Media</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e]" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Policy momentum is building
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { title: "Chemist Care Now Expanding", summary: "Victoria is expanding its pharmacist prescribing program to treat more conditions across 800+ pharmacies.", href: "https://www.health.vic.gov.au/news/chemist-care-now-is-expanding-to-treat-more-conditions" },
               { title: "VIC Pilot Summary Report", summary: "23,000+ services delivered safely in the first 12 months with no serious safety concerns reported.", href: "https://www.health.vic.gov.au/publications/victorian-community-pharmacist-statewide-pilot-summary-report" },
-              { title: "Community Pharmacist Program", summary: "Victoria's community pharmacist program continues to expand access to healthcare across the state.", href: "https://www.health.vic.gov.au/primary-care/community-pharmacist-program" },
+              { title: "Community Pharmacist Program", summary: "Victoria's program continues to expand access to healthcare across the state.", href: "https://www.health.vic.gov.au/primary-care/community-pharmacist-program" },
               { title: "National Scope of Practice Review", summary: "18 recommendations from the Australian Government to expand pharmacist scope of practice nationally.", href: "https://www.health.gov.au/our-work/scope-of-practice-review" },
-              { title: "NSW Trial Hits 12,000 Consultations", summary: "NSW pharmacist prescribing pilot reaches a major milestone with 12,000+ patient consultations.", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
-              { title: "Queensland Pharmacist Prescribing", summary: "Queensland announces expanded scope of practice for pharmacists to improve community healthcare access.", href: "https://statements.qld.gov.au/statements/102216" },
+              { title: "NSW Trial Hits 12,000 Consults", summary: "NSW pharmacist prescribing pilot reaches a major milestone with 12,000+ patient consultations.", href: "https://www.health.nsw.gov.au/news/Pages/20240305_00.aspx" },
+              { title: "Queensland Pharmacist Prescribing", summary: "Queensland announces expanded scope of practice for pharmacists to improve community healthcare.", href: "https://statements.qld.gov.au/statements/102216" },
             ].map((item, i) => (
               <motion.a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="group bg-white/[0.03] border border-white/10 rounded-2xl p-6 hover:border-[#2dd4bf]/30 transition-all duration-300 block">
-                <h3 className="text-base font-bold !text-white mb-2 group-hover:text-[#2dd4bf] transition-colors" style={{ fontFamily: "'Manrope', sans-serif" }}>{item.title}</h3>
-                <p className="text-[#94a3b8] text-sm leading-relaxed mb-4">{item.summary}</p>
-                <span className="inline-flex items-center gap-1.5 text-[#2dd4bf] text-sm font-medium">
+                className="group bg-[#faf8f5] border border-[#e8e0d4] rounded-2xl p-6 hover:border-[#2F8F9D]/40 hover:-translate-y-1 hover:shadow-md transition-all duration-300 block">
+                <h3 className="text-lg font-bold text-[#1a1a2e] mb-2 group-hover:text-[#2F8F9D] transition-colors" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>{item.title}</h3>
+                <p className="text-[#475569] text-sm leading-relaxed mb-4">{item.summary}</p>
+                <span className="inline-flex items-center gap-1.5 text-[#2F8F9D] text-sm font-medium">
                   Read more <ExternalLink size={12} />
                 </span>
               </motion.a>
@@ -420,14 +562,13 @@ export default function LandingPage() {
         </div>
       </Section>
 
-
-      {/* ─── VIDEO SOCIAL PROOF ─── */}
-      <Section className="py-24 md:py-32 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* ─── VIDEO GALLERY ─── */}
+      <Section className="py-24 md:py-32 px-6">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">See the Buzz</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              See What the Buzz Is About
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">See the Buzz</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e]" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Stay present in the moments that matter
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -437,7 +578,7 @@ export default function LandingPage() {
               "https://www.youtube.com/embed/GbVFtOOmEQ4",
             ].map((url, i) => (
               <motion.div key={url} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+                className="rounded-2xl overflow-hidden border border-[#e8e0d4] bg-white shadow-sm">
                 <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
                   <iframe src={url} title={`Video ${i + 1}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
                     className="absolute inset-0 w-full h-full" loading="lazy" />
@@ -448,56 +589,72 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      {/* ─── FAQ ─── */}
-      <Section id="faq" className="py-24 md:py-32 px-4">
+      {/* ─── FAQ (Heidi style — clean, minimal) ─── */}
+      <Section id="faq" className="py-24 md:py-32 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#2dd4bf] text-sm font-semibold tracking-wide uppercase mb-3">Common Questions</p>
-            <h2 className="text-3xl md:text-5xl font-bold !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Frequently Asked Questions
+          <div className="text-center mb-16">
+            <p className="text-[#2F8F9D] text-sm font-semibold tracking-wider uppercase mb-4">Common Questions</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a2e]" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Frequently asked questions
             </h2>
           </div>
-          <div className="bg-white/[0.02] border border-white/10 rounded-2xl px-8">
+          <div>
             {faqs.map(f => <FAQItem key={f.q} {...f} />)}
           </div>
         </div>
       </Section>
 
       {/* ─── FINAL CTA / WAITLIST ─── */}
-      <Section id="waitlist" className="py-24 md:py-32 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 !text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Ready to Transform Your Prescribing Practice?
-          </h2>
-          <p className="text-[#94a3b8] text-lg mt-4 max-w-xl mx-auto mb-10">
-            Join the waitlist and be among the first to experience ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span> when we launch.
-          </p>
-          <WaitlistForm />
-          <p className="text-[#475569] text-sm mt-4">No spam • Instant confirmation • Early access rates for founding partners</p>
+      <Section id="waitlist" className="py-24 md:py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-[#1E5E66] to-[#2F8F9D] rounded-3xl p-10 md:p-16 text-center text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: "'Recoleta', 'Manrope', serif" }}>
+              Ready for your next consult?
+            </h2>
+            <p className="text-white/80 text-lg mt-4 max-w-xl mx-auto mb-10">
+              Join the waitlist and be among the first to experience ChemistCare PrescriberOS when we launch.
+            </p>
+            <WaitlistForm variant="dark" />
+            <p className="text-white/40 text-sm mt-6">No spam · Instant confirmation · Founding partner rates</p>
+          </div>
         </div>
       </Section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="border-t border-white/5 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-center md:text-left">
-              <p className="!text-white font-bold text-lg" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                ChemistCare Prescriber<span className="text-[#2dd4bf]">OS</span>
+      <footer className="border-t border-[#e8e0d4] bg-[#faf8f5] py-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-10">
+            <div className="md:col-span-2">
+              <img src={logoImg} alt="ChemistCare" className="h-10 w-auto mb-4" />
+              <p className="text-[#475569] text-sm max-w-sm leading-relaxed">
+                Clinical workflow software for pharmacist prescribers. Built in Australia, designed for the full scope of pharmacy practice.
               </p>
-              <p className="text-[#64748b] text-sm mt-1">Clinical workflow software for pharmacist prescribers. Built in Australia.</p>
             </div>
-            <div className="text-center md:text-right">
-              <a href="mailto:hugh@burkeroadpharmacy.com.au" className="text-[#94a3b8] hover:text-[#2dd4bf] transition-colors text-sm">
-                hugh@burkeroadpharmacy.com.au
-              </a>
+            <div>
+              <h4 className="text-[#1a1a2e] font-semibold text-sm mb-4">Platform</h4>
+              <div className="space-y-3">
+                <a href="#features" className="block text-[#475569] text-sm hover:text-[#2F8F9D] transition-colors">Features</a>
+                <a href="#how-it-works" className="block text-[#475569] text-sm hover:text-[#2F8F9D] transition-colors">How It Works</a>
+                <a href="#security" className="block text-[#475569] text-sm hover:text-[#2F8F9D] transition-colors">Security</a>
+                <a href="#faq" className="block text-[#475569] text-sm hover:text-[#2F8F9D] transition-colors">FAQ</a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-[#1a1a2e] font-semibold text-sm mb-4">Contact</h4>
+              <div className="space-y-3">
+                <a href="mailto:hugh@burkeroadpharmacy.com.au" className="block text-[#475569] text-sm hover:text-[#2F8F9D] transition-colors">
+                  hugh@burkeroadpharmacy.com.au
+                </a>
+              </div>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap justify-center gap-4 text-[#475569] text-xs">
-            <span>© 2026 ChemistCare PrescriberOS</span>
-            <span>Designed to support AHPRA & TGA compliance</span>
-            <span>Privacy Act aligned</span>
-            <span>Victorian SPA compatible</span>
+          <div className="mt-12 pt-8 border-t border-[#e8e0d4] flex flex-wrap justify-between items-center gap-4 text-[#94a3b8] text-xs">
+            <span>© 2026 ChemistCare PrescriberOS. All rights reserved.</span>
+            <div className="flex flex-wrap gap-4">
+              <span>Designed to support AHPRA & TGA compliance</span>
+              <span>Privacy Act aligned</span>
+              <span>Victorian SPA compatible</span>
+            </div>
           </div>
         </div>
       </footer>
