@@ -1,18 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Pill, Search, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { Pill, Search, Loader2, ExternalLink } from 'lucide-react';
 
 interface Suggestion {
   rxcui: string;
   name: string;
-}
-
-interface InteractionResult {
-  severity: string;
-  description: string;
 }
 
 function useDrugAutocomplete() {
@@ -81,74 +76,88 @@ function DrugSearchField({ label, value, onSelect }: { label: string; value: Sug
   );
 }
 
+function buildDrugsComUrl(drugA: Suggestion, drugB: Suggestion) {
+  const toSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return `https://www.drugs.com/interactions-check.php?drug_list=${encodeURIComponent(toSlug(drugA.name))},${encodeURIComponent(toSlug(drugB.name))}`;
+}
+
 export function DrugInteractionsDialog() {
   const [drugA, setDrugA] = useState<Suggestion | null>(null);
   const [drugB, setDrugB] = useState<Suggestion | null>(null);
-  const [results, setResults] = useState<InteractionResult[] | null>(null);
-  const [checking, setChecking] = useState(false);
-  const [error, setError] = useState('');
+  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+  const [iframeBlocked, setIframeBlocked] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const checkInteractions = async () => {
+  const checkInteractions = () => {
     if (!drugA || !drugB) return;
-    setChecking(true); setError(''); setResults(null);
-    try {
-      const res = await fetch(`https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=${drugA.rxcui}+${drugB.rxcui}`);
-      const data = await res.json();
-      const pairs = data?.fullInteractionTypeGroup?.[0]?.fullInteractionType;
-      if (Array.isArray(pairs) && pairs.length > 0) {
-        const items: InteractionResult[] = [];
-        for (const p of pairs) {
-          for (const ip of p.interactionPair || []) {
-            items.push({ severity: ip.severity || 'Unknown', description: ip.description || 'No details available.' });
-          }
-        }
-        setResults(items.length > 0 ? items : []);
-      } else {
-        setResults([]);
-      }
-    } catch {
-      setError('Failed to reach NLM API. Please try again.');
-    }
-    setChecking(false);
+    const url = buildDrugsComUrl(drugA, drugB);
+    setIframeBlocked(false);
+    setIframeUrl(url);
   };
 
-  const reset = () => { setDrugA(null); setDrugB(null); setResults(null); setError(''); };
+  const handleIframeError = () => {
+    if (iframeUrl) {
+      setIframeBlocked(true);
+      window.open(iframeUrl, '_blank', 'noopener');
+    }
+  };
+
+  const reset = () => { setDrugA(null); setDrugB(null); setIframeUrl(null); setIframeBlocked(false); };
 
   return (
     <Dialog onOpenChange={open => { if (!open) reset(); }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm"><Pill className="mr-1.5 h-4 w-4" /> Drug Interactions</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Drug Interaction Checker</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+        <div className="space-y-4 flex-1 overflow-y-auto pr-1 min-h-0">
           <DrugSearchField label="Medication 1" value={drugA} onSelect={setDrugA} />
           <DrugSearchField label="Medication 2" value={drugB} onSelect={setDrugB} />
-          <Button className="w-full" disabled={!drugA || !drugB || checking} onClick={checkInteractions}>
-            {checking ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking…</> : <><Search className="mr-2 h-4 w-4" /> Check Interactions</>}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button className="flex-1" disabled={!drugA || !drugB} onClick={checkInteractions}>
+              <Search className="mr-2 h-4 w-4" /> Check Interactions
+            </Button>
+            {iframeUrl && (
+              <Button variant="outline" size="icon" onClick={() => window.open(iframeUrl, '_blank', 'noopener')} title="Open in new tab">
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {iframeUrl && !iframeBlocked && (
+            <iframe
+              ref={iframeRef}
+              src={iframeUrl}
+              className="w-full rounded-md border"
+              style={{ minHeight: '600px' }}
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              title="Drug Interaction Results"
+              onError={handleIframeError}
+              onLoad={() => {
+                // Detect X-Frame-Options block: if iframe body is empty after load, fall back
+                try {
+                  const doc = iframeRef.current?.contentDocument;
+                  if (doc && doc.body && doc.body.innerHTML === '') {
+                    handleIframeError();
+                  }
+                } catch {
+                  // Cross-origin — iframe loaded content, which means it wasn't blocked
+                }
+              }}
+            />
+          )}
 
-          {results !== null && (
-            <div className="space-y-2 pt-2 border-t">
-              {results.length === 0 ? (
-                <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                  <CheckCircle className="h-4 w-4" /> No known interactions found between these medications.
-                </div>
-              ) : (
-                results.map((r, i) => (
-                  <div key={i} className="rounded-md border p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className={`h-4 w-4 ${r.severity === 'high' ? 'text-destructive' : 'text-amber-500'}`} />
-                      <span className="text-sm font-semibold capitalize">{r.severity} Severity</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{r.description}</p>
-                  </div>
-                ))
-              )}
+          {iframeBlocked && iframeUrl && (
+            <div className="rounded-md border border-dashed p-4 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                The interaction results could not be displayed inline due to site restrictions.
+              </p>
+              <Button variant="outline" onClick={() => window.open(iframeUrl, '_blank', 'noopener')}>
+                <ExternalLink className="mr-2 h-4 w-4" /> Open Results in New Tab
+              </Button>
             </div>
           )}
         </div>
