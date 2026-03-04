@@ -1398,6 +1398,39 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_sms_consent: {
+        Row: {
+          consent_source: string | null
+          created_at: string
+          id: string
+          opted_in: boolean
+          opted_in_at: string | null
+          opted_out_at: string | null
+          patient_name: string | null
+          patient_phone: string
+        }
+        Insert: {
+          consent_source?: string | null
+          created_at?: string
+          id?: string
+          opted_in?: boolean
+          opted_in_at?: string | null
+          opted_out_at?: string | null
+          patient_name?: string | null
+          patient_phone: string
+        }
+        Update: {
+          consent_source?: string | null
+          created_at?: string
+          id?: string
+          opted_in?: boolean
+          opted_in_at?: string | null
+          opted_out_at?: string | null
+          patient_name?: string | null
+          patient_phone?: string
+        }
+        Relationships: []
+      }
       ppa_integration_settings: {
         Row: {
           created_at: string
@@ -1439,6 +1472,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sms_messages: {
+        Row: {
+          consult_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          direction: string
+          id: string
+          message_body: string
+          message_type: string
+          patient_name: string
+          patient_phone: string
+          response_rating: number | null
+          response_text: string | null
+          sent_at: string | null
+          status: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          consult_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          direction?: string
+          id?: string
+          message_body: string
+          message_type?: string
+          patient_name: string
+          patient_phone: string
+          response_rating?: number | null
+          response_text?: string | null
+          sent_at?: string | null
+          status?: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          consult_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          direction?: string
+          id?: string
+          message_body?: string
+          message_type?: string
+          patient_name?: string
+          patient_phone?: string
+          response_rating?: number | null
+          response_text?: string | null
+          sent_at?: string | null
+          status?: string
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_messages_consult_id_fkey"
+            columns: ["consult_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waitlist_entries: {
         Row: {
