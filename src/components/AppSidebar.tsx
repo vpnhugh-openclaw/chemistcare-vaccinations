@@ -75,8 +75,12 @@ const adminItems = [
       { title: 'PPA Integration', url: '/ppa-settings', icon: Receipt },
     ],
   },
-  { title: 'Practice Settings', url: '/admin/settings', icon: Settings },
-  { title: 'Settings', url: '/settings', icon: Settings },
+  {
+    title: 'Practice Settings', url: '/admin/settings', icon: Settings,
+    children: [
+      { title: 'Settings', url: '/settings', icon: Settings },
+    ],
+  },
 ];
 
 const patientFacingItems = [
