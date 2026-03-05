@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoImg from "@/assets/chemistcare-logo.png";
+import logoFullImg from "@/assets/chemistcare-logo-full.png";
 import { Mic, Brain, FileText, MessageSquare, Languages, Sparkles } from "lucide-react";
 
 /* ── Scrolling Marquee Banner ── */
@@ -225,6 +226,7 @@ export default function LandingPage() {
       {/* ─── NAVBAR ─── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0f172a]/95 backdrop-blur-xl border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+          <img src={logoFullImg} alt="ChemistCare PrescriberOS" className="h-10 w-auto" />
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-[#94a3b8] hover:text-white text-sm font-medium transition-colors">Features</a>
             <a href="#how-it-works" className="text-[#94a3b8] hover:text-white text-sm font-medium transition-colors">How It Works</a>
