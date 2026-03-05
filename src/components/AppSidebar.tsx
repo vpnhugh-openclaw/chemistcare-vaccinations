@@ -1,25 +1,10 @@
 import {
-  LayoutDashboard,
   CalendarDays,
-  FilePlus,
   Users,
-  BookOpen,
-  ClipboardList,
-  Shield,
+  Syringe,
+  Megaphone,
+  BarChart3,
   Settings,
-  Calculator,
-  Receipt,
-  HeartPulse,
-  Stethoscope,
-  UserCheck,
-  Plane,
-  Mic,
-  MessageSquare,
-  ChevronDown,
-  Pill,
-  FileBarChart,
-  HeartHandshake,
-  Plug,
 } from 'lucide-react';
 import logoImg from '@/assets/chemistcare-logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -29,129 +14,29 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
-const mainItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Calendar', url: '/calendar', icon: CalendarDays },
-  {
-    title: 'New Consultation',
-    url: '/consultation',
-    icon: FilePlus,
-    children: [
-      { title: 'Travel Medicine', url: '/travel-consultation', icon: Plane },
-    ],
-  },
+const navItems = [
+  { title: 'Calendar', url: '/vaccination/calendar', icon: CalendarDays },
   { title: 'Patients', url: '/patients', icon: Users },
-  { title: 'Conditions Library', url: '/conditions', icon: BookOpen },
-  { title: 'Prescribing Log', url: '/prescribing-log', icon: ClipboardList },
-  { title: 'Calculators', url: '/calculators', icon: Calculator },
-  { title: 'Clinical Scribe', url: '/scribe', icon: Mic },
-  { title: 'Claims & Reporting', url: '/claims', icon: Receipt },
-  { title: '8CPA / PPA Services', url: '/eight-cpa', icon: HeartPulse },
-  { title: 'Patient Messaging', url: '/messaging', icon: MessageSquare },
+  { title: 'Encounters', url: '/vaccination/encounters', icon: Syringe },
+  { title: 'Communications', url: '/communications', icon: Megaphone },
+  { title: 'Reports', url: '/reports', icon: BarChart3 },
+  { title: 'Settings', url: '/settings', icon: Settings },
 ];
-
-const adminItems = [
-  { title: 'Audit', url: '/audit', icon: Shield },
-  { title: 'PBS Lookup', url: '/pbs-lookup', icon: Pill },
-  {
-    title: 'Integration Settings', url: '/integration-settings', icon: Plug,
-    children: [
-      { title: 'Claims Demo', url: '/claims-demo', icon: FileBarChart },
-      { title: 'FHIR Demo', url: '/fhir-demo', icon: HeartHandshake },
-      { title: 'PPA Integration', url: '/ppa-settings', icon: Receipt },
-    ],
-  },
-  {
-    title: 'Practice Settings', url: '/admin/settings', icon: Settings,
-    children: [
-      { title: 'Settings', url: '/settings', icon: Settings },
-    ],
-  },
-];
-
-const patientFacingItems = [
-  { title: 'Patient Triage', url: '/triage', icon: UserCheck },
-];
-
-type NavItem = {
-  title: string;
-  url: string;
-  icon: typeof LayoutDashboard;
-  children?: { title: string; url: string; icon: typeof LayoutDashboard }[];
-};
-
-function NavItemRenderer({ item, collapsed, isActive }: { item: NavItem; collapsed: boolean; isActive: (path: string) => boolean }) {
-  const active = isActive(item.url) && (!item.children || !item.children.some(c => isActive(c.url)));
-  const childActive = item.children?.some(c => isActive(c.url)) ?? false;
-
-  if (item.children) {
-    return (
-      <Collapsible defaultOpen={active || childActive} className="group/collapsible">
-        <SidebarMenuItem>
-          <CollapsibleTrigger asChild>
-            <SidebarMenuButton className={`sidebar-nav-item ${active ? 'sidebar-nav-active' : ''}`}>
-              <NavLink
-                to={item.url}
-                end
-                className="flex items-center gap-2.5 flex-1"
-                activeClassName=""
-                onClick={e => e.stopPropagation()}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="text-[0.8125rem] font-medium">{item.title}</span>}
-              </NavLink>
-              {!collapsed && <ChevronDown className="h-3.5 w-3.5 ml-auto shrink-0 opacity-50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />}
-            </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {item.children.map((child) => (
-                <SidebarMenuSubItem key={child.title}>
-                  <SidebarMenuSubButton asChild className={`sidebar-nav-item ${isActive(child.url) ? 'sidebar-nav-active' : ''}`}>
-                    <NavLink to={child.url} activeClassName="">
-                      <child.icon className="h-3.5 w-3.5 shrink-0" />
-                      {!collapsed && <span className="text-[0.8125rem]">{child.title}</span>}
-                    </NavLink>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        </SidebarMenuItem>
-      </Collapsible>
-    );
-  }
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild className={`sidebar-nav-item ${active ? 'sidebar-nav-active' : ''}`}>
-        <NavLink to={item.url} end={item.url === '/dashboard'} activeClassName="">
-          <item.icon className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="text-[0.8125rem] font-medium">{item.title}</span>}
-        </NavLink>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  );
-}
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
-  const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+  const isActive = (path: string) =>
+    location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
 
   return (
     <Sidebar collapsible="icon">
@@ -169,40 +54,21 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[0.6875rem] font-semibold tracking-wider text-sidebar-foreground/40 uppercase px-3 mb-1">Clinical</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-0.5">
-              {mainItems.map((item) => (
-                <NavItemRenderer key={item.title} item={item} collapsed={collapsed} isActive={isActive} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Divider between groups */}
-        <div className="mx-3 my-2 border-t border-sidebar-border" />
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[0.6875rem] font-semibold tracking-wider text-sidebar-foreground/40 uppercase px-3 mb-1">Administration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
-              {adminItems.map((item) => (
-                <NavItemRenderer key={item.title} item={item} collapsed={collapsed} isActive={isActive} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Divider between groups */}
-        <div className="mx-3 my-2 border-t border-sidebar-border" />
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[0.6875rem] font-semibold tracking-wider text-sidebar-foreground/40 uppercase px-3 mb-1">Patient-Facing</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
-              {patientFacingItems.map((item) => (
-                <NavItemRenderer key={item.title} item={item} collapsed={collapsed} isActive={isActive} />
-              ))}
+              {navItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild className={`sidebar-nav-item ${active ? 'sidebar-nav-active' : ''}`}>
+                      <NavLink to={item.url} end={false} activeClassName="">
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span className="text-[0.8125rem] font-medium">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
