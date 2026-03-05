@@ -9,13 +9,21 @@ interface LiveNotePreviewProps {
   hasRedFlagTriggered: boolean;
   redFlagsChecked: Record<string, boolean>;
   pinnedEvidence: { question: string; answer: string; sources: string[] }[];
+  noteHeadings?: string[];
 }
 
 export function LiveNotePreview({
-  formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked, pinnedEvidence,
+  formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked, pinnedEvidence, noteHeadings,
 }: LiveNotePreviewProps) {
   const noteText = useMemo(() => {
     const parts: string[] = [];
+
+    // Template note headings at top
+    if (noteHeadings && noteHeadings.length > 0) {
+      parts.push('── TEMPLATE HEADINGS ──');
+      noteHeadings.forEach(h => parts.push(`▸ ${h}`));
+      parts.push('');
+    }
 
     // Patient
     if (formData.firstName || formData.lastName) {
@@ -85,7 +93,7 @@ export function LiveNotePreview({
     }
 
     return parts.join('\n');
-  }, [formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked]);
+  }, [formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked, noteHeadings]);
 
   return (
     <div className="space-y-3">

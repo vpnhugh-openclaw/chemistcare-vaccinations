@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,20 +19,25 @@ import { FormPageSkeleton } from '@/components/PageSkeleton';
 import { ConsultStatusBar } from '@/components/consult/ConsultStatusBar';
 import { LiveNotePreview } from '@/components/consult/LiveNotePreview';
 import { EvidenceDrawer } from '@/components/consult/EvidenceDrawer';
+import { SafetyChecksCard } from '@/components/consult/SafetyChecksCard';
+import { SafetyOverrideDialog } from '@/components/consult/SafetyOverrideDialog';
+import { ApplyTemplateDialog } from '@/components/consult/ApplyTemplateDialog';
 import { ScribeRecorder } from '@/components/scribe/ScribeRecorder';
 import { ReviewPanel } from '@/components/consult/ReviewPanel';
 import { ConsultStatus, transitionConsult } from '@/lib/consultStateMachine';
 import { useConsultAudit } from '@/hooks/useConsultAudit';
+import { evaluateSafety } from '@/lib/safetyEngine';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
-  Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2,
+  Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2, LayoutTemplate,
 } from 'lucide-react';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { AnatomyDialog } from '@/components/AnatomyDialog';
-
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
+import type { SafetyResult, SafetyOverride } from '@/types/safety';
+import type { ConsultTemplate } from '@/types/templates';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
 
@@ -43,6 +48,8 @@ interface DraftState {
   differentials: { diagnosis: string; reasonExcluded: string }[];
   currentStep: ConsultationStep;
   pinnedEvidence: { question: string; answer: string; sources: string[] }[];
+  noteHeadings?: string[];
+  safetyOverride?: SafetyOverride;
 }
 
 const NewConsultation = () => {
@@ -64,15 +71,61 @@ const NewConsultation = () => {
   const [pinnedEvidence, setPinnedEvidence] = useState<{ question: string; answer: string; sources: string[] }[]>([]);
   const [attemptedProgress, setAttemptedProgress] = useState(false);
 
+  // Safety state
+  const [safetyResult, setSafetyResult] = useState<SafetyResult>({ score: 100, alerts: [], blockers: [] });
+  const [safetyOverride, setSafetyOverride] = useState<SafetyOverride | undefined>();
+  const [showOverrideDialog, setShowOverrideDialog] = useState(false);
+  const prevBlockerCount = useRef(0);
+
+  // Template state
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [noteHeadings, setNoteHeadings] = useState<string[]>([]);
+
   const condition = useMemo(() => getConditionById(selectedCondition), [selectedCondition]);
   const stepIndex = CONSULTATION_STEPS.findIndex(s => s.key === currentStep);
   const hasRedFlagTriggered = Object.values(redFlagsChecked).some(Boolean);
   const canProceedFromAssessment = !hasRedFlagTriggered;
 
+  // Re-evaluate safety whenever relevant inputs change
+  useEffect(() => {
+    const allergies = parseTagString(formData.allergies);
+    const currentMeds = parseTagString(formData.medications);
+    const selectedTreatments: string[] = [];
+
+    if (formData.selectedTherapy && condition) {
+      const therapy = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
+      if (therapy) selectedTreatments.push(therapy.medicineName);
+    }
+
+    const result = evaluateSafety({
+      allergies,
+      currentMeds,
+      selectedTreatments,
+      sex: formData.sex,
+      pregnancyStatus: formData.pregnancy,
+    });
+
+    setSafetyResult(result);
+
+    // Audit: blocker count went from 0 to >0
+    if (result.blockers.length > 0 && prevBlockerCount.current === 0) {
+      const cId = consultId || 'draft';
+      logEvent(cId, 'safety_blocker_triggered', {
+        metadata: { blockerCount: result.blockers.length, blockerTitles: result.blockers.map(b => b.title) },
+      });
+    }
+    prevBlockerCount.current = result.blockers.length;
+
+    // Clear override if blockers change
+    if (result.blockers.length === 0) {
+      setSafetyOverride(undefined);
+    }
+  }, [formData.allergies, formData.medications, formData.selectedTherapy, formData.sex, formData.pregnancy, condition]);
+
   // Draft state for autosave
   const draftState: DraftState = useMemo(() => ({
-    formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence,
-  }), [formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence]);
+    formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence, noteHeadings, safetyOverride,
+  }), [formData, selectedCondition, redFlagsChecked, differentials, currentStep, pinnedEvidence, noteHeadings, safetyOverride]);
 
   const isDirty = useMemo(() => {
     return consultStatus !== 'finalised' && consultStatus !== 'discarded' &&
@@ -113,6 +166,8 @@ const NewConsultation = () => {
       setDifferentials(draft.differentials?.length ? draft.differentials : [{ diagnosis: '', reasonExcluded: '' }]);
       setCurrentStep(draft.currentStep || 'patient');
       setPinnedEvidence(draft.pinnedEvidence || []);
+      setNoteHeadings(draft.noteHeadings || []);
+      setSafetyOverride(draft.safetyOverride);
     }
     setShowDraftPrompt(false);
   }, [loadDraft]);
@@ -149,8 +204,14 @@ const NewConsultation = () => {
       const v = getStepValidation(s.key);
       blockers.push(...v.missing);
     });
+    if (safetyResult.blockers.length > 0 && !safetyOverride) {
+      blockers.push('Safety blockers unresolved');
+    }
     return blockers;
-  }, [formData, condition, redFlagsChecked, differentials]);
+  }, [formData, condition, redFlagsChecked, differentials, safetyResult, safetyOverride]);
+
+  // Safety-aware treatment progression check
+  const hasSafetyBlock = safetyResult.blockers.length > 0 && !safetyOverride;
 
   const handleNextStep = () => {
     const steps = CONSULTATION_STEPS;
@@ -167,8 +228,17 @@ const NewConsultation = () => {
       return;
     }
 
+    // Block progression past treatment if safety blockers exist
+    if (currentStep === 'treatment' && hasSafetyBlock) {
+      toast({
+        title: 'Safety blockers detected',
+        description: 'Resolve safety blockers or apply a clinical override before proceeding.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (currentIdx < steps.length - 1) {
-      // For assessment step, check red flag blocking
       if (currentStep === 'assessment' && hasRedFlagTriggered) {
         setCurrentStep('documentation');
         return;
@@ -185,8 +255,54 @@ const NewConsultation = () => {
     }
   };
 
+  const handleSafetyOverride = (override: SafetyOverride) => {
+    setSafetyOverride(override);
+    const cId = consultId || 'draft';
+    logEvent(cId, 'safety_override_applied', {
+      metadata: { reason: override.reason, blockerCount: safetyResult.blockers.length },
+    });
+    toast({ title: 'Safety override applied', description: 'You may now proceed with treatment.' });
+  };
+
+  const handleApplyTemplate = (template: ConsultTemplate) => {
+    const p = template.prefill;
+    setFormData(prev => {
+      const next = { ...prev };
+      if (p.allergies?.length) next.allergies = tagsToString([...parseTagString(prev.allergies), ...p.allergies.filter(a => !parseTagString(prev.allergies).includes(a))]);
+      if (p.currentMeds?.length) next.medications = tagsToString([...parseTagString(prev.medications), ...p.currentMeds.filter(m => !parseTagString(prev.medications).includes(m))]);
+      if (p.comorbidities?.length) next.comorbidities = tagsToString([...parseTagString(prev.comorbidities), ...p.comorbidities.filter(c => !parseTagString(prev.comorbidities).includes(c))]);
+      return next;
+    });
+
+    if (p.differentials?.length) {
+      setDifferentials(prev => {
+        const existing = prev.filter(d => d.diagnosis.trim());
+        const newOnes = p.differentials!.filter(d => !existing.some(e => e.diagnosis === d)).map(d => ({ diagnosis: d, reasonExcluded: '' }));
+        return [...existing, ...newOnes, { diagnosis: '', reasonExcluded: '' }];
+      });
+    }
+
+    if (p.noteHeadings?.length) {
+      setNoteHeadings(prev => {
+        const merged = [...prev];
+        for (const h of p.noteHeadings!) {
+          if (!merged.includes(h)) merged.push(h);
+        }
+        return merged;
+      });
+    }
+
+    const cId = consultId || 'draft';
+    logEvent(cId, 'template_applied', { metadata: { templateName: template.name, templateId: template.id } });
+    toast({ title: `Template applied: ${template.name}` });
+  };
+
   const handleFinalise = async (): Promise<{ success: boolean; consultId?: string; error?: string }> => {
-    // Transition: draft/validated → submitting
+    // Block if safety blockers unresolved
+    if (hasSafetyBlock) {
+      return { success: false, error: 'Safety blockers must be resolved or overridden before finalising.' };
+    }
+
     const nextStatus = transitionConsult(consultStatus, 'SUBMIT') || transitionConsult(consultStatus, 'VALIDATE');
     if (!nextStatus && consultStatus !== 'draft') {
       return { success: false, error: `Cannot finalise from status: ${consultStatus}` };
@@ -239,10 +355,7 @@ const NewConsultation = () => {
       setFinalisedAt(data.finalised_at);
       setConsultStatus('finalised');
 
-      // Audit
       await logEvent(newId, 'finalise_succeeded');
-
-      // Clear draft
       clearDraft();
 
       return { success: true, consultId: newId };
@@ -259,7 +372,6 @@ const NewConsultation = () => {
   };
 
   const handleDiscard = () => {
-    // Clear all state
     setFormData({});
     setSelectedCondition('');
     setRedFlagsChecked({});
@@ -270,6 +382,8 @@ const NewConsultation = () => {
     setConsultId(undefined);
     setFinalisedAt(undefined);
     setAttemptedProgress(false);
+    setSafetyOverride(undefined);
+    setNoteHeadings([]);
     clearDraft();
 
     if (consultId) {
@@ -362,10 +476,12 @@ const NewConsultation = () => {
                 })}
               </div>
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
+                <Button variant="outline" size="sm" onClick={() => setShowTemplateDialog(true)} className="gap-1.5 text-xs">
+                  <LayoutTemplate className="h-3.5 w-3.5" /> Template
+                </Button>
                 <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
                 <CalculatorsDialog />
                 <AnatomyDialog />
-                
               </div>
             </div>
 
@@ -783,7 +899,20 @@ const NewConsultation = () => {
                   <Button variant="outline" onClick={() => setCurrentStep('scope')} className="gap-2">
                     <ChevronLeft className="h-4 w-4" /> Back
                   </Button>
-                  <Button onClick={() => setCurrentStep('documentation')} className="gap-2">
+                  <Button
+                    onClick={() => {
+                      if (hasSafetyBlock) {
+                        toast({
+                          title: 'Safety blockers detected',
+                          description: 'Resolve safety blockers or apply a clinical override before proceeding.',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
+                      setCurrentStep('documentation');
+                    }}
+                    className="gap-2"
+                  >
                     Review & Finalise <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -808,7 +937,7 @@ const NewConsultation = () => {
           </div>
         </div>
 
-        {/* Right panel: Live Note Preview */}
+        {/* Right panel: Live Note Preview + Safety */}
         <div className="hidden lg:block w-80 border-l bg-muted/30 p-4 overflow-auto">
           <LiveNotePreview
             formData={formData}
@@ -817,6 +946,16 @@ const NewConsultation = () => {
             hasRedFlagTriggered={hasRedFlagTriggered}
             redFlagsChecked={redFlagsChecked}
             pinnedEvidence={pinnedEvidence}
+            noteHeadings={noteHeadings}
+          />
+
+          <Separator className="my-4" />
+
+          {/* Safety Checks Card */}
+          <SafetyChecksCard
+            result={safetyResult}
+            override={safetyOverride}
+            onRequestOverride={() => setShowOverrideDialog(true)}
           />
 
           <Separator className="my-4" />
@@ -843,6 +982,19 @@ const NewConsultation = () => {
           </div>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <SafetyOverrideDialog
+        open={showOverrideDialog}
+        onOpenChange={setShowOverrideDialog}
+        blockerCount={safetyResult.blockers.length}
+        onApply={handleSafetyOverride}
+      />
+      <ApplyTemplateDialog
+        open={showTemplateDialog}
+        onOpenChange={setShowTemplateDialog}
+        onApply={handleApplyTemplate}
+      />
     </ClinicalLayout>
   );
 };
