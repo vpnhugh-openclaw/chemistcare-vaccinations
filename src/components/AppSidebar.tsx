@@ -16,6 +16,10 @@ import {
   Mic,
   MessageSquare,
   ChevronDown,
+  Pill,
+  FileBarChart,
+  HeartHandshake,
+  Plug,
 } from 'lucide-react';
 import logoImg from '@/assets/chemistcare-logo.png';
 import { NavLink } from '@/components/NavLink';
@@ -63,6 +67,10 @@ const mainItems = [
 const adminItems = [
   { title: 'Audit', url: '/audit', icon: Shield },
   { title: 'PPA Integration', url: '/ppa-settings', icon: Receipt },
+  { title: 'PBS Lookup', url: '/pbs-lookup', icon: Pill },
+  { title: 'Claims Demo', url: '/claims-demo', icon: FileBarChart },
+  { title: 'FHIR Demo', url: '/fhir-demo', icon: HeartHandshake },
+  { title: 'Integration Settings', url: '/integration-settings', icon: Plug },
   { title: 'Practice Settings', url: '/admin/settings', icon: Settings },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
