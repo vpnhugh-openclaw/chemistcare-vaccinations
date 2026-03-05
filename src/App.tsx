@@ -27,6 +27,10 @@ import BookingPage from "./pages/BookingPage";
 import AdminSettingsPage from "./pages/AdminSettingsPage";
 import ScribePage from "./pages/ScribePage";
 import PatientMessaging from "./pages/PatientMessaging";
+import PbsLookup from "./pages/PbsLookup";
+import ClaimsDemo from "./pages/ClaimsDemo";
+import FhirDemo from "./pages/FhirDemo";
+import IntegrationSettings from "./pages/IntegrationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +60,10 @@ const router = createBrowserRouter([
   { path: "/admin/settings", element: <AdminSettingsPage /> },
   { path: "/scribe", element: <ScribePage /> },
   { path: "/messaging", element: <PatientMessaging /> },
+  { path: "/pbs-lookup", element: <PbsLookup /> },
+  { path: "/claims-demo", element: <ClaimsDemo /> },
+  { path: "/fhir-demo", element: <FhirDemo /> },
+  { path: "/integration-settings", element: <IntegrationSettings /> },
   { path: "*", element: <NotFound /> },
 ]);
 
