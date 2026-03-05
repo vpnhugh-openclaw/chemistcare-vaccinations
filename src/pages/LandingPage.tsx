@@ -238,6 +238,7 @@ export default function LandingPage() {
             className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all">
               Start Prescribing Now
             </button>
+            <img src={logoImg} alt="ChemistCare" className="h-9 w-9 rounded-lg object-cover ml-2" />
           </div>
           <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
