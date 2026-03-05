@@ -548,22 +548,18 @@ const NewConsultation = () => {
                   );
                 })}
               </div>
-              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border shrink-0">
+            </div>
+
+            {/* Scribe recorder + all tool buttons row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <ScribeRecorder compact className="px-1" onTranscriptChange={(text) => {
+                if (text) setFormData(prev => ({ ...prev, clinicalNotes: text }));
+              }} />
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <Button variant="outline" size="sm" onClick={() => setShowTemplateDialog(true)} className="gap-1.5 text-xs">
                   <LayoutTemplate className="h-3.5 w-3.5" /> Template
                 </Button>
                 <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
-              </div>
-            </div>
-
-            {/* Scribe recorder + tool buttons row */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <ScribeRecorder compact className="px-1" onTranscriptChange={(text) => {
-                  if (text) setFormData(prev => ({ ...prev, clinicalNotes: text }));
-                }} />
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
                 <Button variant="outline" size="sm" onClick={() => setShowSketchPad(true)} className="gap-1.5 text-xs">
                   <Pen className="h-3.5 w-3.5" /> Sketch Pad
                 </Button>
