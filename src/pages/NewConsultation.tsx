@@ -4,6 +4,7 @@ import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FloatingInput, FloatingSelectWrapper } from '@/components/ui/floating-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -403,6 +404,7 @@ const NewConsultation = () => {
         lastSaved={lastSaved}
         isSaving={isSaving}
         validationBlockers={validationBlockers}
+        patientName={formData.firstName && formData.lastName ? `${formData.firstName} ${formData.lastName}` : undefined}
       />
 
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-6.5rem)]">
@@ -492,50 +494,58 @@ const NewConsultation = () => {
 
             {/* Step 1: Patient */}
             {currentStep === 'patient' && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold">Patient Profile</h2>
-                  <StepChecklist validation={getStepValidation('patient')} />
+                  {(() => {
+                    const v = getStepValidation('patient');
+                    return (
+                      <span className={`text-xs font-semibold tabular-nums ${v.complete ? 'text-clinical-safe' : 'text-muted-foreground'}`}>
+                        {v.complete ? (
+                          <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Complete</span>
+                        ) : (
+                          <span>{v.filled}/{v.total} fields</span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 </div>
+
+                {/* Patient Identity */}
                 <Card>
                   <CardContent className="pt-5 space-y-4">
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Patient Identity</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-xs">First Name <span className="text-clinical-danger">*</span></Label>
-                        <Input
-                          placeholder="First name"
-                          value={formData.firstName || ''}
-                          onChange={e => updateField('firstName', e.target.value)}
-                          className={attemptedProgress && !formData.firstName ? 'border-clinical-danger' : ''}
-                        />
-                        {attemptedProgress && !formData.firstName && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
-                      </div>
-                      <div>
-                        <Label className="text-xs">Last Name <span className="text-clinical-danger">*</span></Label>
-                        <Input
-                          placeholder="Last name"
-                          value={formData.lastName || ''}
-                          onChange={e => updateField('lastName', e.target.value)}
-                          className={attemptedProgress && !formData.lastName ? 'border-clinical-danger' : ''}
-                        />
-                        {attemptedProgress && !formData.lastName && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
-                      </div>
+                      <FloatingInput
+                        label="First Name"
+                        required
+                        value={formData.firstName || ''}
+                        onChange={e => updateField('firstName', e.target.value)}
+                        error={attemptedProgress && !formData.firstName}
+                        valid={!!formData.firstName}
+                      />
+                      <FloatingInput
+                        label="Last Name"
+                        required
+                        value={formData.lastName || ''}
+                        onChange={e => updateField('lastName', e.target.value)}
+                        error={attemptedProgress && !formData.lastName}
+                        valid={!!formData.lastName}
+                      />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-xs">Date of Birth <span className="text-clinical-danger">*</span></Label>
-                        <Input
-                          type="date"
-                          value={formData.dob || ''}
-                          onChange={e => updateField('dob', e.target.value)}
-                          className={attemptedProgress && !formData.dob ? 'border-clinical-danger' : ''}
-                        />
-                        {attemptedProgress && !formData.dob && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
-                      </div>
-                      <div>
-                        <Label className="text-xs">Sex <span className="text-clinical-danger">*</span></Label>
+                      <FloatingInput
+                        label="Date of Birth"
+                        required
+                        type="date"
+                        value={formData.dob || ''}
+                        onChange={e => updateField('dob', e.target.value)}
+                        error={attemptedProgress && !formData.dob}
+                        valid={!!formData.dob}
+                      />
+                      <FloatingSelectWrapper label="Sex" required hasValue={!!formData.sex} valid={!!formData.sex} error={attemptedProgress && !formData.sex}>
                         <Select value={formData.sex || ''} onValueChange={v => updateField('sex', v)}>
-                          <SelectTrigger className={attemptedProgress && !formData.sex ? 'border-clinical-danger' : ''}>
+                          <SelectTrigger className="border-0 shadow-none focus:ring-0 h-auto py-0 px-3">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
                           <SelectContent>
@@ -544,12 +554,12 @@ const NewConsultation = () => {
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
-                        {attemptedProgress && !formData.sex && <p className="text-xs mt-1 text-clinical-danger">Required</p>}
-                      </div>
-                      <div>
-                        <Label className="text-xs">Pregnancy Status</Label>
+                      </FloatingSelectWrapper>
+                      <FloatingSelectWrapper label="Pregnancy Status" hasValue={!!formData.pregnancy} valid={!!formData.pregnancy}>
                         <Select value={formData.pregnancy || ''} onValueChange={v => updateField('pregnancy', v)}>
-                          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                          <SelectTrigger className="border-0 shadow-none focus:ring-0 h-auto py-0 px-3">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="not_pregnant">Not pregnant</SelectItem>
                             <SelectItem value="pregnant">Pregnant</SelectItem>
@@ -557,20 +567,58 @@ const NewConsultation = () => {
                             <SelectItem value="not_applicable">N/A</SelectItem>
                           </SelectContent>
                         </Select>
-                      </div>
-                    </div>
-                    <div><Label className="text-xs">Known Allergies</Label><TagInput placeholder="Type allergy and press Enter…" value={parseTagString(formData.allergies)} onChange={tags => updateField('allergies', tagsToString(tags))} /></div>
-                    <div><Label className="text-xs">Current Medications</Label><TagInput placeholder="Type medication and press Enter…" value={parseTagString(formData.medications)} onChange={tags => updateField('medications', tagsToString(tags))} /></div>
-                    <div><Label className="text-xs">Comorbidities</Label><TagInput placeholder="Type comorbidity and press Enter…" value={parseTagString(formData.comorbidities)} onChange={tags => updateField('comorbidities', tagsToString(tags))} /></div>
-                    <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div><Label className="text-xs">GP Name</Label><Input placeholder="Dr." value={formData.gpName || ''} onChange={e => updateField('gpName', e.target.value)} /></div>
-                      <div><Label className="text-xs">GP Clinic</Label><Input placeholder="Clinic name" value={formData.gpClinic || ''} onChange={e => updateField('gpClinic', e.target.value)} /></div>
-                      <div><Label className="text-xs">GP Phone</Label><Input placeholder="Phone" value={formData.gpPhone || ''} onChange={e => updateField('gpPhone', e.target.value)} /></div>
+                      </FloatingSelectWrapper>
                     </div>
                   </CardContent>
                 </Card>
 
+                {/* Clinical Background */}
+                <Card>
+                  <CardContent className="pt-5 space-y-4">
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Clinical Background</p>
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Known Allergies</Label>
+                      <TagInput placeholder="Type allergy and press Enter…" value={parseTagString(formData.allergies)} onChange={tags => updateField('allergies', tagsToString(tags))} />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Current Medications</Label>
+                      <TagInput placeholder="Type medication and press Enter…" value={parseTagString(formData.medications)} onChange={tags => updateField('medications', tagsToString(tags))} />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Comorbidities</Label>
+                      <TagInput placeholder="Type comorbidity and press Enter…" value={parseTagString(formData.comorbidities)} onChange={tags => updateField('comorbidities', tagsToString(tags))} />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Referring Clinician */}
+                <Card>
+                  <CardContent className="pt-5 space-y-4">
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Referring Clinician</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <FloatingInput
+                        label="GP Name"
+                        value={formData.gpName || ''}
+                        onChange={e => updateField('gpName', e.target.value)}
+                        valid={!!formData.gpName}
+                      />
+                      <FloatingInput
+                        label="GP Clinic"
+                        value={formData.gpClinic || ''}
+                        onChange={e => updateField('gpClinic', e.target.value)}
+                        valid={!!formData.gpClinic}
+                      />
+                      <FloatingInput
+                        label="GP Phone"
+                        value={formData.gpPhone || ''}
+                        onChange={e => updateField('gpPhone', e.target.value)}
+                        valid={!!formData.gpPhone}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Condition Selection */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm">Select Presenting Condition <span className="text-clinical-danger">*</span></CardTitle>
