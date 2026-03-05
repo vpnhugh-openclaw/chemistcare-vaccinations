@@ -1,4 +1,6 @@
 import {
+  LayoutDashboard,
+  Stethoscope,
   CalendarDays,
   Users,
   Syringe,
@@ -23,6 +25,8 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'New Consultation', url: '/consultation', icon: Stethoscope },
   { title: 'Calendar', url: '/vaccination/calendar', icon: CalendarDays },
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Encounters', url: '/vaccination/encounters', icon: Syringe },
