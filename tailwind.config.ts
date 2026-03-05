@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
@@ -72,12 +72,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        /* ChemistCare named colours for direct use */
-        "chemistcare-teal": "#2F8F9D",
-        "deep-medical-teal": "#1E5E66",
-        "healthcare-blue": "#3B82F6",
+        /* ChemistCare named colours */
+        "clinical-blue": "#1D6FA4",
+        "deep-navy": "#1E293B",
         "clinical-red": "#E63946",
-        "soft-mint": "#CDEEE",
         "prescription-green": "#1FA971",
         "safety-yellow": "#F6D860",
       },
@@ -87,7 +85,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 4px 20px rgba(0, 0, 0, 0.04)",
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
       },
       keyframes: {
         "accordion-down": {
