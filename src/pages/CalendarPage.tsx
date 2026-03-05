@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Plus } from 'lucide-react';
 import { sampleAppointments, AppointmentSlot, BookingStatus } from '@/data/booking-data';
 import { DayView } from '@/components/calendar/DayView';
@@ -9,6 +10,7 @@ import { WeekView } from '@/components/calendar/WeekView';
 import { AppointmentDetailSheet } from '@/components/calendar/AppointmentDetailSheet';
 import { NewAppointmentDialog } from '@/components/calendar/NewAppointmentDialog';
 import { StatusSummaryBar } from '@/components/calendar/StatusSummaryBar';
+import { EncounterWizard } from '@/components/booking/EncounterWizard';
 
 const CalendarPage = () => {
   const [appointments, setAppointments] = useState<AppointmentSlot[]>(sampleAppointments);
@@ -16,6 +18,8 @@ const CalendarPage = () => {
   const [selectedApt, setSelectedApt] = useState<AppointmentSlot | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [encounterApt, setEncounterApt] = useState<AppointmentSlot | null>(null);
+  const [encounterOpen, setEncounterOpen] = useState(false);
 
   const handleStatusChange = (id: string, status: BookingStatus) => {
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
@@ -34,6 +38,20 @@ const CalendarPage = () => {
 
   const handleAddAppointment = (apt: AppointmentSlot) => {
     setAppointments(prev => [...prev, apt]);
+  };
+
+  const handleCompleteEncounter = (apt: AppointmentSlot) => {
+    setSheetOpen(false);
+    setEncounterApt(apt);
+    setEncounterOpen(true);
+  };
+
+  const handleEncounterDone = () => {
+    if (encounterApt) {
+      handleStatusChange(encounterApt.id, 'completed');
+    }
+    setEncounterOpen(false);
+    setEncounterApt(null);
   };
 
   return (
@@ -80,14 +98,31 @@ const CalendarPage = () => {
         onOpenChange={setSheetOpen}
         onStatusChange={handleStatusChange}
         onNotesChange={handleNotesChange}
+        onCompleteEncounter={handleCompleteEncounter}
       />
 
-      {/* New appointment dialog */}
+      {/* New appointment wizard (drawer) */}
       <NewAppointmentDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onAdd={handleAddAppointment}
       />
+
+      {/* Complete Encounter wizard (right-side drawer) */}
+      <Sheet open={encounterOpen} onOpenChange={setEncounterOpen}>
+        <SheetContent className="sm:max-w-lg w-full overflow-y-auto">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Complete Encounter</SheetTitle>
+          </SheetHeader>
+          {encounterOpen && encounterApt && (
+            <EncounterWizard
+              appointment={encounterApt}
+              onComplete={handleEncounterDone}
+              onCancel={() => { setEncounterOpen(false); setEncounterApt(null); }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </ClinicalLayout>
   );
 };
