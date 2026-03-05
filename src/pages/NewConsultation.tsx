@@ -33,12 +33,17 @@ import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2, LayoutTemplate,
+  Circle, ChevronDown,
 } from 'lucide-react';
+import { toast as sonnerToast } from 'sonner';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
 import { AnatomyDialog } from '@/components/AnatomyDialog';
 import { TagInput, parseTagString, tagsToString } from '@/components/ui/tag-input';
 import type { SafetyResult, SafetyOverride } from '@/types/safety';
 import type { ConsultTemplate } from '@/types/templates';
+
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { ValidationResult } from '@/components/ConsultationValidation';
 
 const DRAFT_KEY = 'chemistcare_consultation_draft';
 
@@ -51,6 +56,65 @@ interface DraftState {
   pinnedEvidence: { question: string; answer: string; sources: string[] }[];
   noteHeadings?: string[];
   safetyOverride?: SafetyOverride;
+}
+
+function StepProgressPanel({ getStepStatus, getStepValidation }: {
+  getStepStatus: (step: ConsultationStep) => string;
+  getStepValidation: (step: ConsultationStep) => ValidationResult;
+}) {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="flex items-center justify-between w-full group">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Step Progress</h3>
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="space-y-2.5 mt-3 text-xs">
+          {CONSULTATION_STEPS.map(s => {
+            const status = getStepStatus(s.key);
+            const validation = getStepValidation(s.key);
+            const pct = validation.total > 0 ? Math.round((validation.filled / validation.total) * 100) : (status === 'complete' ? 100 : 0);
+
+            return (
+              <div key={s.key} className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {status === 'complete' ? (
+                      <CheckCircle className="h-3.5 w-3.5" style={{ color: 'hsl(var(--clinical-safe))' }} />
+                    ) : status === 'active' ? (
+                      <div className="h-3.5 w-3.5 rounded-full border-2 border-primary pulse-ring" style={{ backgroundColor: 'hsl(var(--primary) / 0.15)' }} />
+                    ) : status === 'blocked' ? (
+                      <XCircle className="h-3.5 w-3.5 text-clinical-danger" />
+                    ) : (
+                      <Circle className="h-3.5 w-3.5 text-muted-foreground/30" />
+                    )}
+                    <span className={status === 'active' ? 'font-medium text-foreground' : status === 'complete' ? 'text-foreground/70' : 'text-muted-foreground'}>{s.label}</span>
+                  </div>
+                  {validation.total > 0 && (
+                    <span className={`tabular-nums ${validation.complete ? 'text-clinical-safe' : 'text-muted-foreground'}`}>
+                      {validation.filled}/{validation.total}
+                    </span>
+                  )}
+                </div>
+                {/* Thin progress bar */}
+                <div className="h-1 rounded-full bg-muted ml-5.5" style={{ marginLeft: '22px' }}>
+                  <div
+                    className="h-full rounded-full step-progress-fill"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: status === 'complete' ? 'hsl(var(--clinical-safe))' : pct > 0 ? 'hsl(var(--primary))' : 'transparent',
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
 }
 
 const NewConsultation = () => {
@@ -244,7 +308,9 @@ const NewConsultation = () => {
         setCurrentStep('documentation');
         return;
       }
-      setCurrentStep(steps[currentIdx + 1].key);
+      const nextStep = steps[currentIdx + 1];
+      sonnerToast.success(`${steps[currentIdx].label} saved ✓`, { duration: 3000, position: 'bottom-right' });
+      setCurrentStep(nextStep.key);
     }
   };
 
@@ -410,7 +476,7 @@ const NewConsultation = () => {
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-6.5rem)]">
         {/* Main content */}
         <div className="flex-1 p-4 sm:p-6 overflow-auto">
-          <div className="max-w-3xl space-y-5 animate-fade-in">
+          <div key={currentStep} className="max-w-3xl space-y-5 slide-enter">
 
             {/* Draft restore prompt */}
             {showDraftPrompt && (
@@ -648,6 +714,7 @@ const NewConsultation = () => {
                         return;
                       }
                       setAttemptedProgress(false);
+                      sonnerToast.success('Patient profile saved ✓', { duration: 3000, position: 'bottom-right' });
                       setCurrentStep('assessment');
                     }}
                     className="gap-2"
@@ -995,6 +1062,7 @@ const NewConsultation = () => {
             redFlagsChecked={redFlagsChecked}
             pinnedEvidence={pinnedEvidence}
             noteHeadings={noteHeadings}
+            isGenerating={Object.keys(formData).length > 0 && currentStep !== 'documentation'}
           />
 
           <Separator className="my-4" />
@@ -1008,26 +1076,11 @@ const NewConsultation = () => {
 
           <Separator className="my-4" />
 
-          {/* Step Progress */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Step Progress</h3>
-          <div className="space-y-1 text-xs">
-            {CONSULTATION_STEPS.map(s => {
-              const status = getStepStatus(s.key);
-              const validation = getStepValidation(s.key);
-              return (
-                <div key={s.key} className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    {status === 'complete' ? <CheckCircle className="h-3 w-3 text-clinical-safe" /> :
-                     status === 'active' ? <div className="h-3 w-3 rounded-full bg-accent" /> :
-                     status === 'blocked' ? <XCircle className="h-3 w-3 text-clinical-danger" /> :
-                     <div className="h-3 w-3 rounded-full bg-muted-foreground/20" />}
-                    <span className={status === 'active' ? 'font-medium' : 'text-muted-foreground'}>{s.label}</span>
-                  </div>
-                  {validation.total > 0 && <StepChecklist validation={validation} compact />}
-                </div>
-              );
-            })}
-          </div>
+          {/* Collapsible Step Progress */}
+          <StepProgressPanel
+            getStepStatus={getStepStatus}
+            getStepValidation={getStepValidation}
+          />
         </div>
       </div>
 

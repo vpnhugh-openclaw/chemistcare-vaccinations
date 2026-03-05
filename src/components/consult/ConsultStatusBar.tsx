@@ -33,13 +33,22 @@ export function ConsultStatusBar({
 
   return (
     <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b shadow-sm px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-2.5 text-xs">
+      {/* Clinical Mode indicator */}
+      <div className="flex items-center gap-1.5 mr-1">
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="pulse-dot absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'hsl(var(--clinical-safe))' }} />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: 'hsl(var(--clinical-safe))' }} />
+        </span>
+        <span className="text-[0.6875rem] font-semibold text-foreground/70">Clinical Mode</span>
+      </div>
+
       {/* Status badge */}
       <Badge variant={config.variant} className={`gap-1.5 px-2.5 py-1 text-[0.6875rem] font-semibold ${config.className}`}>
         <StatusIcon className={`h-3 w-3 ${status === 'submitting' ? 'animate-spin' : ''}`} />
         {config.label}
       </Badge>
 
-      {/* Step counter — blue for in-progress */}
+      {/* Step counter */}
       <Badge variant="outline" className="gap-1 px-2.5 py-1 text-[0.6875rem] font-medium bg-primary/8 text-primary border-primary/20">
         Step {stepIndex + 1} of {totalSteps}
         <span className="text-primary/60">·</span>
@@ -61,7 +70,7 @@ export function ConsultStatusBar({
         </Badge>
       )}
 
-      {/* Validation blockers — amber */}
+      {/* Validation blockers */}
       {validationBlockers.length > 0 && status === 'draft' && (
         <Badge variant="outline" className="gap-1 px-2.5 py-1 text-[0.6875rem] font-medium bg-clinical-warning-bg text-clinical-warning border-clinical-warning/20">
           <AlertTriangle className="h-3 w-3" />
@@ -69,7 +78,7 @@ export function ConsultStatusBar({
         </Badge>
       )}
 
-      {/* Autosave — far right */}
+      {/* Autosave */}
       <div className="ml-auto">
         <SaveStatus lastSaved={lastSaved} isSaving={isSaving} />
       </div>
