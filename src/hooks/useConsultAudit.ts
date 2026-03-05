@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { appendAudit } from '@/lib/auditStore';
 
 export type AuditEventType =
   | 'draft_saved'
@@ -8,7 +9,10 @@ export type AuditEventType =
   | 'finalise_succeeded'
   | 'finalise_failed'
   | 'draft_discarded'
-  | 'evidence_pinned';
+  | 'evidence_pinned'
+  | 'safety_blocker_triggered'
+  | 'safety_override_applied'
+  | 'template_applied';
 
 export function useConsultAudit() {
   const logEvent = useCallback(async (
@@ -21,6 +25,19 @@ export function useConsultAudit() {
       metadata?: Record<string, unknown>;
     }
   ) => {
+    // Always write to local store
+    appendAudit({
+      consultId,
+      action: eventType,
+      details: {
+        step: options?.step,
+        validationResult: options?.validationResult,
+        errorReason: options?.errorReason,
+        ...options?.metadata,
+      },
+    });
+
+    // Best-effort write to Supabase
     try {
       const { data: { user } } = await supabase.auth.getUser();
       await (supabase.from('consult_audit_events') as any).insert({
@@ -34,7 +51,7 @@ export function useConsultAudit() {
       });
     } catch {
       // Audit logging should never break the UI
-      console.warn('[Audit] Failed to log event:', eventType);
+      console.warn('[Audit] Failed to log event to backend:', eventType);
     }
   }, []);
 
