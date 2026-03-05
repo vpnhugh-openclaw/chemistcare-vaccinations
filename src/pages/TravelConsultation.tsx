@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
+import { SketchPad } from '@/components/consult/SketchPad';
+import { Pen } from 'lucide-react';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,6 +83,7 @@ const RESOURCE_LINKS = [
 
 export default function TravelConsultation() {
   const [step, setStep] = useState<TravelStep>('patient-form');
+  const [showSketchPad, setShowSketchPad] = useState(false);
   const [form, setForm] = useState<TravelPatientForm>(emptyForm());
   const [riskFlags, setRiskFlags] = useState<TravelRiskFlag[]>([]);
   const [plannedVaccines, setPlannedVaccines] = useState<PlannedVaccine[]>([]);
@@ -217,6 +220,7 @@ ${pharmacistCredentials}`;
   };
 
   return (
+    <>
     <ClinicalLayout>
       <div className="p-4 lg:p-6 space-y-4 max-w-5xl animate-fade-in">
         {/* Header */}
@@ -226,8 +230,12 @@ ${pharmacistCredentials}`;
             <p className="text-xs text-muted-foreground mt-0.5">Victorian Pharmacist Prescriber — Pre-Travel Health Assessment</p>
           </div>
           <div className="flex items-center gap-2">
-            <CalculatorsDialog />
-            <AnatomyDialog />
+            <Button variant="outline" size="sm" onClick={() => setShowSketchPad(true)} className="gap-1.5 border-accent/40 text-accent hover:bg-accent/10 hover:text-accent">
+                  <Pen className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sketch Pad</span>
+                </Button>
+                <CalculatorsDialog />
+                <AnatomyDialog />
             
             {daysToDep !== null && (
               <Badge variant={daysToDep < 14 ? 'destructive' : 'secondary'} className="tabular-nums">
@@ -963,5 +971,7 @@ ${pharmacistCredentials}`;
         </div>
       </div>
     </ClinicalLayout>
+    <SketchPad open={showSketchPad} onOpenChange={setShowSketchPad} />
+    </>
   );
 }
