@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
-import { ChevronDown, User, Phone, Mail, Clock, Stethoscope } from 'lucide-react';
+import { ChevronDown, User, Phone, Mail, Clock, Stethoscope, Syringe } from 'lucide-react';
 import { AppointmentSlot, BookingStatus } from '@/data/booking-data';
 import { useState } from 'react';
 
@@ -14,6 +14,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   onStatusChange: (id: string, status: BookingStatus) => void;
   onNotesChange: (id: string, notes: string) => void;
+  onCompleteEncounter?: (appointment: AppointmentSlot) => void;
 }
 
 const statusColors: Record<BookingStatus, string> = {
@@ -24,7 +25,7 @@ const statusColors: Record<BookingStatus, string> = {
   'no-show': 'text-red-300',
 };
 
-export function AppointmentDetailSheet({ appointment, open, onOpenChange, onStatusChange, onNotesChange }: Props) {
+export function AppointmentDetailSheet({ appointment, open, onOpenChange, onStatusChange, onNotesChange, onCompleteEncounter }: Props) {
   const [eligOpen, setEligOpen] = useState(false);
   if (!appointment) return null;
 
@@ -102,6 +103,11 @@ export function AppointmentDetailSheet({ appointment, open, onOpenChange, onStat
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
+            {appointment.status === 'confirmed' && onCompleteEncounter && (
+              <Button size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onCompleteEncounter(appointment)}>
+                <Syringe className="h-4 w-4" /> Complete Encounter
+              </Button>
+            )}
             <Button size="sm" onClick={() => onStatusChange(appointment.id, 'completed')}>Mark Complete</Button>
             <Button size="sm" variant="destructive" onClick={() => onStatusChange(appointment.id, 'cancelled')}>Cancel Appointment</Button>
             <Button size="sm" variant="outline">Reschedule</Button>
