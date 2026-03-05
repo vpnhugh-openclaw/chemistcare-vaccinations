@@ -47,7 +47,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
-  { path: "/", element: <LandingPage />, errorElement: <ErrorBoundary><NotFound /></ErrorBoundary> },
+  { path: "/", element: <Navigate to="/dashboard" replace />, errorElement: <ErrorBoundary><NotFound /></ErrorBoundary> },
+  { path: "/landing", element: <LandingPage /> },
 
   // Main 6 sidebar routes
   { path: "/vaccination/calendar", element: <CalendarPage /> },
