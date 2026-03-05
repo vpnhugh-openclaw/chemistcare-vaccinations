@@ -25,6 +25,7 @@ import { SafetyOverrideDialog } from '@/components/consult/SafetyOverrideDialog'
 import { ApplyTemplateDialog } from '@/components/consult/ApplyTemplateDialog';
 import { ScribeRecorder } from '@/components/scribe/ScribeRecorder';
 import { ReviewPanel } from '@/components/consult/ReviewPanel';
+import { SketchPad } from '@/components/consult/SketchPad';
 import { ConsultStatus, transitionConsult } from '@/lib/consultStateMachine';
 import { useConsultAudit } from '@/hooks/useConsultAudit';
 import { evaluateSafety } from '@/lib/safetyEngine';
@@ -33,7 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle, CheckCircle, XCircle, ChevronRight, ChevronLeft,
   Shield, Pill, FileText, User, Stethoscope, Brain, Lock, RotateCcw, Trash2, LayoutTemplate,
-  Circle, ChevronDown,
+  Circle, ChevronDown, Pen,
 } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { CalculatorsDialog } from '@/components/CalculatorsDialog';
@@ -145,6 +146,10 @@ const NewConsultation = () => {
   // Template state
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [noteHeadings, setNoteHeadings] = useState<string[]>([]);
+
+  // Sketch pad state
+  const [showSketchPad, setShowSketchPad] = useState(false);
+  const [savedSketches, setSavedSketches] = useState<{ dataUrl: string; timestamp: string }[]>([]);
 
   const condition = useMemo(() => getConditionById(selectedCondition), [selectedCondition]);
   const stepIndex = CONSULTATION_STEPS.findIndex(s => s.key === currentStep);
@@ -548,6 +553,9 @@ const NewConsultation = () => {
                   <LayoutTemplate className="h-3.5 w-3.5" /> Template
                 </Button>
                 <EvidenceDrawer conditionName={condition?.name} onPinEvidence={handlePinEvidence} />
+                <Button variant="outline" size="sm" onClick={() => setShowSketchPad(true)} className="gap-1.5 text-xs">
+                  <Pen className="h-3.5 w-3.5" /> Sketch Pad
+                </Button>
                 <CalculatorsDialog />
                 <AnatomyDialog />
               </div>
@@ -1095,6 +1103,16 @@ const NewConsultation = () => {
         open={showTemplateDialog}
         onOpenChange={setShowTemplateDialog}
         onApply={handleApplyTemplate}
+      />
+      <SketchPad
+        open={showSketchPad}
+        onOpenChange={setShowSketchPad}
+        onSave={(dataUrl) => {
+          setSavedSketches(prev => [...prev, {
+            dataUrl,
+            timestamp: new Date().toISOString(),
+          }]);
+        }}
       />
     </ClinicalLayout>
   );
