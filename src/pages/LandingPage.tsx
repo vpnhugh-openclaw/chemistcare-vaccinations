@@ -225,7 +225,10 @@ export default function LandingPage() {
       {/* ─── NAVBAR ─── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0f172a]/95 backdrop-blur-xl border-b border-white/5" : "bg-transparent"}`}>
         <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
-          <img src={logoImg} alt="ChemistCare" className="h-10 w-auto" />
+          <div className="flex items-center gap-3">
+            <img src={logoImg} alt="ChemistCare" className="h-9 w-9 rounded-lg object-cover" />
+            <img src={logoImg} alt="ChemistCare" className="h-10 w-auto" />
+          </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-[#94a3b8] hover:text-white text-sm font-medium transition-colors">Features</a>
             <a href="#how-it-works" className="text-[#94a3b8] hover:text-white text-sm font-medium transition-colors">How It Works</a>
@@ -238,7 +241,7 @@ export default function LandingPage() {
             className="bg-[#2dd4bf] hover:bg-[#14b8a6] text-[#0f172a] font-semibold text-sm px-5 py-2.5 rounded-lg transition-all">
               Start Prescribing Now
             </button>
-            <img src={logoImg} alt="ChemistCare" className="h-9 w-9 rounded-lg object-cover ml-2" />
+            
           </div>
           <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
