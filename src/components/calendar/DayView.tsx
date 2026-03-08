@@ -1,6 +1,6 @@
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { AppointmentSlot } from '@/data/booking-data';
 import { AppointmentCard } from './AppointmentCard';
 import { cn } from '@/lib/utils';
@@ -21,10 +21,11 @@ const TIME_SLOTS = Array.from({ length: 21 }, (_, i) => {
 export function DayView({ selectedDate, onDateChange, appointments, onAppointmentClick }: Props) {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const dayAppts = appointments.filter(a => a.date === dateStr);
+  const today = isToday(selectedDate);
 
   return (
     <div className="flex gap-6 lg:gap-10">
-      {/* Sidebar */}
+      {/* Sidebar mini-calendar */}
       <div className="w-[260px] shrink-0 hidden md:block space-y-4 overflow-hidden">
         <Calendar
           mode="single"
@@ -32,18 +33,36 @@ export function DayView({ selectedDate, onDateChange, appointments, onAppointmen
           onSelect={(d) => d && onDateChange(d)}
           className={cn("p-2 pointer-events-auto rounded-lg border w-full [&_table]:w-full")}
         />
-        <Button variant="outline" size="sm" className="w-full" onClick={() => onDateChange(new Date())}>Today</Button>
-        <p className="text-sm text-muted-foreground text-center">{dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''} today</p>
+        <Button variant="outline" size="sm" className="w-full rounded-full" onClick={() => onDateChange(new Date())}>
+          Today
+        </Button>
+        <p className="text-sm text-muted-foreground text-center">
+          {dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {/* Time grid */}
       <div className="flex-1 min-w-0">
-        <h2 className="text-base font-semibold mb-4">{format(selectedDate, 'EEEE, d MMMM yyyy')}</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className={cn(
+            'text-base font-semibold mb-0',
+            today && 'text-primary',
+          )}>
+            {format(selectedDate, 'EEEE, d MMMM yyyy')}
+          </h2>
+          {today && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary pulse-dot" />
+              Today
+            </span>
+          )}
+        </div>
+
         <div className="space-y-0">
           {TIME_SLOTS.map(slot => {
             const slotAppts = dayAppts.filter(a => a.time === slot);
             return (
-              <div key={slot} className="flex min-h-[3rem] border-t border-border/50">
+              <div key={slot} className="flex min-h-[3rem] border-t border-border/30 group hover:bg-secondary/20 transition-colors rounded-sm">
                 <div className="w-16 shrink-0 pt-1 text-xs text-muted-foreground font-mono">{slot}</div>
                 <div className="flex-1 py-1 space-y-1">
                   {slotAppts.map(a => (
