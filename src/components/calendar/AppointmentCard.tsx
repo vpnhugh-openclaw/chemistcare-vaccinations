@@ -1,12 +1,12 @@
-import { Card } from '@/components/ui/card';
 import { AppointmentSlot, BookingStatus } from '@/data/booking-data';
+import { cn } from '@/lib/utils';
 
-const borderColors: Record<BookingStatus, string> = {
-  confirmed: 'border-l-green-500',
-  pending: 'border-l-amber-400',
-  completed: 'border-l-gray-400',
-  cancelled: 'border-l-red-400',
-  'no-show': 'border-l-red-200',
+const statusStyles: Record<BookingStatus, string> = {
+  confirmed: 'border-l-[hsl(var(--clinical-safe))] bg-[hsl(var(--clinical-safe-bg))]',
+  pending: 'border-l-[hsl(var(--clinical-warning))] bg-[hsl(var(--clinical-warning-bg))]',
+  completed: 'border-l-muted-foreground/40 bg-muted/50',
+  cancelled: 'border-l-[hsl(var(--clinical-danger))] bg-[hsl(var(--clinical-danger-bg))]',
+  'no-show': 'border-l-[hsl(var(--clinical-danger))]/60 bg-[hsl(var(--clinical-danger-bg))]',
 };
 
 interface Props {
@@ -16,14 +16,19 @@ interface Props {
 
 export function AppointmentCard({ appointment, onClick }: Props) {
   return (
-    <Card
-      className={`border-l-4 ${borderColors[appointment.status]} p-2.5 cursor-pointer hover:shadow-md transition-shadow`}
+    <button
       onClick={onClick}
+      className={cn(
+        'w-full text-left border-l-[3px] rounded-md px-2.5 py-2 cursor-pointer transition-all',
+        'hover:shadow-sm hover:translate-x-px',
+        statusStyles[appointment.status],
+      )}
     >
-      <p className="text-xs font-mono text-muted-foreground">{appointment.time} · {appointment.durationMinutes}min</p>
-      <p className="text-sm font-semibold mt-0.5">{appointment.patientName}</p>
-      <p className="text-xs text-muted-foreground">{appointment.service}</p>
-      <p className="text-xs text-muted-foreground">{appointment.pharmacistName}</p>
-    </Card>
+      <p className="text-[11px] font-mono text-muted-foreground leading-tight">
+        {appointment.time} · {appointment.durationMinutes}min
+      </p>
+      <p className="text-sm font-semibold text-foreground mt-0.5 leading-tight">{appointment.patientName}</p>
+      <p className="text-xs text-muted-foreground leading-tight">{appointment.service}</p>
+    </button>
   );
 }
