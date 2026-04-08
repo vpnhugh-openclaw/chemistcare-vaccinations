@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,7 @@ const PrescribingLog = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     setLoading(true);
     const { data, error } = await (supabase.from('consultations') as any)
       .select('id, status, patient_first_name, patient_last_name, condition_name, working_diagnosis, finalised_at, created_at, red_flag_triggered')
@@ -36,9 +36,9 @@ const PrescribingLog = () => {
       setRecords(data);
     }
     setLoading(false);
-  };
+  }, []);
 
-  useEffect(() => { fetchRecords(); }, []);
+  useEffect(() => { void fetchRecords(); }, [fetchRecords]);
 
   return (
     <ClinicalLayout>

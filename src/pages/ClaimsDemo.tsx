@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ClinicalLayout } from '@/components/ClinicalLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,14 +34,12 @@ function saveClaims(c: DemoClaim[]) { localStorage.setItem(CLAIMS_KEY, JSON.stri
 const rebates: Record<string, number> = { MedsCheck: 42.10, DMAP: 120.00, 'Vaccination': 18.85 };
 
 export default function ClaimsDemo() {
-  const [claims, setClaims] = useState<DemoClaim[]>([]);
+  const [claims, setClaims] = useState<DemoClaim[]>(() => loadClaims());
   const [pharmacyId, setPharmacyId] = useState('');
   const [medicare, setMedicare] = useState('');
   const [service, setService] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successClaim, setSuccessClaim] = useState<DemoClaim | null>(null);
-
-  useEffect(() => { setClaims(loadClaims()); }, []);
 
   const handleSubmit = () => {
     if (!pharmacyId || !medicare || !service) { toast.error('Please fill all fields'); return; }
