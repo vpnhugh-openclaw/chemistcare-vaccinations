@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Condition } from '@/types/clinical';
+import type { ConsultationCondition } from '@/lib/conditionRegistry';
+import { buildClinicalNote } from '@/lib/consultationNotes';
 import { Copy, FileDown, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LiveNotePreviewProps {
   formData: Record<string, string>;
-  condition?: Condition;
+  condition?: ConsultationCondition;
   differentials: { diagnosis: string; reasonExcluded: string }[];
   hasRedFlagTriggered: boolean;
   redFlagsChecked: Record<string, boolean>;
@@ -21,78 +22,35 @@ export function LiveNotePreview({
 }: LiveNotePreviewProps) {
   const [copied, setCopied] = useState(false);
 
-  const noteText = useMemo(() => {
-    const parts: string[] = [];
-
-    if (noteHeadings && noteHeadings.length > 0) {
-      parts.push('── TEMPLATE HEADINGS ──');
-      noteHeadings.forEach(h => parts.push(`▸ ${h}`));
-      parts.push('');
-    }
-
-    if (formData.firstName || formData.lastName) {
-      parts.push(`PATIENT: ${formData.firstName || ''} ${formData.lastName || ''}`);
-      if (formData.dob) parts.push(`DOB: ${formData.dob}`);
-      if (formData.sex) parts.push(`Sex: ${formData.sex}`);
-      if (formData.allergies) parts.push(`Allergies: ${formData.allergies}`);
-      if (formData.medications) parts.push(`Current Medications: ${formData.medications}`);
-    }
-
-    if (condition) {
-      parts.push('');
-      parts.push(`PRESENTING CONDITION: ${condition.name} (${condition.classification})`);
-    }
-
-    const assessFields = condition?.assessmentFields || [];
-    const filledAssess = assessFields.filter(f => formData[`assess_${f}`]);
-    if (filledAssess.length > 0) {
-      parts.push('');
-      parts.push('ASSESSMENT:');
-      filledAssess.forEach(f => parts.push(`  ${f}: ${formData[`assess_${f}`]}`));
-    }
-
-    if (hasRedFlagTriggered) {
-      parts.push('');
-      parts.push('⚠ RED FLAGS TRIGGERED — PRESCRIBING BLOCKED');
-      Object.entries(redFlagsChecked).filter(([, v]) => v).forEach(([id]) => {
-        const rf = condition?.redFlags.find(r => r.id === id);
-        if (rf) parts.push(`  • ${rf.description}`);
-      });
-      if (formData.referralNotes) parts.push(`Referral: ${formData.referralNotes}`);
-    }
-
-    if (formData.workingDiagnosis) {
-      parts.push('');
-      parts.push(`WORKING DIAGNOSIS: ${formData.workingDiagnosis}`);
-      differentials.filter(d => d.diagnosis.trim()).forEach((d, i) => {
-        parts.push(`  Differential ${i + 1}: ${d.diagnosis} — Excluded: ${d.reasonExcluded || 'N/A'}`);
-      });
-    }
-
-    if (formData.selectedTherapy && condition) {
-      const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-      if (t) {
-        parts.push('');
-        parts.push(`TREATMENT: ${t.medicineName} ${t.dose}`);
-        parts.push(`  ${t.frequency} for ${t.duration} — Qty: ${t.maxQuantity}, Repeats: ${t.repeats}`);
-        if (formData.deviationJustification) parts.push(`  Deviation justification: ${formData.deviationJustification}`);
-      }
-    }
-
-    if (formData.followUpPlan) {
-      parts.push('');
-      parts.push(`FOLLOW-UP: ${formData.followUpPlan}`);
-    }
-    if (formData.safetyNet) {
-      parts.push(`SAFETY NET: ${formData.safetyNet}`);
-    }
-    if (formData.clinicalNotes) {
-      parts.push('');
-      parts.push(`ADDITIONAL NOTES: ${formData.clinicalNotes}`);
-    }
-
-    return parts.join('\n');
-  }, [formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked, noteHeadings]);
+  const noteText = useMemo(() => buildClinicalNote({
+    condition,
+    patient: {
+      firstName: formData.firstName || '',
+      lastName: formData.lastName || '',
+      dob: formData.dob || '',
+      sex: formData.sex || '',
+      allergies: formData.allergies || '',
+      medications: formData.medications || '',
+    },
+    assessment: Object.fromEntries(Object.entries(formData).filter(([key]) => key.startsWith('assess_')).map(([key, value]) => [key.replace(/^assess_/, ''), value])),
+    differentials: {
+      workingDiagnosis: formData.workingDiagnosis || '',
+      items: differentials.filter((item) => item.diagnosis.trim()),
+    },
+    treatment: {
+      selectedTherapy: formData.selectedTherapy || '',
+      deviationJustification: formData.deviationJustification || '',
+      followUpPlan: formData.followUpPlan || '',
+      safetyNet: formData.safetyNet || '',
+    },
+    documentation: {
+      clinicalNotes: formData.clinicalNotes || '',
+      referralNotes: formData.referralNotes || '',
+    },
+    redFlagsChecked,
+    hasRedFlagTriggered,
+    noteHeadings,
+  }), [formData, condition, differentials, hasRedFlagTriggered, redFlagsChecked, noteHeadings]);
 
   const wordCount = useMemo(() => {
     return noteText.trim() ? noteText.trim().split(/\s+/).length : 0;

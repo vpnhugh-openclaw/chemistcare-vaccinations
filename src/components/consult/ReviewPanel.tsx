@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Condition } from '@/types/clinical';
+import type { ConsultationCondition } from '@/lib/conditionRegistry';
+import { buildClinicalNote, buildGpLetter, buildPatientSummary } from '@/lib/consultationNotes';
 import { ConsultStatus } from '@/lib/consultStateMachine';
 import {
   CheckCircle, FileText, Send, Loader2, AlertTriangle, Download,
@@ -14,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ReviewPanelProps {
   formData: Record<string, string>;
-  condition?: Condition;
+  condition?: ConsultationCondition;
   differentials: { diagnosis: string; reasonExcluded: string }[];
   hasRedFlagTriggered: boolean;
   consultStatus: ConsultStatus;
@@ -33,9 +34,62 @@ export function ReviewPanel({
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const { toast } = useToast();
 
-  const fullNote = generateFullNote(formData, condition, differentials, hasRedFlagTriggered, pinnedEvidence);
-  const gpLetter = generateGpLetter(formData, condition, differentials);
-  const patientSummary = generatePatientSummary(formData, condition);
+  const fullNote = buildClinicalNote({
+    condition,
+    patient: {
+      firstName: formData.firstName || '',
+      lastName: formData.lastName || '',
+      dob: formData.dob || '',
+      sex: formData.sex || '',
+      allergies: formData.allergies || '',
+      medications: formData.medications || '',
+      gpName: formData.gpName || '',
+    },
+    assessment: Object.fromEntries(Object.entries(formData).filter(([key]) => key.startsWith('assess_')).map(([key, value]) => [key.replace(/^assess_/, ''), value])),
+    differentials: {
+      workingDiagnosis: formData.workingDiagnosis || '',
+      items: differentials.filter((item) => item.diagnosis.trim()),
+    },
+    treatment: {
+      selectedTherapy: formData.selectedTherapy || '',
+      followUpPlan: formData.followUpPlan || '',
+      safetyNet: formData.safetyNet || '',
+      deviationJustification: formData.deviationJustification || '',
+    },
+    documentation: {
+      clinicalNotes: formData.clinicalNotes || '',
+      referralNotes: formData.referralNotes || '',
+    },
+    redFlagsChecked: {},
+    hasRedFlagTriggered,
+  });
+  const gpLetter = buildGpLetter({
+    condition,
+    patient: {
+      firstName: formData.firstName || '',
+      lastName: formData.lastName || '',
+      dob: formData.dob || '',
+      gpName: formData.gpName || '',
+    },
+    differentials: {
+      workingDiagnosis: formData.workingDiagnosis || '',
+      items: differentials.filter((item) => item.diagnosis.trim()),
+    },
+    treatment: {
+      selectedTherapy: formData.selectedTherapy || '',
+    },
+  });
+  const patientSummary = buildPatientSummary({
+    condition,
+    patient: {
+      firstName: formData.firstName || '',
+    },
+    treatment: {
+      selectedTherapy: formData.selectedTherapy || '',
+      followUpPlan: formData.followUpPlan || '',
+      safetyNet: formData.safetyNet || '',
+    },
+  });
 
   const handleFinalise = async () => {
     setIsSubmitting(true);
@@ -92,7 +146,7 @@ export function ReviewPanel({
                 <a href="/patients">View Patient</a>
               </Button>
               <Button size="sm" asChild>
-                <a href="/consultation">New Consultation</a>
+                <a href="/consultations/new">New Consultation</a>
               </Button>
             </div>
           </CardContent>
@@ -216,129 +270,3 @@ function ReviewTabs({ fullNote, gpLetter, patientSummary, onCopy }: {
   );
 }
 
-function generateFullNote(
-  formData: Record<string, string>,
-  condition: Condition | undefined,
-  differentials: { diagnosis: string; reasonExcluded: string }[],
-  hasRedFlagTriggered: boolean,
-  pinnedEvidence: { question: string; answer: string; sources: string[] }[],
-): string {
-  const lines: string[] = [];
-  lines.push('═══════════════════════════════════════');
-  lines.push('CLINICAL CONSULTATION NOTE');
-  lines.push(`Date: ${new Date().toLocaleDateString('en-AU')}`);
-  lines.push('═══════════════════════════════════════');
-  lines.push('');
-  lines.push('PATIENT DETAILS');
-  lines.push(`Name: ${formData.firstName || ''} ${formData.lastName || ''}`);
-  lines.push(`DOB: ${formData.dob || 'N/A'}  Sex: ${formData.sex || 'N/A'}`);
-  if (formData.allergies) lines.push(`Allergies: ${formData.allergies}`);
-  if (formData.medications) lines.push(`Current Medications: ${formData.medications}`);
-  if (formData.comorbidities) lines.push(`Comorbidities: ${formData.comorbidities}`);
-  lines.push('');
-  lines.push('PRESENTING CONDITION');
-  lines.push(`${condition?.name || 'Not specified'} (${condition?.classification || ''})`);
-  lines.push('');
-  lines.push('ASSESSMENT');
-  condition?.assessmentFields.forEach(f => {
-    if (formData[`assess_${f}`]) lines.push(`  ${f}: ${formData[`assess_${f}`]}`);
-  });
-  if (hasRedFlagTriggered) {
-    lines.push('');
-    lines.push('⚠ RED FLAGS: PRESCRIBING BLOCKED');
-    if (formData.referralNotes) lines.push(`Referral: ${formData.referralNotes}`);
-  }
-  lines.push('');
-  lines.push('CLINICAL REASONING');
-  lines.push(`Working Diagnosis: ${formData.workingDiagnosis || 'N/A'}`);
-  differentials.filter(d => d.diagnosis.trim()).forEach((d, i) => {
-    lines.push(`  Differential ${i + 1}: ${d.diagnosis} — Excluded: ${d.reasonExcluded || 'N/A'}`);
-  });
-  if (formData.selectedTherapy && condition) {
-    const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-    if (t) {
-      lines.push('');
-      lines.push('TREATMENT');
-      lines.push(`${t.medicineName} ${t.dose} — ${t.frequency} for ${t.duration}`);
-      lines.push(`Qty: ${t.maxQuantity} | Repeats: ${t.repeats} | PBS: ${t.pbsRestriction || 'N/A'}`);
-      if (formData.deviationJustification) lines.push(`Deviation: ${formData.deviationJustification}`);
-    }
-  }
-  if (formData.followUpPlan) { lines.push(''); lines.push(`FOLLOW-UP: ${formData.followUpPlan}`); }
-  if (formData.safetyNet) { lines.push(`SAFETY NET: ${formData.safetyNet}`); }
-  if (formData.clinicalNotes) { lines.push(''); lines.push(`NOTES: ${formData.clinicalNotes}`); }
-  if (pinnedEvidence.length > 0) {
-    lines.push('');
-    lines.push('EVIDENCE REFERENCES');
-    pinnedEvidence.forEach((e, i) => {
-      lines.push(`  [${i + 1}] ${e.question}`);
-      lines.push(`      Sources: ${e.sources.join(', ')}`);
-    });
-  }
-  lines.push('');
-  lines.push('═══════════════════════════════════════');
-  lines.push('Generated by ChemistCare PrescriberOS');
-  return lines.join('\n');
-}
-
-function generateGpLetter(
-  formData: Record<string, string>,
-  condition: Condition | undefined,
-  differentials: { diagnosis: string; reasonExcluded: string }[],
-): string {
-  return [
-    `Dear ${formData.gpName || 'Doctor'},`,
-    '',
-    `Re: ${formData.firstName || ''} ${formData.lastName || ''} (DOB: ${formData.dob || 'N/A'})`,
-    '',
-    `I am writing to inform you that the above patient presented to our pharmacy for management of ${condition?.name || 'a condition'} under the Victorian Community Pharmacist Prescribing Pilot.`,
-    '',
-    `Working Diagnosis: ${formData.workingDiagnosis || 'N/A'}`,
-    '',
-    differentials.filter(d => d.diagnosis.trim()).length > 0 ? 'Differentials considered and excluded:' : '',
-    ...differentials.filter(d => d.diagnosis.trim()).map((d, i) => `  ${i + 1}. ${d.diagnosis} — ${d.reasonExcluded || 'N/A'}`),
-    '',
-    formData.selectedTherapy && condition ? (() => {
-      const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-      return t ? `Treatment initiated: ${t.medicineName} ${t.dose}, ${t.frequency} for ${t.duration}` : '';
-    })() : 'No pharmacological treatment was initiated.',
-    '',
-    formData.followUpPlan ? `Follow-up plan: ${formData.followUpPlan}` : '',
-    '',
-    'Please do not hesitate to contact me should you require further information.',
-    '',
-    'Kind regards,',
-    'Pharmacist Prescriber',
-    `${formData.gpClinic ? `\nCC: ${formData.gpClinic}` : ''}`,
-  ].filter(Boolean).join('\n');
-}
-
-function generatePatientSummary(
-  formData: Record<string, string>,
-  condition: Condition | undefined,
-): string {
-  return [
-    `Patient Information Sheet`,
-    `Date: ${new Date().toLocaleDateString('en-AU')}`,
-    '',
-    `Dear ${formData.firstName || 'Patient'},`,
-    '',
-    `Today you visited the pharmacy for: ${condition?.name || 'your condition'}`,
-    '',
-    formData.selectedTherapy && condition ? (() => {
-      const t = condition.therapyOptions.find(t => t.id === formData.selectedTherapy);
-      return t ? [
-        'Your medication:',
-        `  • ${t.medicineName} ${t.dose}`,
-        `  • Take: ${t.frequency}`,
-        `  • Duration: ${t.duration}`,
-      ].join('\n') : '';
-    })() : '',
-    '',
-    formData.safetyNet ? `Important — when to seek help:\n${formData.safetyNet}` : '',
-    '',
-    formData.followUpPlan ? `Follow-up:\n${formData.followUpPlan}` : '',
-    '',
-    'If you have any concerns, contact your pharmacist or GP.',
-  ].filter(Boolean).join('\n');
-}

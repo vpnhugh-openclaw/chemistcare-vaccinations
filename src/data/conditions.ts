@@ -769,7 +769,7 @@ export const CONDITIONS: Condition[] = [
   {
     id: 'travel-medicine',
     name: 'Travel Medicine',
-    classification: 'preventive',
+    classification: 'travel',
     description: 'Pre-travel health assessment, vaccination, and malaria prophylaxis',
     scopeValidation: { minAge: 18, pregnancyExcluded: false, breastfeedingExcluded: false, jurisdictionNotes: 'Pharmacist prescribers may provide travel vaccinations and antimalarials per jurisdictional authority' },
     redFlags: [

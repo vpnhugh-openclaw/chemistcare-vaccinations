@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getConditionById } from '@/data/conditions';
+import { getConditionById } from '@/lib/conditionRegistry';
 import { AlertTriangle, ArrowLeft, Shield, Pill, FileText, Clock, XCircle, CheckCircle } from 'lucide-react';
 
 const ConditionDetail = () => {
@@ -31,14 +31,15 @@ const ConditionDetail = () => {
         </Button>
 
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
             <h1 className="text-2xl font-bold">{condition.name}</h1>
             <span className={`clinical-badge ${
-              condition.classification === 'acute' ? 'clinical-badge-danger' :
-              condition.classification === 'chronic' ? 'clinical-badge-info' :
-              condition.classification === 'preventive' ? 'clinical-badge-safe' : 'clinical-badge-warning'
+              condition.category === 'acute' ? 'clinical-badge-danger' :
+              condition.category === 'chronic' ? 'clinical-badge-info' :
+              condition.category === 'preventive' ? 'clinical-badge-safe' :
+              condition.category === 'travel' ? 'clinical-badge-info' : 'clinical-badge-warning'
             }`}>
-              {condition.classification}
+              {condition.category}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">{condition.description}</p>
@@ -46,7 +47,6 @@ const ConditionDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Scope Validation */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -59,16 +59,10 @@ const ConditionDetail = () => {
               {condition.scopeValidation.sexRestriction && <div className="flex justify-between"><span className="text-muted-foreground">Sex Restriction</span><span className="font-medium capitalize">{condition.scopeValidation.sexRestriction} only</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Pregnancy Excluded</span><span className="font-medium">{condition.scopeValidation.pregnancyExcluded ? 'Yes' : 'No'}</span></div>
               {condition.scopeValidation.temporalConstraint && <div className="flex justify-between"><span className="text-muted-foreground">Temporal</span><span className="font-medium">{condition.scopeValidation.temporalConstraint}</span></div>}
-              {condition.scopeValidation.jurisdictionNotes && (
-                <>
-                  <Separator />
-                  <p className="text-muted-foreground italic">{condition.scopeValidation.jurisdictionNotes}</p>
-                </>
-              )}
+              {condition.scopeValidation.jurisdictionNotes && (<><Separator /><p className="text-muted-foreground italic">{condition.scopeValidation.jurisdictionNotes}</p></>)}
             </CardContent>
           </Card>
 
-          {/* Red Flags */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -88,23 +82,21 @@ const ConditionDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Assessment Fields */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
-                <FileText className="h-4 w-4 text-accent" /> Assessment Fields
+                <FileText className="h-4 w-4 text-accent" /> Assessment Template
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-1.5">
-                {condition.assessmentFields.map(f => (
-                  <Badge key={f} variant="secondary" className="text-xs font-normal">{f}</Badge>
+                {condition.template.assessmentFields.map((field) => (
+                  <Badge key={field.id} variant="secondary" className="text-xs font-normal">{field.label}</Badge>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Follow-up */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -115,10 +107,10 @@ const ConditionDetail = () => {
               <p><span className="text-muted-foreground">Interval:</span> <span className="font-medium">{condition.followUpInterval}</span></p>
               {condition.monitoringChecklist && (
                 <div className="space-y-1 mt-2">
-                  {condition.monitoringChecklist.map(m => (
-                    <div key={m} className="flex items-center gap-2">
+                  {condition.monitoringChecklist.map((item) => (
+                    <div key={item} className="flex items-center gap-2">
                       <CheckCircle className="h-3 w-3 text-clinical-safe" />
-                      <span>{m}</span>
+                      <span>{item}</span>
                     </div>
                   ))}
                 </div>
@@ -127,7 +119,6 @@ const ConditionDetail = () => {
           </Card>
         </div>
 
-        {/* Therapy Options */}
         {condition.therapyOptions.length > 0 && (
           <Card>
             <CardHeader>
@@ -136,41 +127,32 @@ const ConditionDetail = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {condition.therapyOptions.map((t) => (
-                <div key={t.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-semibold">{t.medicineName}</h4>
-                      <span className={`clinical-badge ${t.line === 'first' ? 'clinical-badge-safe' : t.line === 'second' ? 'clinical-badge-info' : 'clinical-badge-warning'}`}>
-                        {t.line}-line
-                      </span>
-                      {t.authorityRequired && <span className="clinical-badge clinical-badge-danger">Authority Required</span>}
+              {condition.therapyOptions.map((therapy) => (
+                <div key={therapy.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-sm font-semibold">{therapy.medicineName}</h4>
+                      <span className={`clinical-badge ${therapy.line === 'first' ? 'clinical-badge-safe' : therapy.line === 'second' ? 'clinical-badge-info' : 'clinical-badge-warning'}`}>{therapy.line}-line</span>
+                      {therapy.authorityRequired && <span className="clinical-badge clinical-badge-danger">Authority Required</span>}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                    <div><span className="text-muted-foreground block">Dose</span><span className="font-medium">{t.dose}</span></div>
-                    <div><span className="text-muted-foreground block">Frequency</span><span className="font-medium">{t.frequency}</span></div>
-                    <div><span className="text-muted-foreground block">Duration</span><span className="font-medium">{t.duration}</span></div>
-                    <div><span className="text-muted-foreground block">Max Qty / Repeats</span><span className="font-medium">{t.maxQuantity} / {t.repeats}</span></div>
+                    <div><span className="text-muted-foreground block">Dose</span><span className="font-medium">{therapy.dose}</span></div>
+                    <div><span className="text-muted-foreground block">Frequency</span><span className="font-medium">{therapy.frequency}</span></div>
+                    <div><span className="text-muted-foreground block">Duration</span><span className="font-medium">{therapy.duration}</span></div>
+                    <div><span className="text-muted-foreground block">Max Qty / Repeats</span><span className="font-medium">{therapy.maxQuantity} / {therapy.repeats}</span></div>
                   </div>
-                  {t.pbsRestriction && <p className="text-xs text-muted-foreground">PBS: {t.pbsRestriction}</p>}
-                  {t.contraindications.length > 0 && (
-                    <div className="text-xs"><span className="text-clinical-danger font-medium">Contraindications: </span>{t.contraindications.join(', ')}</div>
-                  )}
-                  {t.interactions.length > 0 && (
-                    <div className="text-xs"><span className="text-clinical-warning font-medium">Interactions: </span>{t.interactions.join(', ')}</div>
-                  )}
-                  {t.specialPopulations && <p className="text-xs italic text-muted-foreground">{t.specialPopulations}</p>}
-                  {t.monitoringRequired && <p className="text-xs"><span className="font-medium">Monitoring: </span>{t.monitoringRequired}</p>}
+                  {therapy.pbsRestriction && <p className="text-xs text-muted-foreground">PBS: {therapy.pbsRestriction}</p>}
+                  {therapy.contraindications.length > 0 && <div className="text-xs"><span className="text-clinical-danger font-medium">Contraindications: </span>{therapy.contraindications.join(', ')}</div>}
+                  {therapy.interactions.length > 0 && <div className="text-xs"><span className="text-clinical-warning font-medium">Interactions: </span>{therapy.interactions.join(', ')}</div>}
                 </div>
               ))}
             </CardContent>
           </Card>
         )}
 
-        {/* Start Consultation */}
         <div className="flex justify-end">
-          <Button onClick={() => navigate(`/consultation?condition=${condition.id}`)} className="gap-2">
+          <Button onClick={() => navigate(`/consultations/new/${condition.slug}`)} className="gap-2">
             Start Consultation for {condition.name}
           </Button>
         </div>

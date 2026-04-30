@@ -1,4 +1,4 @@
-export type ConditionClassification = 'acute' | 'chronic' | 'preventive' | 'resupply';
+export type ConditionClassification = 'acute' | 'chronic' | 'preventive' | 'resupply' | 'travel';
 
 export type Severity = 'mild' | 'moderate' | 'severe';
 

@@ -30,7 +30,7 @@ const Dashboard = () => {
               ChemistCare Prescriber<span className="text-accent">OS</span> — Pharmacist Prescriber Workspace
             </p>
           </div>
-          <Button onClick={() => navigate('/consultation')} className="gap-2 w-full sm:w-auto">
+          <Button onClick={() => navigate('/consultations/new')} className="gap-2 w-full sm:w-auto">
             <FilePlus className="h-4 w-4" />
             New Consultation
           </Button>
@@ -67,7 +67,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               {[
-                { label: 'Start New Consultation', desc: 'Begin structured clinical assessment', icon: FilePlus, action: () => navigate('/consultation') },
+                { label: 'Start New Consultation', desc: 'Begin structured clinical assessment', icon: FilePlus, action: () => navigate('/consultations/new') },
                 { label: 'View Conditions Library', desc: 'Browse 22 supported conditions', icon: TrendingUp, action: () => navigate('/conditions') },
                 { label: 'Patient Records', desc: 'Search and manage patient profiles', icon: Users, action: () => navigate('/patients') },
                 { label: 'Clinical Calculators', desc: 'CrCl, eGFR, Framingham & more', icon: Calculator, action: () => navigate('/calculators'), accent: true },

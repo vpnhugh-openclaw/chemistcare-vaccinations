@@ -16,17 +16,21 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { getPinnedConditions } from '@/lib/conditionRegistry';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'New Consultation', url: '/consultation', icon: Stethoscope },
   { title: 'Calendar', url: '/vaccination/calendar', icon: CalendarDays },
   { title: 'Patients', url: '/patients', icon: Users },
   { title: 'Encounters', url: '/vaccination/encounters', icon: Syringe },
@@ -39,8 +43,8 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
-  const isActive = (path: string) =>
-    location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+  const quickStartConditions = getPinnedConditions();
+  const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
 
   return (
     <Sidebar collapsible="icon">
@@ -60,6 +64,38 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-0.5">
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className={`sidebar-nav-item ${location.pathname.startsWith('/consultations/new') ? 'sidebar-nav-active' : ''}`}>
+                  <NavLink to="/consultations/new" end={false} activeClassName="">
+                    <Stethoscope className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span className="text-[0.8125rem] font-medium">New Consultation</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+                {!collapsed && (
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarGroupLabel className="px-2 h-6 text-[11px] uppercase tracking-wider">Quick Start</SidebarGroupLabel>
+                    </SidebarMenuSubItem>
+                    {quickStartConditions.map((condition) => (
+                      <SidebarMenuSubItem key={condition.slug}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === `/consultations/new/${condition.slug}`}>
+                          <NavLink to={`/consultations/new/${condition.slug}`}>
+                            <span>{condition.name}</span>
+                          </NavLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/consultations/new'}>
+                        <NavLink to="/consultations/new">
+                          <span>All Conditions</span>
+                        </NavLink>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+
               {navItems.map((item) => {
                 const active = isActive(item.url);
                 return (
@@ -81,12 +117,8 @@ export function AppSidebar() {
       <SidebarFooter className="px-5 py-4 border-t border-sidebar-border">
         {!collapsed && (
           <div className="space-y-1.5">
-            <p className="text-[0.6875rem] text-sidebar-foreground/45 leading-snug font-medium">
-              Australian Pharmacist Prescriber
-            </p>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-semibold bg-sidebar-primary/15 text-sidebar-primary">
-              Clinical Decision Support v1.0
-            </span>
+            <p className="text-[0.6875rem] text-sidebar-foreground/45 leading-snug font-medium">Australian Pharmacist Prescriber</p>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-semibold bg-sidebar-primary/15 text-sidebar-primary">Clinical Decision Support v1.0</span>
           </div>
         )}
       </SidebarFooter>

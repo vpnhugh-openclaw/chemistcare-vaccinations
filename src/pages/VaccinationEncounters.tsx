@@ -14,7 +14,7 @@ export default function VaccinationEncounters() {
             <h1 className="text-2xl font-bold">Encounters</h1>
             <p className="text-sm text-muted-foreground mt-1">Vaccination and prescribing encounters</p>
           </div>
-          <Link to="/consultation">
+          <Link to="/consultations/new">
             <Button className="gap-2">
               <Plus className="h-4 w-4" /> New Encounter
             </Button>

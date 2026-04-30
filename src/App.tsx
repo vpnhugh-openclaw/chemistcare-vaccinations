@@ -70,7 +70,9 @@ const router = createBrowserRouter([
 
   // Existing routes preserved (not in sidebar but still reachable)
   { path: "/dashboard", element: <Index /> },
-  { path: "/consultation", element: <NewConsultation /> },
+  { path: "/consultations/new", element: <NewConsultation /> },
+  { path: "/consultations/new/:conditionSlug", element: <NewConsultation /> },
+  { path: "/consultation", element: <Navigate to="/consultations/new" replace /> },
   { path: "/conditions", element: <ConditionsLibrary /> },
   { path: "/conditions/:id", element: <ConditionDetail /> },
   { path: "/prescribing-log", element: <PrescribingLog /> },
