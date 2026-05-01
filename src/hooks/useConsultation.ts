@@ -77,12 +77,12 @@ function normalizeLegacyDraft(value: any): ConsultationDraft {
     stepData: {
       patient: Object.fromEntries(Object.entries(value?.formData || {}).filter(([key]) => [
         'firstName', 'lastName', 'dob', 'sex', 'pregnancy', 'allergies', 'medications', 'comorbidities', 'gpName', 'gpClinic', 'gpPhone',
-      ].includes(key))),
+      ].includes(key))) as Record<string, string>,
       assessment: Object.fromEntries(
         Object.entries(value?.formData || {})
           .filter(([key]) => key.startsWith('assess_'))
           .map(([key, entryValue]) => [key.replace(/^assess_/, ''), entryValue]),
-      ),
+      ) as Record<string, string>,
       differentials: {
         workingDiagnosis: value?.formData?.workingDiagnosis || '',
         items: value?.differentials?.length ? value.differentials : [{ diagnosis: '', reasonExcluded: '' }],
@@ -241,11 +241,11 @@ export function useConsultation(conditionSlug?: string) {
   const formData = useMemo(() => flattenStepData(draft.stepData), [draft.stepData]);
   const hasRedFlagTriggered = useMemo(() => Object.values(draft.redFlagsChecked).some(Boolean), [draft.redFlagsChecked]);
 
-  const isDirty = useMemo(() => draft.consultStatus !== 'finalised' && draft.consultStatus !== 'discarded' && (
+  const isDirty = useMemo<boolean>(() => draft.consultStatus !== 'finalised' && draft.consultStatus !== 'discarded' && (
     isPatientDataEntered(draft.stepData.patient)
     || !!draft.conditionSlug
-    || draft.stepData.differentials.items.some((item) => item.diagnosis.trim())
-    || draft.stepData.documentation.clinicalNotes?.trim()
+    || draft.stepData.differentials.items.some((item) => !!item.diagnosis.trim())
+    || !!draft.stepData.documentation.clinicalNotes?.trim()
   ), [draft]);
 
   const { lastSaved, isSaving, loadDraft, clearDraft, hasDraft } = useAutosave(DRAFT_KEY, draft, isLoaded && isDirty);
