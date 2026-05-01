@@ -23,12 +23,25 @@ interface Patient {
   medicare: string;
   lastVisit: string;
   conditions: string[];
+  email?: string;
+  address?: string;
+  emergencyContact?: string;
+  allergies?: string[];
 }
 
 const INITIAL_PATIENTS: Patient[] = [
-  { id: '1', firstName: 'Sarah', lastName: 'Mitchell', dateOfBirth: '1985-03-14', sex: 'female', phone: '0412 345 678', medicare: '2345 67890 1', lastVisit: '2026-02-28', conditions: ['UTI'] },
-  { id: '2', firstName: 'James', lastName: 'Chen', dateOfBirth: '1972-08-22', sex: 'male', phone: '0423 456 789', medicare: '3456 78901 2', lastVisit: '2026-02-25', conditions: ['Hypertension', 'T2DM'] },
-  { id: '3', firstName: 'Emily', lastName: "O'Brien", dateOfBirth: '1990-11-05', sex: 'female', phone: '0434 567 890', medicare: '4567 89012 3', lastVisit: '2026-02-20', conditions: ['OCP Resupply'] },
+  { id: '1', firstName: 'Sarah', lastName: 'Mitchell', dateOfBirth: '1985-03-14', sex: 'female', phone: '0412 345 678', medicare: '2345 67890 1', lastVisit: '2026-04-28', conditions: ['UTI', 'Hypertension'], email: 'sarah.m@email.com', address: '12 Oak St, Blackburn VIC 3130', allergies: ['Penicillin'] },
+  { id: '2', firstName: 'James', lastName: 'Chen', dateOfBirth: '1972-08-22', sex: 'male', phone: '0423 456 789', medicare: '3456 78901 2', lastVisit: '2026-04-25', conditions: ['Hypertension', 'T2DM'], email: 'james.chen@email.com', address: '45 Maple Ave, Box Hill VIC 3128', allergies: [] },
+  { id: '3', firstName: 'Emily', lastName: "O'Brien", dateOfBirth: '1990-11-05', sex: 'female', phone: '0434 567 890', medicare: '4567 89012 3', lastVisit: '2026-04-20', conditions: ['OCP Resupply'], email: 'emily.obrien@email.com', address: '78 Pine Rd, Doncaster VIC 3108', allergies: ['Sulfa'] },
+  { id: '4', firstName: 'David', lastName: 'Nguyen', dateOfBirth: '1965-07-30', sex: 'male', phone: '0467 890 123', medicare: '5678 90123 4', lastVisit: '2026-05-01', conditions: ['Hypertension', 'Hyperlipidaemia'], email: 'david.nguyen@email.com', address: '33 Bamboo Ln, Springvale VIC 3171', allergies: [] },
+  { id: '5', firstName: 'Linda', lastName: 'Park', dateOfBirth: '1958-12-03', sex: 'female', phone: '0478 901 234', medicare: '6789 01234 5', lastVisit: '2026-05-01', conditions: ['Influenza Vaccination', 'Osteoarthritis'], email: 'linda.park@email.com', address: '56 Cherry St, Glen Waverley VIC 3150', allergies: ['Egg'] },
+  { id: '6', firstName: 'Peter', lastName: 'Thompson', dateOfBirth: '1949-05-18', sex: 'male', phone: '0489 012 345', medicare: '7890 12345 6', lastVisit: '2026-04-30', conditions: ['Shingles Treatment', 'CAD'], email: 'peter.t@email.com', address: '89 Walnut Cres, Vermont VIC 3133', allergies: ['NSAIDs'] },
+  { id: '7', firstName: 'Sophie', lastName: 'Anderson', dateOfBirth: '1995-09-22', sex: 'female', phone: '0490 123 456', medicare: '8901 23456 7', lastVisit: '2026-04-15', conditions: ['OCP Resupply'], email: 'sophie.a@email.com', address: '21 Elm St, Hawthorn VIC 3122', allergies: [] },
+  { id: '8', firstName: 'Ahmed', lastName: 'Hassan', dateOfBirth: '1978-01-11', sex: 'male', phone: '0411 234 567', medicare: '9012 34567 8', lastVisit: '2026-04-22', conditions: ['T2DM', 'Dyslipidaemia'], email: 'ahmed.h@email.com', address: '67 Cedar Rd, Coburg VIC 3058', allergies: ['Metformin (GI)'] },
+  { id: '9', firstName: 'Geraldine', lastName: 'White', dateOfBirth: '1942-04-08', sex: 'female', phone: '0422 345 678', medicare: '0123 45678 9', lastVisit: '2026-04-29', conditions: ['MedsCheck', 'AF'], email: 'geraldine.w@email.com', address: '44 Ash St, Camberwell VIC 3124', allergies: ['Warfarin interactions'] },
+  { id: '10', firstName: 'Mark', lastName: 'Stevens', dateOfBirth: '1988-10-27', sex: 'male', phone: '0433 456 789', medicare: '1234 56789 0', lastVisit: '2026-04-18', conditions: ['Smoking Cessation'], email: 'mark.s@email.com', address: '99 Birch Ave, Richmond VIC 3121', allergies: [] },
+  { id: '11', firstName: 'Catherine', lastName: 'Brown', dateOfBirth: '1970-06-14', sex: 'female', phone: '0444 567 890', medicare: '2345 67890 2', lastVisit: '2026-04-27', conditions: ['Influenza Vaccination'], email: 'catherine.b@email.com', address: '15 Spruce St, Kew VIC 3101', allergies: [] },
+  { id: '12', firstName: 'Daniel', lastName: 'Kim', dateOfBirth: '1992-02-28', sex: 'male', phone: '0455 678 901', medicare: '3456 78901 3', lastVisit: '2026-04-10', conditions: ['Travel Medicine'], email: 'daniel.kim@email.com', address: '88 Willow Ln, South Yarra VIC 3141', allergies: ['Quinolones'] },
 ];
 
 function fuzzyMatch(query: string, ...fields: string[]): boolean {
@@ -45,7 +58,7 @@ function fuzzyMatch(query: string, ...fields: string[]): boolean {
 }
 
 const emptyForm = (): Omit<Patient, 'id' | 'lastVisit'> => ({
-  firstName: '', lastName: '', dateOfBirth: '', sex: '', phone: '', medicare: '', conditions: [],
+  firstName: '', lastName: '', dateOfBirth: '', sex: '', phone: '', medicare: '', conditions: [], email: '', address: '', allergies: [],
 });
 
 const Patients = () => {
@@ -65,7 +78,7 @@ const Patients = () => {
   const filtered = useMemo(() => {
     if (!search.trim()) return patients;
     return patients.filter(p =>
-      fuzzyMatch(search, p.firstName, p.lastName, `${p.firstName} ${p.lastName}`, p.dateOfBirth, p.phone || '', p.medicare || '')
+      fuzzyMatch(search, p.firstName, p.lastName, `${p.firstName} ${p.lastName}`, p.dateOfBirth, p.phone || '', p.medicare || '', p.email || '')
     );
   }, [search, patients]);
 
@@ -84,7 +97,7 @@ const Patients = () => {
 
   const openEdit = (p: Patient) => {
     setEditingPatient(p);
-    setForm({ firstName: p.firstName, lastName: p.lastName, dateOfBirth: p.dateOfBirth, sex: p.sex, phone: p.phone, medicare: p.medicare, conditions: [...p.conditions] });
+    setForm({ firstName: p.firstName, lastName: p.lastName, dateOfBirth: p.dateOfBirth, sex: p.sex, phone: p.phone, medicare: p.medicare, conditions: [...p.conditions], email: p.email || '', address: p.address || '', allergies: p.allergies ? [...p.allergies] : [] });
     setEditDialogOpen(true);
   };
 
@@ -126,15 +139,31 @@ const Patients = () => {
 
   return (
     <ClinicalLayout>
-      <div className="p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-6 space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1>Patients</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Patients</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage patient profiles and consultation history</p>
           </div>
-          <Button className="gap-2" onClick={openAdd}>
+          <Button className="gap-2 w-full sm:w-auto" onClick={openAdd}>
             <UserPlus className="h-4 w-4" /> Add Patient
           </Button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Total Patients', value: patients.length },
+            { label: 'Active (30d)', value: patients.filter(p => new Date(p.lastVisit) > new Date(Date.now() - 30*86400000)).length },
+            { label: 'With Allergies', value: patients.filter(p => p.allergies && p.allergies.length > 0).length },
+            { label: 'Chronic Conditions', value: patients.filter(p => p.conditions.some(c => ['Hypertension', 'T2DM', 'CAD', 'AF'].includes(c))).length },
+          ].map(stat => (
+            <Card key={stat.label}>
+              <CardContent className="pt-3 pb-2.5 px-3 sm:pt-4 sm:pb-3 sm:px-4">
+                <p className="text-[0.625rem] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">{stat.label}</p>
+                <p className="text-xl sm:text-[1.75rem] font-semibold tabular-nums leading-none">{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <div className="relative max-w-lg">
@@ -159,18 +188,21 @@ const Patients = () => {
           <div className="space-y-2">
             {filtered.map((p) => (
               <Card key={p.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4 flex items-center justify-between">
+                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
                       {p.firstName[0]}{p.lastName[0]}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold">{p.firstName} {p.lastName}</p>
                       <p className="text-xs text-muted-foreground tabular-nums">DOB: {p.dateOfBirth} · {p.sex} · Medicare: {p.medicare}</p>
+                      {p.allergies && p.allergies.length > 0 && (
+                        <p className="text-[0.625rem] text-destructive mt-0.5">⚠ Allergies: {p.allergies.join(', ')}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1 hidden sm:flex">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex gap-1 flex-wrap">
                       {p.conditions.map(c => (
                         <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
                       ))}
@@ -192,7 +224,7 @@ const Patients = () => {
 
       {/* Edit / Add Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingPatient ? 'Edit Patient' : 'Add Patient'}</DialogTitle>
             <DialogDescription>
@@ -238,12 +270,20 @@ const Patients = () => {
               </div>
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={form.email} onChange={e => updateForm('email', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" value={form.address} onChange={e => updateForm('address', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
               <Label>Conditions</Label>
-              <TagInput
-                value={form.conditions}
-                onChange={(tags) => updateForm('conditions', tags)}
-                placeholder="Type a condition and press Enter..."
-              />
+              <TagInput value={form.conditions} onChange={(tags) => updateForm('conditions', tags)} placeholder="Type a condition and press Enter..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Allergies</Label>
+              <TagInput value={form.allergies || []} onChange={(tags) => updateForm('allergies', tags)} placeholder="Type an allergy and press Enter..." />
             </div>
           </div>
           <DialogFooter>

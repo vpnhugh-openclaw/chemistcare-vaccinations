@@ -28,7 +28,7 @@ export function WeekView({ selectedDate, onDateChange, appointments, onAppointme
         </Button>
       </div>
 
-      <div className="grid grid-cols-7 gap-3">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-3 overflow-x-auto" style={{ minWidth: '100%' }}>
         {days.map(day => {
           const dateStr = format(day, 'yyyy-MM-dd');
           const dayAppts = appointments.filter(a => a.date === dateStr);
@@ -36,7 +36,7 @@ export function WeekView({ selectedDate, onDateChange, appointments, onAppointme
           const selected = isSameDay(day, selectedDate);
 
           return (
-            <div key={dateStr} className="min-h-[10rem]">
+            <div key={dateStr} className="min-w-[120px] md:min-w-[140px] min-h-[10rem]">
               <button
                 onClick={() => onDateChange(day)}
                 className={cn(

@@ -104,15 +104,18 @@ const CalendarPage = () => {
 
             {/* View toggle */}
             <Tabs value={activeView} onValueChange={setActiveView}>
-              <TabsList className="bg-secondary/60 rounded-full px-1">
-                <TabsTrigger value="month" className="rounded-full text-xs px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Monthly View
+              <TabsList className="bg-secondary/60 rounded-full px-1 h-auto flex-wrap justify-center gap-0.5">
+                <TabsTrigger value="month" className="rounded-full text-xs px-3 sm:px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <span className="hidden sm:inline">Monthly View</span>
+                  <span className="sm:hidden">Month</span>
                 </TabsTrigger>
-                <TabsTrigger value="week" className="rounded-full text-xs px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Weekly View
+                <TabsTrigger value="week" className="rounded-full text-xs px-3 sm:px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <span className="hidden sm:inline">Weekly View</span>
+                  <span className="sm:hidden">Week</span>
                 </TabsTrigger>
-                <TabsTrigger value="day" className="rounded-full text-xs px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Daily View
+                <TabsTrigger value="day" className="rounded-full text-xs px-3 sm:px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <span className="hidden sm:inline">Daily View</span>
+                  <span className="sm:hidden">Day</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>

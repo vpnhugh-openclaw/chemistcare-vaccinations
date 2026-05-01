@@ -24,21 +24,27 @@ export function DayView({ selectedDate, onDateChange, appointments, onAppointmen
   const today = isToday(selectedDate);
 
   return (
-    <div className="flex gap-6 lg:gap-10">
-      {/* Sidebar mini-calendar */}
-      <div className="w-[260px] shrink-0 hidden md:block space-y-4 overflow-hidden">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={(d) => d && onDateChange(d)}
-          className={cn("p-2 pointer-events-auto rounded-lg border w-full [&_table]:w-full")}
-        />
-        <Button variant="outline" size="sm" className="w-full rounded-full" onClick={() => onDateChange(new Date())}>
-          Today
-        </Button>
-        <p className="text-sm text-muted-foreground text-center">
-          {dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''}
-        </p>
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 xl:gap-10">
+      {/* Sidebar mini-calendar — hidden below lg for better tablet use */}
+      <div className="w-full lg:w-[260px] shrink-0 space-y-3">
+        <div className="hidden lg:block">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(d) => d && onDateChange(d)}
+            className={cn("p-2 pointer-events-auto rounded-lg border w-full [&_table]:w-full")}
+          />
+        </div>
+        <div className="flex lg:flex-col gap-2">
+          <Button variant="outline" size="sm" className="w-full rounded-full" onClick={() => onDateChange(new Date())}>
+            Today
+          </Button>
+          <div className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start">
+            <p className="text-sm text-muted-foreground">
+              {dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Time grid */}

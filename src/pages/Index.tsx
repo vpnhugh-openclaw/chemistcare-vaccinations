@@ -39,10 +39,10 @@ const Dashboard = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {[
-            { label: "Today's Consults", value: '0', icon: Activity, color: 'text-accent' },
-            { label: 'Active Patients', value: '0', icon: Users, color: 'text-clinical-safe' },
-            { label: 'Pending Follow-ups', value: '0', icon: Clock, color: 'text-clinical-warning' },
-            { label: 'Scripts This Month', value: '0', icon: ClipboardList, color: 'text-foreground' },
+            { label: "Today's Consults", value: '8', icon: Activity, color: 'text-accent' },
+            { label: 'Active Patients', value: '12', icon: Users, color: 'text-clinical-safe' },
+            { label: 'Pending Follow-ups', value: '3', icon: Clock, color: 'text-clinical-warning' },
+            { label: 'Scripts This Month', value: '47', icon: ClipboardList, color: 'text-foreground' },
           ].map((stat) => (
             <Card key={stat.label}>
               <CardContent className="pt-3 pb-2.5 px-3 sm:pt-4 sm:pb-3 sm:px-4">
