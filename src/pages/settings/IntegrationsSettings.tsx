@@ -208,7 +208,6 @@ export default function IntegrationsSettings() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">{integration.name}</p>
                         <Badge variant="outline" className={`text-[0.625rem] ${CATEGORY_COLOUR[integration.category]}`}>
-                          {CATEGORY_ICON[integration.category] && <span className="mr-1"></>}
                           {integration.category}
                         </Badge>
                         {integration.connected ? (
