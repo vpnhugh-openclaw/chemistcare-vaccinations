@@ -380,7 +380,7 @@ export function renderDocumentationTemplate(
   return condition.template.documentationTemplate.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, token) => replacementMap[token] || 'Not documented');
 }
 
-export const CONDITION_REGISTRY: ConsultationCondition[] = BASE_CONDITIONS.map((condition, index) => {
+export const CONDITION_REGISTRY: ConsultationCondition[] = (BASE_CONDITIONS.map((condition, index) => {
   const assessmentFields = getFieldDefinitions(condition);
   const slug = SLUG_OVERRIDES[condition.id] || slugify(condition.id);
   const category = getCategory(condition);
@@ -410,7 +410,7 @@ export const CONDITION_REGISTRY: ConsultationCondition[] = BASE_CONDITIONS.map((
     pinned: PINNED_CONDITIONS.has(condition.id),
     sortOrder: PINNED_CONDITIONS.has(condition.id) ? index : index + 100,
   };
-}).sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+}) as unknown as ConsultationCondition[]).sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
 
 export function getConditionBySlug(slug?: string | null) {
   return CONDITION_REGISTRY.find((condition) => condition.slug === slug);
