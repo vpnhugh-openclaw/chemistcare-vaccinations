@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Plus, MessageSquare, Send, Pencil, Trash2, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, MessageSquare, Send, Pencil, Trash2, Clock, CheckCircle2, AlertCircle, Eye } from 'lucide-react';
 
 interface MessageTemplate {
   id: string;
